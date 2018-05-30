@@ -15,3 +15,4 @@ Variable à definir avant compilation dans votre module
 
 #define  BUF_SIZE  60                    // Taille max des notification ( nb de caractéres max )
 
+Plus de detail dans l'article DIY Horloge et Notification sur mon blog http://byfeel.info
