@@ -6,8 +6,8 @@
 // Byfeel
 // *************************
 
-#define Ver 2.13
-#define NOMMODULE "ESP-Horloge_nom"   // nom module
+#define Ver 2.34
+#define NOMMODULE "ESP-Horloge_Nom"   // nom module
 #define NTPSERVER "fr.pool.ntp.org"         // Serveur NTP
 #define ACTIVBOUTON true              // Si bouton installé
 #define ACTIVCAPTLUM true              // Si capteur luminosité installé
@@ -83,12 +83,16 @@ boolean Alert=false;
 boolean AutoIn=true;      // Auto / manu intensite
 boolean TimeOn=true;      // ON - off Affichage horloge
 int Intensite=5;
+int BkIntensite;
 const long interval = 10000;  // interval pour mesure luminosite réglé sur 5 s
 unsigned long previousMillis=0 ;
 int clic=0;
 int clicstate=1;
 String message="";
 String type="";
+
+
+
 
 //*****************************************
 // UTF8 - Ascii etendu
@@ -154,7 +158,6 @@ void utf8Ascii(char* s)
 // Serveur NTP
 // **************************
 
-// const char ntpserver[] = "pool.ntp.org";
 // TimeZone
 int8_t timeZone = 1;
 // Le fuseau utilise les horaires été / hiver
@@ -358,7 +361,7 @@ void setup() {
   }
   // on affiche l'adresse IP attribuee pour le serveur DSN et on affecte le nom reseau
    WiFi.hostname(NOMMODULE);
-  P.print("Wifi Ready ...");
+  P.print("Ready ...");
   delay(400);
   P.print("");
   //*************************
@@ -369,16 +372,24 @@ void setup() {
  server.on("/Notification", [](){
     // on recupere les parametre dans l'url dans la partie /Notification?msg="notification a affiocher"&type="PAC"
      if ( server.hasArg("msg")) {
+      BkIntensite=Intensite;
         message=server.arg("msg");
+        if (message ) {
         message.toCharArray(Notif,BUF_SIZE);
+        if (server.hasArg("intnotif") && server.arg("intnotif").length() > 0 ) {
+          Intensite = server.arg("intnotif").toInt();
+          if (Intensite < 1 ) Intensite = 0 ;
+          if (Intensite > 14 ) Intensite = MAX_INTENSITY;
+          P.setIntensity(Intensite); // intensité pour les notifs si pas de valeur Intensité par defaut
+        } 
         if (server.arg("type")) {
               type=server.arg("type");
-              P.setIntensity(MAX_INTENSITY); // intensité au max pour les notifications
                }
      Alert=true;
      P.print("");
     // on repond au client
-    server.send(200, "text/plain", "message :" + message + " & Animation : "+server.arg("type"));
+    server.send(200, "text/plain", "message :" + message + " & Animation : "+server.arg("type") + " & Intensite : "+server.arg("intnotif"));
+        }
      }
     });
   
@@ -452,7 +463,7 @@ void loop() {
       break;
     case 2: // double clic - ON / OFF horloge
       TimeOn =!TimeOn;
-      if (TimeOn) P.print("Time On"); else P.print("Time Off");
+      if (TimeOn) P.print("On"); else P.print("Off");
       delay(400);
       clic=0;
       break;
@@ -530,6 +541,7 @@ void loop() {
     else {
          P.displayText(Notif, PA_LEFT, 40, 1000, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
         Alert=false;
+         Intensite=BkIntensite;
     }
   }
   // Sinon affichage de l'heure
@@ -600,8 +612,28 @@ String getPage(){
    page +="<option value=''>Defaut</option>";
   page +="<option value='PAC'>PAC MAN</option>";
   page +="<option value='BLINDS'>BLINDS</option>";
-page +="<option value='OPENING'>Opening</option>";
-  page +="</select>";
+  page +="<option value='OPENING'>Opening</option>";
+   page +="</select><br />";
+  page +="<label for='intnotif'>Intensite : </label><br />";
+  page += "<p><input id='sliderINT' type='range' min='0' max='15' step='1' name='intnotif' list='tickmarks' />";
+  page +="<datalist id='tickmarks'>";
+  page +="<option value='0' label='0'>";
+  page +="<option value='1'>";
+  page +="<option value='2'>";
+  page +="<option value='3'>";
+  page +="<option value='4'>";
+  page +="<option value='5' label='5'>";
+  page +="<option value='6'>";
+  page +="<option value='7'>";
+  page +="<option value='8'>";
+  page +="<option value='9'>";
+  page +="<option value='10' label='10'>";
+  page +="<option value='11'>";
+  page +="<option value='12'>";
+  page +="<option value='13'>";
+  page +="<option value='14'>";
+  page +="<option value='15' label='15'>";
+  page +="</datalist></p>";
   page +="</fieldset>";
   page += "<INPUT type='submit' value='Envoyer Message' /></div>";
   page += "</form></div>";
