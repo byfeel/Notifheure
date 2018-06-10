@@ -20,9 +20,15 @@ Plus de detail dans l'article DIY Horloge et Notification sur mon blog http://by
 Historique version :
 
 V2.3 : Ajout de la gestion de la luminosité et des animations depuis jeedom
+
 V2.2 : Animation PAC Man
+
 V2.1 : Gestion des clicks - Ajouts des animations
+
 V2 : Ajout support bouton / refonte du code
+
 V1.3 : Ajout interface WEB
+
 V1.2 : Ajout du support de notification
+
 V1 : Debut projet / affichage Horloge avec gestion NTP
