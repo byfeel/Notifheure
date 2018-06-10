@@ -19,6 +19,8 @@ Plus de detail dans l'article DIY Horloge et Notification sur mon blog http://by
 
 Historique version :
 
+V2.4 : Remontée d'info dans jeedom
+
 V2.3 : Ajout de la gestion de la luminosité et des animations depuis jeedom
 
 V2.2 : Animation PAC Man
