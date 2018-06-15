@@ -6,7 +6,7 @@
 // Byfeel
 // *************************
 
-#define Ver 2.40
+#define Ver 2.45
 #define NOMMODULE "ESP-Horloge_nom"      // nom module
 #define NTPSERVER "fr.pool.ntp.org"     // Serveur NTP
 #define ACTIVBOUTON true                // Si bouton installé
@@ -14,31 +14,6 @@
 
 #define  BUF_SIZE  60                   // Taille max des notification ( nb de caractéres max )
 
-// Parametrage matrice  ( Pin Arduino ou est branché la matrice )
-#define MAX_DEVICES 8// ( nombre de matrice )
-#define CLK_PIN   D5
-#define DATA_PIN  D7
-#define CS_PIN    D6
-
-//**********************//
-//interaction Jeedom
-#define JEEDOM false                  // Activation interaction avec Jeedom ( veuillez renseigner tous les champs )
-String ApiKey   = ""; // cle API Jeedom  ex :mVuQikcXm620321DMYZiCsLj0wamT0HsCcrBCuXRxntJDO1kn
-String IPJeedom = "192.168.xxx.xxx";
-String PortJeedom = "80";
-// ID equipement a modifier     
-// id test
-String idEtatHorloge  = "10821";
-String idLum ="10822";
-String idSec = "10823";
-String idAuto ="10834";
-// id salon
-
-
-//base URL jeedom Virtuel
-String BaseUrlJeedom ="http://"+IPJeedom+":"+PortJeedom+"/core/api/jeeApi.php?apikey=" + ApiKey + "&type=virtual&id="; 
-
-// ******************************//
 
 // ******************************//
 //******** Bibliotheque *********//
@@ -66,6 +41,7 @@ String BaseUrlJeedom ="http://"+IPJeedom+":"+PortJeedom+"/core/api/jeeApi.php?ap
 // gestion de l'affichage matricielle
 #include <MD_Parola.h>
 #include <MD_MAX72xx.h>
+//#include <SPI.h>
 #include "Parola_Fonts_data.h"
 // **** Temps
 // librairie temps
@@ -75,6 +51,38 @@ String BaseUrlJeedom ="http://"+IPJeedom+":"+PortJeedom+"/core/api/jeeApi.php?ap
 //librairies click bouton
 #include <ClickButton.h>
 #endif
+// ******************************//
+
+// 
+// Parametrage matrice  ( Pin Arduino ou est branché la matrice )
+//#define HARDWARE_TYPE MD_MAX72XX::FC16_HW    /// Bibliotheque PAROLA et MAX 72xxx en V3 minimum !!!!!
+#define HARDWARE_TYPE MD_MAX72XX::FC16_HW
+#define MAX_DEVICES 8// ( nombre de matrice )
+#define CLK_PIN   D5
+#define DATA_PIN  D7
+#define CS_PIN    D6
+
+//**********************//
+//interaction Jeedom
+#define JEEDOM false                  // Activation interaction avec Jeedom ( veuillez renseigner tous les champs )
+String ApiKey   = ""; // cle API Jeedom  ex :mVuQikcXm620321DMYZiCsLj0wamT0HsCcrBCuXRxntJDO1kn
+String IPJeedom = "192.168.x.x";
+String PortJeedom = "80";
+// ID equipement a modifier     
+// id test
+String idEtatHorloge  = "10821";
+String idLum ="10822";
+String idSec = "10823";
+String idAuto ="10834";
+// id salon
+
+
+//base URL jeedom Virtuel
+String BaseUrlJeedom ="http://"+IPJeedom+":"+PortJeedom+"/core/api/jeeApi.php?apikey=" + ApiKey + "&type=virtual&id="; 
+
+
+
+
 
 //**************************
 //**** Varaible & service ***
@@ -101,8 +109,12 @@ int sensorValue;
 #endif
 
 
-// initialisation de la matrice
-MD_Parola P = MD_Parola(DATA_PIN, CLK_PIN, CS_PIN, MAX_DEVICES); 
+// initialisation de la matrice  - Attention bibliotheque Parola et Max72xx en V3 minimum !!!!!
+// HARDWARE SPI
+//MD_Parola P = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
+// SOFTWARE SPI
+MD_Parola P = MD_Parola(HARDWARE_TYPE, DATA_PIN, CLK_PIN, CS_PIN, MAX_DEVICES);
+
 
 //variable systemes
 char Notif[BUF_SIZE];
@@ -158,10 +170,12 @@ uint8_t utf8Ascii(uint8_t ascii)
     {
     case 0xC2: c = ascii;  break;
     case 0xC3: c = ascii | 0xC0;  break;
-    case 0x82: if (ascii==0xAC) c = 0x80; // Euro symbol special case
+   case 0x82: if (ascii==0xAC )   c = 0x80; // Euro symbol special case
+
     }
     cPrev = ascii;   // save last char
   }
+
   return(c);
 }
 
@@ -466,7 +480,10 @@ NTP.setInterval (10);
  boutonClick.longClickTime  = 1000; // time until "held-down clicks" register
 #endif
 
-//Init variable jeedom
+// Si Petit ecran
+if (MAX_DEVICES <6 ) DisSec = false;
+
+//Initialisation etat jeedom 
 if (  DisSec ) sendToJeedom(BaseUrlJeedom , idSec,"on");
   else sendToJeedom(BaseUrlJeedom , idSec,"off");
   
@@ -676,7 +693,7 @@ String printDigits(int digits)
 // Page WEB Accueil
 // ***********************************
 String getPage(){
-  String page = "<html lang=fr-FR><head><meta http-equiv='content-type' content='text/html; charset=iso-8859-15' /><meta http-equiv='refresh' content='120'/>";
+  String page = "<html lang=fr-FR><head><meta http-equiv='content-type' content='text/html;charset=ISO-8859-15' /><meta http-equiv='refresh' content='120'/>";
   page += "<title>Horloge / Notification - Byfeel.info</title>";
   page += "<style> table.steelBlueCols { border: 3px solid #555555;background-color: #555555;width: 95%;text-align: left;border-collapse: collapse;}";
   page +="table.steelBlueCols td, table.steelBlueCols th { border: 1px solid #555555;padding: 4px 9px;}";
@@ -688,10 +705,10 @@ String getPage(){
   page += "<h3><span style='background-color: #398AA4; color: #ffffff; padding: 0 5px;'> Heure : ";
   page += printDigits(hour())+":"+printDigits(minute())+":"+printDigits(second());
   page += " - Date : "+printDigits(day())+"/"+printDigits(month())+"/"+year()+"</span></h3>";
-   page += "<div class='bloc'><form action='/Notification' method='GET'>";
+   page += "<div class='bloc'><form action='/Notification' method='GET' accept-charset='ISO-8859-1'>";
   page +="<fieldset><legend>Envoyer une Notification :</legend>";
   page +="<label for='msg'>Message </label><br />";
-  page += "<INPUT type='text' name='msg' id='msg'maxlength='59' style='width:400px;' placeholder='Votre Message - 60 caracteres max -'/>";
+  page += "<INPUT type='text' name='msg' id='msg'maxlength='59' style='width:400px;' placeholder='Votre Message - "+String(BUF_SIZE) +" caracteres max -'/>";
    page +="<label for='type'>type : </label>";
    page +="<select name='type' id='type'>";
    page +="<option value=''>Defaut</option>";
