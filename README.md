@@ -19,6 +19,13 @@ Plus de detail dans l'article DIY Horloge et Notification sur mon blog http://by
 
 Historique version :
 
+!!!!!!!!!!!!!!!!!!!!
+
+V2.45 : Utilisation des bibliotheque V3 de parola et MAX72xx  !!!!!!!!
+
+!!!!!!!
+
+
 V2.4 : Remontée d'info dans jeedom
 
 V2.3 : Ajout de la gestion de la luminosité et des animations depuis jeedom
