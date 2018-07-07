@@ -19,6 +19,11 @@ Plus de detail dans l'article DIY Horloge et Notification sur mon blog http://by
 
 Historique version :
 
+V2.6 : Ajout affichage Horloge ( font personalisé ) - pour un affichage plus PRO.
+
+V2.5 : Enregistrement des options en EEPROM , pour sauvegarde aprés coupure de courant
+Gestion de deux ZONES
+
 !!!!!!!!!!!!!!!!!!!!
 
 V2.45 : Utilisation des bibliotheque V3 de parola et MAX72xx  !!!!!!!!
