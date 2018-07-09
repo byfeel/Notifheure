@@ -1,16 +1,17 @@
 
 //**************************
-// NOTIFEUR
+// **** i-Notif'Heure
+// Hotloge / notification
 // OTA + Interface Web + Connecté
 // Gestion Zone + enregistrement eeprom
 //  Juin 2018
 // Byfeel
 // *************************
 
-#define Ver 2.6-2
-#define NOMMODULE "NotifHeure_nom"      // nom module
+#define Ver 2.6-3
+#define NOMMODULE "NotifHeure_Salon"      // nom module
 #define NTPSERVER "pool.ntp.org"     // Serveur NTP
-#define ACTIVBOUTON true               // Si bouton installé
+#define ACTIVBOUTON false               // Si bouton installé
 #define ACTIVCAPTLUM true               // Si capteur luminosité installé
 
 #define  BUF_SIZE  60                   // Taille max des notification ( nb de caractéres max )
@@ -18,7 +19,7 @@
 // Options horloge à définir avant programmation
 boolean AutoIn=true;      // Auto / manu intensite
 boolean TimeOn=true;      // ON - off Affichage horloge
-boolean DisSec=true;    // on-off secondesboolean Alert=false;  
+boolean DisSec=false;    // on-off secondesboolean Alert=false;  
 
 #define DEBUG false
 
@@ -64,9 +65,12 @@ boolean DisSec=true;    // on-off secondesboolean Alert=false;
 // ******************************//
 
 
-// Define the number of devices we have in the chain and the hardware interface
-// NOTE: These pin numbers will probably not work with your hardware and may
-// need to be adapted
+// Definir le nombre de module
+//la taille de la zone time si plus de deux modules
+// et les PINS ou sont branches les modules
+// ***************************************
+// ***** Doit etre verifié avant chaque compilation
+//**********************************************
 #define HARDWARE_TYPE MD_MAX72XX::FC16_HW
 #define MAX_DEVICES 8   // nombre de matrice    
 #define MAX_ZONES   1   // 1 ou 2 zones
@@ -90,21 +94,21 @@ MD_Parola P = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
 
 //**********************//
 //interaction Jeedom
-#define JEEDOM false                 // Activation interaction avec Jeedom ( veuillez renseigner tous les champs )
+#define JEEDOM true                  // Activation interaction avec Jeedom ( veuillez renseigner tous les champs )
 String ApiKey   = ""; // cle API Jeedom  ex :mVuQikcXm620321DMYZiCsLj0wamT0HsCcrBCuXRxntJDO1kn
 String IPJeedom = "192.168.x.x";
 String PortJeedom = "80";
 // ID equipement a modifier     
-// id SDJ
-//String idHor  = "10821";
-//String idLum ="10822";
-//String idSec = "10823";
-//String idAuto ="10834";
-// id salon
+ //id SDJ
+String idHor  = "10821";
+String idLum ="10822";
+String idSec = "10823";
+String idAuto ="10834";
 
 
 
 //base URL jeedom Virtuel
+
 String BaseUrlJeedom ="http://"+IPJeedom+":"+PortJeedom+"/core/api/jeeApi.php?apikey=" + ApiKey + "&type=virtual&id="; 
 
 
@@ -131,6 +135,8 @@ ClickButton boutonClick(bouton, LOW, CLICKBTN_PULLUP);
 #if (ACTIVCAPTLUM) 
 int sensorValue;
 #endif
+
+
 
 //variable systemes
 char Notif[BUF_SIZE];
@@ -390,8 +396,9 @@ int value=valeur;
            Pid = &idSec ;
             bitWrite(valEPROM, 1, valeur);
            }
-           if ( Poption == &AutoIn )  {
+          else if ( Poption == &AutoIn )  {
            Pid = &idAuto ;
+           if (!bitRead(valEPROM,3) && valeur ) NotifMsg("Auto",Intensite,true);
             bitWrite(valEPROM, 3, valeur);
                if (!valeur) {  
                   if ( Intensite == 0 ) message="Min";
@@ -399,9 +406,8 @@ int value=valeur;
                   else message="LUM :"+String(Intensite);
                 NotifMsg(message,Intensite,true);
                }
-                    else NotifMsg("Auto",Intensite,true);
            }
-           if ( Poption == &TimeOn  )  {
+           else if ( Poption == &TimeOn  )  {
                    Pid = &idHor ;
                     bitWrite(valEPROM, 2, valeur);
                     if (!valeur) 
@@ -749,10 +755,15 @@ if (P.displayAnimate())
     else {
       P.displayClear(0);
       P.displayZoneText(0, Notif, PA_LEFT,SPEED_TIME, PAUSE_TIME, effect[fx_in], effect[fx_out]);
-       if (fx_center) P.setTextAlignment(0,PA_CENTER);
+       if (fx_center) { 
+        P.setTextAlignment(0,PA_CENTER);
+       fx_center=false;
+       }
+       
       Alert=false;
      // Intensite=BkIntensite;
     }
+
     }
     }
     else {
@@ -766,6 +777,7 @@ if (P.displayAnimate())
 
   
  if (MAX_ZONES > 1) {
+                         if (P.getZoneStatus(0)) P.displayClear(0);
                          P.setFont(1, numeric7Seg_Byfeel);
                          digitalClockDisplay(Horloge,flasher);
                          P.displayZoneText(1, Horloge, PA_CENTER, SPEED_TIME, PAUSE_TIME, PA_PRINT, PA_NO_EFFECT);
