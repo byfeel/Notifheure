@@ -7,30 +7,22 @@
 //  Juin 2018
 // Byfeel
 // *************************
-
-<<<<<<< HEAD
+ 
 String Ver="2.631";
-=======
-#define Ver 2.63
->>>>>>> 0c7a0e57cf9a03d77afd5211522fa44051c39fe0
 #define NTPSERVER "pool.ntp.org"     // Serveur NTP
 #define ACTIVBOUTON true               // Si bouton installé
 #define ACTIVCAPTLUM true               // Si capteur luminosité installé
 #define  BUF_SIZE  60                   // Taille max des notification ( nb de caractéres max )
-
-<<<<<<< HEAD
-#define NOMMODULE "NotifHeure_Salon"      // nom module
-=======
-#define NOMMODULE "NotifHeure_SDJ"      // nom module
->>>>>>> 0c7a0e57cf9a03d77afd5211522fa44051c39fe0
-
+ 
+#define NOMMODULE "NotifHeure_nom"      // nom module
+ 
 // Options horloge à définir avant programmation
 boolean AutoIn=true;      // Auto / manu intensite
 boolean TimeOn=true;      // ON - off Affichage horloge
 boolean DisSec=false;    // on-off secondesboolean Alert=false;  
-
+ 
 #define DEBUG false
-
+ 
 // ******************************//
 //******** Bibliotheque *********//
 //******************************//
@@ -71,8 +63,8 @@ boolean DisSec=false;    // on-off secondesboolean Alert=false;
 #include <ClickButton.h>
 #endif
 // ******************************//
-
-
+ 
+ 
 // Definir le nombre de module
 //la taille de la zone time si plus de deux modules
 // et les PINS ou sont branches les modules
@@ -91,39 +83,20 @@ boolean DisSec=false;    // on-off secondesboolean Alert=false;
 #define CLK_PIN   D5
 #define DATA_PIN  D7
 #define CS_PIN    D6
-
+ 
 // Hardware SPI connection
 MD_Parola P = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
 // Si probleme avec detection auto SPI 
 // MD_Parola P = MD_Parola(HARDWARE_TYPE, DATA_PIN, CLK_PIN, CS_PIN, MAX_DEVICES);
-
+ 
 #define SPEED_TIME  30
 #define PAUSE_TIME  1000
-
+ 
 //**********************//
 //interaction Jeedom
-<<<<<<< HEAD
-#define JEEDOM true                  // Activation interaction avec Jeedom ( veuillez renseigner tous les champs )
-String ApiKey   = "LV2Vtr5jjyieep7XmcfXm3YXi9V2EYXq"; // cle API Jeedom  ex :mVuQikcXm620321DMYZiCsLj0wamT0HsCcrBCuXRxntJDO1kn
-String IPJeedom = "192.168.8.120";
-String PortJeedom = "80";
-// ID equipement a modifier     
- //id SDJ
-//String idHor  = "10821";
-//String idLum ="10822";
-//String idSec = "10823";
-//String idAuto ="10834";
-// id salon
-String idHor  = "10844";
-String idLum ="10839";
-String idSec = "10848";
-String idAuto ="10842";
-
-
-=======
 #define JEEDOM false                  // Activation interaction avec Jeedom ( veuillez renseigner tous les champs )
 String ApiKey   = ""; // cle API Jeedom  ex :mVuQikcXm620321DMYZiCsLj0wamT0HsCcrBCuXRxntJDO1kn
-String IPJeedom = "192.168.x.x";
+String IPJeedom = "192.168.8.x";
 String PortJeedom = "80";
 // ID equipement a modifier     
  //id SDJ
@@ -131,39 +104,42 @@ String idHor  = "10821";
 String idLum ="10822";
 String idSec = "10823";
 String idAuto ="10834";
->>>>>>> 0c7a0e57cf9a03d77afd5211522fa44051c39fe0
-
+// id salon
+ 
+ 
+ 
+ 
 //base URL jeedom Virtuel
-
+ 
 String BaseUrlJeedom ="http://"+IPJeedom+":"+PortJeedom+"/core/api/jeeApi.php?apikey=" + ApiKey + "&type=virtual&id="; 
-
-
+ 
+ 
 //**************************
 //**** Varaible & service ***
 // *************************
-
+ 
 ESP8266WebServer server(80);         // serveur WEB sur port 80
-
+ 
 #if (JEEDOM) 
 HTTPClient http; // init client WEB
 #endif
-
+ 
 // definition du numero de LED interne 
 #define led 2 // led built IN
-
+ 
 // Bouton
 #if (ACTIVBOUTON)
 #define bouton  0 // GPIO0 ( pullup integré - D8 pour R1 ou D3 pour R2 )
 ClickButton boutonClick(bouton, LOW, CLICKBTN_PULLUP);
 #endif
-
+ 
 // variable pour stocker la valeur du photoresistor
 #if (ACTIVCAPTLUM) 
 int sensorValue;
 #endif
-
-
-
+ 
+ 
+ 
 //variable systemes
 char Notif[BUF_SIZE];
 char Horloge[BUF_SIZE];
@@ -179,7 +155,7 @@ String type="";
 int httpCode=200;
 byte NTPcount=0;
 byte valEPROM;
-
+ 
 //******** fx *******
 textEffect_t  effect[] =
 {
@@ -213,12 +189,12 @@ textEffect_t  effect[] =
   PA_SLICE,
   PA_SCROLL_DOWN,
 };
-
+ 
 byte fx_in=3;
 byte fx_out=3;
 bool fx_center;
-
-
+ 
+ 
 //*****************************************
 // UTF8 - Ascii etendu
 //*****************************************
@@ -241,7 +217,7 @@ uint8_t utf8Ascii(uint8_t ascii)
 {
   static uint8_t cPrev;
   uint8_t c = '\0';
-
+ 
   if (ascii < 0x7f)   // Standard ASCII-set 0..0x7F, no conversion
   {
     cPrev = '\0';
@@ -254,21 +230,21 @@ uint8_t utf8Ascii(uint8_t ascii)
     case 0xC2: c = ascii;  break;
     case 0xC3: c = ascii | 0xC0;  break;
    case 0x82: if (ascii==0xAC )   c = 0x80; // Euro symbol special case
-
+ 
     }
     cPrev = ascii;   // save last char
   }
-
+ 
   return(c);
 }
-
+ 
 void utf8Ascii(char* s)
 // In place conversion UTF-8 string to Extended ASCII
 // The extended ASCII string is always shorter.
 {
   uint8_t c, k = 0;
   char *cp = s;
-
+ 
   while (*s != '\0')
   {
     c = utf8Ascii(*s++);
@@ -277,23 +253,23 @@ void utf8Ascii(char* s)
   }
   *cp = '\0';   // terminate the new string
 }
-
+ 
 //*****************************************
-
-
+ 
+ 
 // **************************
 // Parametre NTP
 // Serveur NTP
 // **************************
-
+ 
 // TimeZone
 int8_t timeZone = 1;
 // Le fuseau utilise les horaires été / hiver
 bool DLS = true;
 boolean syncEventTriggered = false; // True if a time even has been triggered
 NTPSyncEvent_t ntpEvent; // Last triggered event
-
-
+ 
+ 
 void configModeCallback (WiFiManager *myWiFiManager) {
   P.print("Choisir AP..");
   delay(3000);
@@ -304,8 +280,8 @@ void configModeCallback (WiFiManager *myWiFiManager) {
   //if you used auto generated SSID, print it
   //Serial.println(myWiFiManager->getConfigPortalSSID());
 }
-
-
+ 
+ 
 //void processNtpEvent (NTPSyncEvent_t ntpEvent) {
  void processSyncEvent (NTPSyncEvent_t ntpEvent) {
   if (ntpEvent) {
@@ -319,9 +295,9 @@ void configModeCallback (WiFiManager *myWiFiManager) {
   }
   
 }
-
+ 
 // **************************************
-
+ 
 #if (ACTIVCAPTLUM)
 // fonction reglage auto luminosite
 void luminosite() {
@@ -333,11 +309,11 @@ void luminosite() {
   if (bkint != Intensite )  ToJeedom( idLum ,Intensite);
 }
 #endif
-
+ 
 // ******************
 // Gestion page WEB
 //******************
-
+ 
 void handleRoot(){ 
   if ( server.hasArg("SEC") || server.hasArg("LUM") || server.hasArg("HOR")) {
     handleSubmit();
@@ -374,12 +350,12 @@ void handleSubmit() {
   }
   server.send ( 200, "text/html", getPage() );
 }
-
+ 
 // *****************************
 // ANIMATION
 // SPRITE DEFINITION (PAC MAn )
 // *****************************
-
+ 
 const uint8_t F_PMAN1 = 6;
  const uint8_t W_PMAN1 = 8;
 static  uint8_t pacman1[F_PMAN1 * W_PMAN1] =  // gobbling pacman animation
@@ -391,7 +367,7 @@ static  uint8_t pacman1[F_PMAN1 * W_PMAN1] =  // gobbling pacman animation
   0x24, 0x66, 0xe7, 0xff, 0xff, 0xff, 0x7e, 0x3c,
   0x00, 0x42, 0xe7, 0xe7, 0xff, 0xff, 0x7e, 0x3c,
 };
-
+ 
 const uint8_t F_PMAN2 = 6;
 const uint8_t W_PMAN2 = 18;
 static uint8_t pacman2[F_PMAN2 * W_PMAN2] =  // ghost pursued by a pacman
@@ -403,13 +379,13 @@ static uint8_t pacman2[F_PMAN2 * W_PMAN2] =  // ghost pursued by a pacman
   0x24, 0x66, 0xe7, 0xff, 0xff, 0xff, 0x7e, 0x3c, 0x00, 0x00, 0x00, 0xfe, 0x73, 0xfb, 0x7f, 0xf3, 0x7b, 0xfe,
   0x00, 0x42, 0xe7, 0xe7, 0xff, 0xff, 0x7e, 0x3c, 0x00, 0x00, 0x00, 0xfe, 0x73, 0xfb, 0x7f, 0xf3, 0x7b, 0xfe,
 };
-
-
+ 
+ 
 // ***************************
 // Fonction gestion des Options
 // TimeOn , DisSec / AutoIn
 //*****************************
-
+ 
 void Option(boolean *Poption, boolean valeur) {
 String *Pid = NULL ;
 int value=valeur;
@@ -422,7 +398,6 @@ int value=valeur;
            }
           else if ( Poption == &AutoIn )  {
            Pid = &idAuto ;
-<<<<<<< HEAD
            if (!bitRead(UpVal,6) && valeur ) NotifMsg("Auto",Intensite,true);
             bitWrite(valEPROM, 6, valeur);
                if ( !valeur ) {  
@@ -432,17 +407,6 @@ int value=valeur;
                     NotifMsg(message,Intensite,true);
                     valEPROM=valEPROM&240;  // masque sur les 4 derniers bits
                     valEPROM+=Intensite;
-=======
-           if (!bitRead(valEPROM,3) && valeur ) NotifMsg("Auto",Intensite,true);
-            bitWrite(valEPROM, 6, valeur);
-               if (!valeur) {  
-                  if ( Intensite == 0 ) message="Min";
-                  else if ( Intensite == 15 ) message="Max";
-                  else message="LUM :"+String(Intensite);
-                NotifMsg(message,Intensite,true);
-                valEPROM=valEPROM&240;  // masque sur les 4 derniers bits
-                valEPROM+=Intensite;
->>>>>>> 0c7a0e57cf9a03d77afd5211522fa44051c39fe0
                 if (DEBUG) {
                   Serial.println(" Menu Option");
                   Serial.println("valeur enregistrement EPROM " + String(valEPROM) );
@@ -466,7 +430,7 @@ int value=valeur;
    // envoie a jeedom des modifications effectués en fonction de l 'option
    ToJeedom(*Pid,value);
 }
-
+ 
 void NotifMsg(String Msg,byte lum,boolean Info)
   {
      P.setFont(0,ExtASCII);
@@ -487,7 +451,7 @@ void NotifMsg(String Msg,byte lum,boolean Info)
      }
     
   }
-
+ 
 //***********************
 // Boucle SETUP
 // *********************
@@ -500,10 +464,10 @@ Serial.begin(9600);
 }
 EEPROM.begin(512);
 P.print("Start ...");
-
+ 
 //******** WiFiManager ************
     WiFiManager wifiManager;
-
+ 
      //Si besoin de fixer une adresse IP
     //wifiManager.setAPStaticIPConfig(IPAddress(10,0,1,1), IPAddress(10,0,1,1), IPAddress(255,255,255,0));
     
@@ -526,22 +490,22 @@ P.print("Start ...");
         } 
     
 // ****** Fin config WIFI Manager ************
-
+ 
 P.print( "OTA ...");
 //******* OTA ***************
 // Port defaults to 8266
   // ArduinoOTA.setPort(8266);
-
+ 
   // Hostname defaults to esp8266-[ChipID]
   ArduinoOTA.setHostname(NOMMODULE);
-
+ 
   // No authentication by default
   // ArduinoOTA.setPassword("admin");
-
+ 
   // Password can be set with it's md5 value as well
   // MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
   // ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
-
+ 
   ArduinoOTA.onStart([]() {
     digitalWrite(led, HIGH); // allume led au debut du transfert
     P.begin();
@@ -552,7 +516,7 @@ P.print( "OTA ...");
     digitalWrite(led, LOW); // eteint a la fin de la mise a jour
   });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-
+ 
     if (MAX_DEVICES<5) sprintf(Notif,"Up %u%%", (progress / (total / 100)));
     else sprintf(Notif,"Upload  %u%%", (progress / (total / 100)));
     P.print(Notif); 
@@ -563,7 +527,7 @@ P.print( "OTA ...");
   });
   ArduinoOTA.begin();
   //********* Fin OTA ***************
-
+ 
 // on attend d'etre connecte au WiFi avant de continuer
   while (WiFi.status() != WL_CONNECTED) {
   }
@@ -573,7 +537,7 @@ P.print( "OTA ...");
   
   // on definit les points d'entree (les URL a saisir dans le navigateur web) : Racine du site est géré par la fonction handleRoot
   server.on("/", handleRoot);
-
+ 
  server.on("/Notification", [](){
     // on recupere les parametre dans l'url dans la partie /Notification?msg="notification a affiocher"&type="PAC"
      if ( server.hasArg("msg")) {
@@ -590,7 +554,7 @@ P.print( "OTA ...");
         if (server.arg("type")) {
               type=server.arg("type");
                }
-
+ 
     // on repond au client
          NotifMsg(message,Intensite,false);
     server.send(200, "text/plain", "message :" + message + " & Animation : "+server.arg("type") + " & Intensite : "+server.arg("intnotif"));
@@ -598,22 +562,22 @@ P.print( "OTA ...");
      }
     });
   
-
+ 
   // on demarre le serveur web 
   server.begin();
-
+ 
 //******* Service NTP ********
     NTP.onNTPSyncEvent ([](NTPSyncEvent_t event) {
         ntpEvent = event;
         syncEventTriggered = true;
     });
-
+ 
 P.print("init");    
 // Démarrage du processus NTP  
 NTP.begin(NTPSERVER, timeZone, DLS);
 // Interval de synchronisation en seconde , 10 s au depart pour forcer une mise a jour rapide
 NTP.setInterval (10);
-
+ 
 //************************************
 // init systéme - lecture Eeprom si existe et envoie info à jeedom
 valEPROM = EEPROM.read(100);
@@ -628,12 +592,12 @@ if (bitRead(valEPROM, 7))  // Si Enregistrement existe
       Serial.println(" valeur intensite : "+String(Intensite));
     }
   }
-
+ 
 ToJeedom(idSec,DisSec);
 ToJeedom(idHor,TimeOn);
 ToJeedom(idAuto,AutoIn);
 // *********************************
-
+ 
 //************ Initialisation des Zones
  P.begin(MAX_ZONES);
   P.setSpriteData(pacman1, W_PMAN1, F_PMAN1,pacman2, W_PMAN2, F_PMAN2);   // chargement animation en memoire
@@ -647,8 +611,8 @@ ToJeedom(idAuto,AutoIn);
   #else
   P.setZone(0, 0, MAX_DEVICES);
   #endif
-
-
+ 
+ 
 P.displayZoneText(0, "", PA_LEFT, SPEED_TIME, PAUSE_TIME, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
 if (MAX_ZONES > 1 ) P.displayZoneText(1, Horloge, PA_CENTER, 0,0, PA_PRINT, PA_NO_EFFECT);
   
@@ -660,21 +624,21 @@ if (MAX_ZONES > 1 ) P.displayZoneText(1, Horloge, PA_CENTER, 0,0, PA_PRINT, PA_N
  NotifMsg(message,Intensite,false);
   
 }
-
-
+ 
+ 
 //***********************************
 //***********************************
 //********* Boucle loop *************
 //***********************************
 //**********************************
-
+ 
 void loop(void)
 {
  static uint32_t lastTime = 0; // millis() memory
  static bool flasher = false;  // seconds passing flasher
-
+ 
 // ******** Gestion luminosite
-
+ 
   // Si Horloge activé
   if (TimeOn) {
   // Si gestion Auto luminositée activé
@@ -691,9 +655,9 @@ void loop(void)
   }
   }
     if (DEBUG) Serial.print("valeur luminosité "+ String(Intensite));
-
+ 
 // ********** Fin gestion luminosite
-
+ 
 // ***********  Gestion bouton
  #if (ACTIVBOUTON)
   // etat bouton
@@ -746,8 +710,8 @@ void loop(void)
   }
 #endif
 // ******** Fin gestion bouton
-
-
+ 
+ 
  
 // ********* Gestion Reseau : Pages WEB , NTP et OTA
 // ********* Service NTP
@@ -758,24 +722,24 @@ void loop(void)
     
 //  ****** Page WEb : a chaque iteration, la fonction handleClient traite les requetes 
   server.handleClient();
-
+ 
 // ******* OTA
 // Surveillance des demandes de mise a jour en OTA
   ArduinoOTA.handle();
   
 // ******** Fin gestion reseau
-
+ 
 //********** flasher
 if (millis() - lastTime >= 1000)
   {
     lastTime = millis();
     flasher = !flasher;
   }
-
-
+ 
+ 
 if (P.displayAnimate())
 {
-
+ 
     if (Alert) {
       if (P.getZoneStatus(0))
       {
@@ -800,14 +764,10 @@ if (P.displayAnimate())
         P.setTextAlignment(0,PA_CENTER);
        fx_center=false;
        }
-<<<<<<< HEAD
        Intensite=BkIntensite; // reviens a intensite avant notif
-=======
-       
->>>>>>> 0c7a0e57cf9a03d77afd5211522fa44051c39fe0
       Alert=false;
     }
-
+ 
     }
     }
     else {
@@ -817,7 +777,7 @@ if (P.displayAnimate())
                           P.displayZoneText(0, Notif, PA_CENTER, 0, 0, PA_PRINT, PA_NO_EFFECT);
     }
     }
-
+ 
   
  if (MAX_ZONES > 1) {
                          if (P.getZoneStatus(0)) P.displayClear(0);
@@ -831,13 +791,13 @@ if (P.displayAnimate())
   // return status of the displayAnimate() method as the other unused zones are completed, but we
   // still need to call it to run the animations.
   //while (!P.getZoneStatus(MAX_ZONES-1))
-
+ 
 }  // fin displayanimate
-
+ 
 }
 //********************** fin boucle
-
-
+ 
+ 
 // Fonction envoie requete vers Jeedom
 void ToJeedom( String id , byte valeur){
   #if (JEEDOM)  
@@ -854,7 +814,7 @@ void ToJeedom( String id , byte valeur){
         else {
           value=valeur;
         }
-
+ 
         url = BaseUrlJeedom;
         url +=id; 
         url +="&value="+value;
@@ -863,7 +823,7 @@ void ToJeedom( String id , byte valeur){
   http.end();
   #endif
 }
-
+ 
 // Fonction clockformat ( ajoute les zeros devant les unités )
 void digitalClockDisplay(char *heure,bool flash)
     {
@@ -894,9 +854,9 @@ void digitalClockDisplay(char *heure,bool flash)
       sprintf(heure,"%c",(flash ? '.' : ' '));
     }
   }
-
-
-
+ 
+ 
+ 
   //************************************
 // Page WEB Accueil
 // ***********************************
@@ -1048,4 +1008,3 @@ String getPage(){
   page += "</body></html>";
   return page;
 }
-
