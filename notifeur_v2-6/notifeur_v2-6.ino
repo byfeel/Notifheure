@@ -8,13 +8,21 @@
 // Byfeel
 // *************************
 
+<<<<<<< HEAD
 String Ver="2.631";
+=======
+#define Ver 2.63
+>>>>>>> 0c7a0e57cf9a03d77afd5211522fa44051c39fe0
 #define NTPSERVER "pool.ntp.org"     // Serveur NTP
 #define ACTIVBOUTON true               // Si bouton installé
 #define ACTIVCAPTLUM true               // Si capteur luminosité installé
 #define  BUF_SIZE  60                   // Taille max des notification ( nb de caractéres max )
 
+<<<<<<< HEAD
 #define NOMMODULE "NotifHeure_Salon"      // nom module
+=======
+#define NOMMODULE "NotifHeure_SDJ"      // nom module
+>>>>>>> 0c7a0e57cf9a03d77afd5211522fa44051c39fe0
 
 // Options horloge à définir avant programmation
 boolean AutoIn=true;      // Auto / manu intensite
@@ -72,7 +80,7 @@ boolean DisSec=false;    // on-off secondesboolean Alert=false;
 // ***** Doit etre verifié avant chaque compilation
 //**********************************************
 #define HARDWARE_TYPE MD_MAX72XX::FC16_HW
-#define MAX_DEVICES 8   // nombre de matrice    
+#define MAX_DEVICES 4   // nombre de matrice    
 #define MAX_ZONES   1   // 1 ou 2 zones
 #if (MAX_ZONES == 1 ) 
 #define ZONE_TIME (MAX_DEVICES)
@@ -94,6 +102,7 @@ MD_Parola P = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
 
 //**********************//
 //interaction Jeedom
+<<<<<<< HEAD
 #define JEEDOM true                  // Activation interaction avec Jeedom ( veuillez renseigner tous les champs )
 String ApiKey   = "LV2Vtr5jjyieep7XmcfXm3YXi9V2EYXq"; // cle API Jeedom  ex :mVuQikcXm620321DMYZiCsLj0wamT0HsCcrBCuXRxntJDO1kn
 String IPJeedom = "192.168.8.120";
@@ -111,6 +120,18 @@ String idSec = "10848";
 String idAuto ="10842";
 
 
+=======
+#define JEEDOM false                  // Activation interaction avec Jeedom ( veuillez renseigner tous les champs )
+String ApiKey   = ""; // cle API Jeedom  ex :mVuQikcXm620321DMYZiCsLj0wamT0HsCcrBCuXRxntJDO1kn
+String IPJeedom = "192.168.x.x";
+String PortJeedom = "80";
+// ID equipement a modifier     
+ //id SDJ
+String idHor  = "10821";
+String idLum ="10822";
+String idSec = "10823";
+String idAuto ="10834";
+>>>>>>> 0c7a0e57cf9a03d77afd5211522fa44051c39fe0
 
 //base URL jeedom Virtuel
 
@@ -401,6 +422,7 @@ int value=valeur;
            }
           else if ( Poption == &AutoIn )  {
            Pid = &idAuto ;
+<<<<<<< HEAD
            if (!bitRead(UpVal,6) && valeur ) NotifMsg("Auto",Intensite,true);
             bitWrite(valEPROM, 6, valeur);
                if ( !valeur ) {  
@@ -410,6 +432,17 @@ int value=valeur;
                     NotifMsg(message,Intensite,true);
                     valEPROM=valEPROM&240;  // masque sur les 4 derniers bits
                     valEPROM+=Intensite;
+=======
+           if (!bitRead(valEPROM,3) && valeur ) NotifMsg("Auto",Intensite,true);
+            bitWrite(valEPROM, 6, valeur);
+               if (!valeur) {  
+                  if ( Intensite == 0 ) message="Min";
+                  else if ( Intensite == 15 ) message="Max";
+                  else message="LUM :"+String(Intensite);
+                NotifMsg(message,Intensite,true);
+                valEPROM=valEPROM&240;  // masque sur les 4 derniers bits
+                valEPROM+=Intensite;
+>>>>>>> 0c7a0e57cf9a03d77afd5211522fa44051c39fe0
                 if (DEBUG) {
                   Serial.println(" Menu Option");
                   Serial.println("valeur enregistrement EPROM " + String(valEPROM) );
@@ -767,7 +800,11 @@ if (P.displayAnimate())
         P.setTextAlignment(0,PA_CENTER);
        fx_center=false;
        }
+<<<<<<< HEAD
        Intensite=BkIntensite; // reviens a intensite avant notif
+=======
+       
+>>>>>>> 0c7a0e57cf9a03d77afd5211522fa44051c39fe0
       Alert=false;
     }
 
