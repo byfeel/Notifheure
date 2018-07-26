@@ -8,13 +8,13 @@
 // Byfeel
 // *************************
 
-#define Ver 2.6-3
-#define NOMMODULE "NotifHeure_Salon"      // nom module
+String Ver="2.631";
 #define NTPSERVER "pool.ntp.org"     // Serveur NTP
-#define ACTIVBOUTON false               // Si bouton installé
+#define ACTIVBOUTON true               // Si bouton installé
 #define ACTIVCAPTLUM true               // Si capteur luminosité installé
-
 #define  BUF_SIZE  60                   // Taille max des notification ( nb de caractéres max )
+
+#define NOMMODULE "NotifHeure_Salon"      // nom module
 
 // Options horloge à définir avant programmation
 boolean AutoIn=true;      // Auto / manu intensite
@@ -95,15 +95,20 @@ MD_Parola P = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
 //**********************//
 //interaction Jeedom
 #define JEEDOM true                  // Activation interaction avec Jeedom ( veuillez renseigner tous les champs )
-String ApiKey   = ""; // cle API Jeedom  ex :mVuQikcXm620321DMYZiCsLj0wamT0HsCcrBCuXRxntJDO1kn
-String IPJeedom = "192.168.x.x";
+String ApiKey   = "LV2Vtr5jjyieep7XmcfXm3YXi9V2EYXq"; // cle API Jeedom  ex :mVuQikcXm620321DMYZiCsLj0wamT0HsCcrBCuXRxntJDO1kn
+String IPJeedom = "192.168.8.120";
 String PortJeedom = "80";
 // ID equipement a modifier     
  //id SDJ
-String idHor  = "10821";
-String idLum ="10822";
-String idSec = "10823";
-String idAuto ="10834";
+//String idHor  = "10821";
+//String idLum ="10822";
+//String idSec = "10823";
+//String idAuto ="10834";
+// id salon
+String idHor  = "10844";
+String idLum ="10839";
+String idSec = "10848";
+String idAuto ="10842";
 
 
 
@@ -284,9 +289,7 @@ void configModeCallback (WiFiManager *myWiFiManager) {
  void processSyncEvent (NTPSyncEvent_t ntpEvent) {
   if (ntpEvent) {
     //if (ntpEvent == noResponse) P.print ("Serveur NTP injoignable");
-    // else if (ntpEvent == invalidAddress) P.print ("Adresse du serveur NTP invalide");
   } else {
-
     // dateNum2 = datenum(dateStr2,'dd-mmm-yyyy HH:MM:SS');
      if ( NTPcount>14 ) {
              NTP.setInterval (1200);
@@ -329,7 +332,7 @@ void handleSubmit() {
   String HOR = server.arg("HOR");
   if ( LUM =="manu" ) {
             if (server.arg("INT") !="") Intensite=server.arg("INT").toInt();
-           // ToJeedom(idLum , Intensite);
+      ToJeedom(idLum , Intensite);
       Option(&AutoIn,false);
     } else if ( LUM == "auto") 
         { 
@@ -394,22 +397,28 @@ int value=valeur;
  byte UpVal = valEPROM;
            if ( Poption == &DisSec  ) {
            Pid = &idSec ;
-            bitWrite(valEPROM, 1, valeur);
+            bitWrite(valEPROM, 4, valeur);
            }
           else if ( Poption == &AutoIn )  {
            Pid = &idAuto ;
-           if (!bitRead(valEPROM,3) && valeur ) NotifMsg("Auto",Intensite,true);
-            bitWrite(valEPROM, 3, valeur);
-               if (!valeur) {  
-                  if ( Intensite == 0 ) message="Min";
-                  else if ( Intensite == 15 ) message="Max";
-                  else message="LUM :"+String(Intensite);
-                NotifMsg(message,Intensite,true);
+           if (!bitRead(UpVal,6) && valeur ) NotifMsg("Auto",Intensite,true);
+            bitWrite(valEPROM, 6, valeur);
+               if ( !valeur ) {  
+                    if ( Intensite == 0 ) message="Min";
+                     else if ( Intensite == 15 ) message="Max";
+                    else message="LUM :"+String(Intensite);
+                    NotifMsg(message,Intensite,true);
+                    valEPROM=valEPROM&240;  // masque sur les 4 derniers bits
+                    valEPROM+=Intensite;
+                if (DEBUG) {
+                  Serial.println(" Menu Option");
+                  Serial.println("valeur enregistrement EPROM " + String(valEPROM) );
+                }
                }
            }
            else if ( Poption == &TimeOn  )  {
                    Pid = &idHor ;
-                    bitWrite(valEPROM, 2, valeur);
+                    bitWrite(valEPROM, 5, valeur);
                     if (!valeur) 
                     {
                       NotifMsg("OFF",Intensite,true);
@@ -417,7 +426,7 @@ int value=valeur;
            }
           if (UpVal != valEPROM ) {
             // enregistre en EEprom les options si changement
-           bitWrite(valEPROM, 0, true);
+           bitWrite(valEPROM, 7, true);
            EEPROM.write(100,valEPROM);
            EEPROM.commit();
           }
@@ -548,8 +557,7 @@ P.print( "OTA ...");
         if (server.arg("type")) {
               type=server.arg("type");
                }
-     //Alert=true;
-     //P.print("");
+
     // on repond au client
          NotifMsg(message,Intensite,false);
     server.send(200, "text/plain", "message :" + message + " & Animation : "+server.arg("type") + " & Intensite : "+server.arg("intnotif"));
@@ -576,11 +584,16 @@ NTP.setInterval (10);
 //************************************
 // init systéme - lecture Eeprom si existe et envoie info à jeedom
 valEPROM = EEPROM.read(100);
-if (bitRead(valEPROM, 0))  // Si Enregistrement existe
+if (bitRead(valEPROM, 7))  // Si Enregistrement existe
       {
-    DisSec=bitRead(valEPROM, 1);
-    TimeOn=bitRead(valEPROM, 2);
-    AutoIn=bitRead(valEPROM, 3);
+    DisSec=bitRead(valEPROM, 4);
+    TimeOn=bitRead(valEPROM, 5);
+    AutoIn=bitRead(valEPROM, 6);
+    if (!AutoIn) Intensite=valEPROM&15;  // masque sur les 4 derniers bits , pour recuperer valeur intensite mode manuel
+    if (DEBUG) {
+      Serial.println(" Valeur lu en Memoire : ");
+      Serial.println(" valeur intensite : "+String(Intensite));
+    }
   }
 
 ToJeedom(idSec,DisSec);
@@ -601,10 +614,7 @@ ToJeedom(idAuto,AutoIn);
   #else
   P.setZone(0, 0, MAX_DEVICES);
   #endif
-  //for (uint8_t i=0; i<MAX_ZONES; i++)
-  //{
-   // P.setZone(i, ZONE_SIZE*i, (ZONE_SIZE*(i+1))-1);
- // }
+
 
 P.displayZoneText(0, "", PA_LEFT, SPEED_TIME, PAUSE_TIME, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
 if (MAX_ZONES > 1 ) P.displayZoneText(1, Horloge, PA_CENTER, 0,0, PA_PRINT, PA_NO_EFFECT);
@@ -640,15 +650,14 @@ void loop(void)
   if( millis() - previousMillis >= interval) {
     previousMillis = millis();
   luminosite();
-  if (DEBUG) Serial.println("valeur luminosité Auto "+ String(Intensite));
   }
     #endif
   }
   else {
-  if (DEBUG) Serial.println("valeur luminosité "+ String(Intensite));
   P.setIntensity(Intensite);
   }
   }
+    if (DEBUG) Serial.print("valeur luminosité "+ String(Intensite));
 
 // ********** Fin gestion luminosite
 
@@ -658,7 +667,7 @@ void loop(void)
     boutonClick.Update();
   // Sauvegarde de la valeur dans la variable click
   if (boutonClick.clicks != 0) clic = boutonClick.clicks;
-  if (DEBUG) Serial.println("valeur clic :  "+ String(clic));
+  if (DEBUG  && clic ) Serial.print("valeur clic :  "+ String(clic));
   switch (clic) {
     case 1: // double clic - Affiche ou non les secondes
           Option(&DisSec,!DisSec);
@@ -733,8 +742,7 @@ if (millis() - lastTime >= 1000)
 
 if (P.displayAnimate())
 {
-//if (P.getZoneStatus(0))
-  //{
+
     if (Alert) {
       if (P.getZoneStatus(0))
       {
@@ -759,9 +767,8 @@ if (P.displayAnimate())
         P.setTextAlignment(0,PA_CENTER);
        fx_center=false;
        }
-       
+       Intensite=BkIntensite; // reviens a intensite avant notif
       Alert=false;
-     // Intensite=BkIntensite;
     }
 
     }
@@ -773,7 +780,6 @@ if (P.displayAnimate())
                           P.displayZoneText(0, Notif, PA_CENTER, 0, 0, PA_PRINT, PA_NO_EFFECT);
     }
     }
-   //P.displayReset(0);
 
   
  if (MAX_ZONES > 1) {
@@ -784,15 +790,13 @@ if (P.displayAnimate())
                 
  }
   
- // } 
   // Check for individual zone completion. Note that we check the status of the zone rather than use the
   // return status of the displayAnimate() method as the other unused zones are completed, but we
   // still need to call it to run the animations.
   //while (!P.getZoneStatus(MAX_ZONES-1))
 
-}
-  // increment for next time
-  //curZone = ++curZone % MAX_ZONES;
+}  // fin displayanimate
+
 }
 //********************** fin boucle
 
@@ -836,6 +840,7 @@ void digitalClockDisplay(char *heure,bool flash)
     secondes[0]=secondes[0]+23;  // permutation codes AScci 71 à 80
     secondes[1]=secondes[1]+23;
   if (DEBUG) { 
+      Serial.println("debug des secondes : ");
       Serial.println(second());
       Serial.println(secondes[0]);
       Serial.println(secondes[1]);
@@ -862,14 +867,14 @@ String getPage(){
   char ddj[30];
   sprintf(ddj,"%02d:%02d:%02d - Date : %02d/%02d/%4d",hour(),minute(),second(),day(),month(),year());
   String page = "<html lang=fr-FR><head><meta http-equiv='content-type' content='text/html;charset=ISO-8859-15' /><meta http-equiv='refresh' content='120'/>";
-  page += "<title>NotifHeure - Byfeel.info</title>";
+  page += "<title>i-Notif'Heure - Byfeel.info</title>";
   page += "<style> table.steelBlueCols { border: 3px solid #555555;background-color: #555555;width: 95%;text-align: left;border-collapse: collapse;}";
   page +="table.steelBlueCols td, table.steelBlueCols th { border: 1px solid #555555;padding: 4px 9px;}";
   page +="table.steelBlueCols tbody td {font-size: 1em;font-weight: bold;color: #FFFFFF;} table.steelBlueCols td:nth-child(even) {background: #398AA4;}";
   page +="fieldset { padding:0 20px 20px 20px; margin-bottom:10px;border:1px solid #398AA4;width:95%;} div.bloc {float:left;width:450px}";
   //page +="table.steelBlueCols tfoot .links a{display: inline-block;background: #FFFFFF;color: #398AA4;padding: 2px 8px;border-radius: 5px;"
   page +="}</style>";
-  page += "</head><body><h1><span style='background-color: #398AA4; color: #ffffff; padding: 0 5px;'>NotifHeure</span></h1>";
+  page += "</head><body><h1><span style='background-color: #398AA4; color: #ffffff; padding: 0 5px;'>i-Notif\'Heure</span></h1>";
   page += "<h3><span style='background-color: #398AA4; color: #ffffff; padding: 0 5px;'> Heure : ";
   page += ddj;
   page += "</span></h3>";
