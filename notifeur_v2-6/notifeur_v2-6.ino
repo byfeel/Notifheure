@@ -8,13 +8,13 @@
 // Byfeel
 // *************************
  
-String Ver="2.631";
+String Ver="2.632";
 #define NTPSERVER "pool.ntp.org"     // Serveur NTP
-#define ACTIVBOUTON true               // Si bouton installé
+#define ACTIVBOUTON false               // Si bouton installé
 #define ACTIVCAPTLUM true               // Si capteur luminosité installé
 #define  BUF_SIZE  60                   // Taille max des notification ( nb de caractéres max )
  
-#define NOMMODULE "NotifHeure_nom"      // nom module
+#define NOMMODULE "NotifHeure_salon"      // nom module
  
 // Options horloge à définir avant programmation
 boolean AutoIn=true;      // Auto / manu intensite
@@ -94,18 +94,18 @@ MD_Parola P = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
  
 //**********************//
 //interaction Jeedom
-#define JEEDOM false                  // Activation interaction avec Jeedom ( veuillez renseigner tous les champs )
+#define JEEDOM false                 // Activation interaction avec Jeedom ( veuillez renseigner tous les champs )
 String ApiKey   = ""; // cle API Jeedom  ex :mVuQikcXm620321DMYZiCsLj0wamT0HsCcrBCuXRxntJDO1kn
-String IPJeedom = "192.168.8.x";
-String PortJeedom = "80";
-// ID equipement a modifier     
- //id SDJ
+String IPJeedom = "192.168.x.x";
+String PortJeedom = "80"; 
+// ID equipement a modifier     // id SDJ
 String idHor  = "10821";
 String idLum ="10822";
 String idSec = "10823";
 String idAuto ="10834";
 // id salon
- 
+
+
  
  
  
@@ -144,8 +144,9 @@ int sensorValue;
 char Notif[BUF_SIZE];
 char Horloge[BUF_SIZE];
 boolean Alert=false;
+boolean FinMsg=false;
 byte Intensite=5;
-byte BkIntensite;
+byte BkIntensite=Intensite;
 const long interval = 20000;  // interval pour mesure luminosite réglé sur 20 s
 unsigned long previousMillis=0 ;
 byte clic=0;
@@ -298,17 +299,19 @@ void configModeCallback (WiFiManager *myWiFiManager) {
  
 // **************************************
  
-#if (ACTIVCAPTLUM)
-// fonction reglage auto luminosite
+
 void luminosite() {
+  #if (ACTIVCAPTLUM)
+// fonction reglage auto luminosite
   byte bkint = Intensite;
   sensorValue = analogRead(A0); // read analog input pin 0
   Intensite =round((sensorValue*1.5)/100);
   if (Intensite < 1 ) Intensite = 0 ;
   if (Intensite > 15 ) Intensite = MAX_INTENSITY;
   if (bkint != Intensite )  ToJeedom( idLum ,Intensite);
+  #endif
 }
-#endif
+
  
 // ******************
 // Gestion page WEB
@@ -407,6 +410,7 @@ int value=valeur;
                     NotifMsg(message,Intensite,true);
                     valEPROM=valEPROM&240;  // masque sur les 4 derniers bits
                     valEPROM+=Intensite;
+                      P.setIntensity(Intensite); 
                 if (DEBUG) {
                   Serial.println(" Menu Option");
                   Serial.println("valeur enregistrement EPROM " + String(valEPROM) );
@@ -541,25 +545,25 @@ P.print( "OTA ...");
  server.on("/Notification", [](){
     // on recupere les parametre dans l'url dans la partie /Notification?msg="notification a affiocher"&type="PAC"
      if ( server.hasArg("msg")) {
-      BkIntensite=Intensite;
        message=server.arg("msg");
         if (message ) {
        // message.toCharArray(Notif,BUF_SIZE);
         if (server.hasArg("intnotif") && server.arg("intnotif").length() > 0 ) {
+          BkIntensite=Intensite;  
           Intensite = server.arg("intnotif").toInt();
           if (Intensite < 1 ) Intensite = 0 ;
           if (Intensite > 14 ) Intensite = MAX_INTENSITY;
-          P.setIntensity(Intensite); // intensité pour les notifs si pas de valeur Intensité par defaut
         } 
         if (server.arg("type")) {
               type=server.arg("type");
                }
- 
+     P.setIntensity(Intensite); // intensité pour les notifs si pas de valeur Intensité par defaut
     // on repond au client
          NotifMsg(message,Intensite,false);
-    server.send(200, "text/plain", "message :" + message + " & Animation : "+server.arg("type") + " & Intensite : "+server.arg("intnotif"));
+    server.send(200, "text/plain", "message :" + message + " & Animation : "+server.arg("type") + " & Intensite : "+Intensite);
         }
      }
+ 
     });
   
  
@@ -650,11 +654,9 @@ void loop(void)
   }
     #endif
   }
-  else {
-  P.setIntensity(Intensite);
+  //P.setIntensity(Intensite);
   }
-  }
-    if (DEBUG) Serial.print("valeur luminosité "+ String(Intensite));
+   // if (DEBUG) Serial.println("valeur luminosité "+ String(Intensite));
  
 // ********** Fin gestion luminosite
  
@@ -764,8 +766,10 @@ if (P.displayAnimate())
         P.setTextAlignment(0,PA_CENTER);
        fx_center=false;
        }
-       Intensite=BkIntensite; // reviens a intensite avant notif
+       else  FinMsg=true;
       Alert=false;
+       //Intensite=BkIntensite; // reviens a intensite avant notif
+       if (DEBUG) Serial.println("valeur de intensite : "+String(Intensite) +" Valeur de bk : "+String(BkIntensite));
     }
  
     }
@@ -775,6 +779,7 @@ if (P.displayAnimate())
                           P.setFont(0, numeric7Seg_Byfeel); 
                           digitalClockDisplay(Notif,flasher);
                           P.displayZoneText(0, Notif, PA_CENTER, 0, 0, PA_PRINT, PA_NO_EFFECT);
+                         
     }
     }
  
@@ -829,6 +834,10 @@ void digitalClockDisplay(char *heure,bool flash)
     {
    // Si affichage de l'heure      
   if (TimeOn) { 
+     if (FinMsg) { 
+        Intensite=BkIntensite;
+        FinMsg=false;
+     }
      P.setIntensity(Intensite);
   if ( DisSec ) 
   {  // si affichage des Secondes  00:00 (secondes en petit )
@@ -837,10 +846,10 @@ void digitalClockDisplay(char *heure,bool flash)
     secondes[0]=secondes[0]+23;  // permutation codes AScci 71 à 80
     secondes[1]=secondes[1]+23;
   if (DEBUG) { 
-      Serial.println("debug des secondes : ");
-      Serial.println(second());
-      Serial.println(secondes[0]);
-      Serial.println(secondes[1]);
+      //Serial.println("debug des secondes : ");
+      //Serial.println(second());
+      //Serial.println(secondes[0]);
+      //Serial.println(secondes[1]);
   } 
     sprintf(heure,"%02d:%02d %c%c",hour(),minute(),secondes[0],secondes[1]);
     //sprintf(heure,"%02d%c%02d%c%c",hour(),(flash ? ':' : ' '),minute(),secondes[0],secondes[1]);
