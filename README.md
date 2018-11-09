@@ -18,6 +18,14 @@ Variable à definir avant compilation dans votre module
 Plus de detail dans l'article DIY Horloge et Notification sur mon blog http://byfeel.info
 
 Historique version :
+V3.1.1 : Mise a jour bug dht
+
+V3.1 : Nouvelle version ( Novembre 2018 )
+
+
+--------------------------------------------
+Si pas intéressé par fonction avançés interface web - V2.6 suffit
+
 
 V2.6 : Ajout affichage Horloge ( font personalisé ) - pour un affichage plus PRO.
 
