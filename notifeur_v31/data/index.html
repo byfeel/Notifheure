@@ -78,14 +78,14 @@
 <div class="container">
 <div class="row">
     <!-- DHT-->
-    <div class="col-10 col-sm-10 col-md-4 col-lg-4 d-none mx-auto" id="dht_box">
+    <div class="col-10 col-sm-10 col-md-7 col-lg-4 d-none mx-auto" id="dht_box">
     <div class="card bg-dark text-white mb-3 text-center" style="max-width: 20rem;">
-  <div class="card-header" id="thermo">DHT</div>
+        <div class="card-header" id="thermo"><h4><span id="Modele">DHT</span></h4></div>
   <div class="card-body tex-center">
 
         <h2 class="display-3"><span id="Temp"></span> &deg;C</h2>
          <h2 class="display-4"><span id="Hum"></span> %</h2>
-    <p class="card-text" >Confort : <span id="Confort"></span></p>
+    <p class="card-text" >Statut :<span id="Status"></span> </p>
     </div>
           </div>
     </div>
@@ -101,15 +101,20 @@
     <input name='HOR' type="checkbox"  data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-size="small" id="HOR"  checked>
          <label class="form-check-label ml-3" for="HOR"> Affichage Horloge </label>
         </div>
+      <div class="form-check mb-1 d-none" id="Night">
+    <input name='NIG' type="checkbox"  data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-size="small" id="NIG"  checked >
+         <label class="form-check-label ml-3" for="NIG"> Mode Nuit (Veilleuse) - en test</label>
+        </div>
       <div class="form-check mb-1">
     <input name='LUM' type="checkbox"  data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-size="small" data-on="Auto" data-off="Manu" class="col-sm-3" id="LUM" checked>
-    <label class="form-check-label ml-2" for="LUM">Mode Auto / Manuel <span class="badge badge-info" id="int"></span></label>
+    <label class="form-check-label ml-2" for="LUM">Mode Auto / Manuel <span class="badge badge-info" id="int"></span></label>    
     </div>
-        </div>
-    <div class="col-10 col-sm-4 col-md-3 col-lg-2 d-none" id="OptionsINT">
+         <div id="OptionsINT" class="d-none">
         <p class="text-danger">Réglage Intensité en Mode Manuel</p>
        <div id="SliderIntensiteOption" class="mx-auto"></div>
     </div>
+        </div>
+   
         </form>
 </div>
 </div>
@@ -424,11 +429,13 @@ function InitSocket(IP) {
               if(jinfo.system.LED) { 
                         $('#LED').text("Present");
                         $('#boxflash').removeClass("d-none");
+                        $('#Night').removeClass("d-none");
                         $("#flash").prop("disabled", false);         
                                    }
                 else { 
                     $('#LED').text("Absent");
                     $('#boxflash').addClass("d-none");
+                    $('#Night').addClass("d-none");
                 }
             
             if (jinfo.system.Bouton1 || jinfo.system.Bouton2) {
@@ -446,7 +453,7 @@ function InitSocket(IP) {
              if(jinfo.system.dhtsensor) {
                     $('#dht_box').removeClass("d-none");
                     $("#navdht").removeClass("disabled");
-                    $('#dht').text("Present");
+                    $('#dht').text("Present - "+jinfo.dht.Modele);
                  // info dht
                     $('#Temp').text(jinfo.dht.T);
                     $('#Hum').text(jinfo.dht.H);
@@ -455,13 +462,14 @@ function InitSocket(IP) {
                     $('#dht_hi').text(jinfo.dht.Hi);
                     $('#dht_p').text(jinfo.dht.P);
                     $('#dhtdate').text(jinfo.dht.dht_date);
-                    if (jinfo.dht.Confort=="OK")  {
+                    if (jinfo.dht.Status=="OK")  {
                     $('#thermo').attr('class','card-header bg-success')
                         }
                     else {
                     $('#thermo').attr('class','card-header bg-danger')
                         }
-                    $('#Confort').text(jinfo.dht.Confort);
+                    $('#Modele').text(jinfo.dht.Modele);
+                    $('#Status').text(jinfo.dht.Status);
              }  // fin presence dht
                 else {
                       $('#dht').text("Absent");
@@ -548,6 +556,7 @@ function SliderAM(){
                         });
                 }
                  $("#FormMsg")[0].reset();
+                $('#SliderIntensite').removeClass("invisible");
                 }
         });
     return false;

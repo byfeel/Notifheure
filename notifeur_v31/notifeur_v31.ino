@@ -1,4 +1,6 @@
 
+
+
 //**************************
 // NOTIFEUR
 // OTA + Interface Web + API ( box domotique )
@@ -7,7 +9,7 @@
 //  -------------------------
 // Copyright Byfeel 2017-2018
 // *************************
-String Ver="3.1.0";
+String Ver="3.1.1";
 // *************************
 //**************************
 //****** CONFIG SKETCH *****
@@ -19,12 +21,14 @@ String Ver="3.1.0";
 #define CLK_PIN   D5
 #define DATA_PIN  D7
 #define CS_PIN    D6
-// Options ( modifié si different ou laisser valeur par défaut )
+// Options ( modifie si different ou laisser valeur par défaut )
+// Ne pas supprime
 #define PINbouton1 0 // Bouton 1   --- GPIO0 ( pullup integré - D8 pour R1 ou D3 pour R2 )
 #define PINbouton2 2 // Bouton 2
+#define DHTTYPE DHTesp::DHT22  // si DHT22
+//#define DHTTYPE DHTesp::DHT11  // si DHT11
 #define dhtpin 16 // GPIO16  egale a D2 sur WEMOS D1R1  ou D0 pour les autres ( a verifier selon esp )
-#define DHTType DHTesp::DHT11   //DHT11 ou DHT22 selon capteur
-#define LEDPin D15
+#define LEDPin 5
 
 
 //***************************
@@ -51,8 +55,7 @@ const char* www_password = "notif";
 //****** Serveur WEB
 #include <ESP8266WebServer.h>
 #include <WebSocketsServer.h>
-//#include <WebSocketsClient.h>
-//#include <WebSockets.h>
+
 //****** Client WEB
 #include <ESP8266HTTPClient.h>
 // WIFI Manager , afin de gerer la connexion au WIFI de façon plus intuitive
@@ -83,6 +86,7 @@ const char* www_password = "notif";
 // bibliotheque temperature
 #include <DHTesp.h>
 
+
 //librairies click bouton
 #include <ClickButton.h>
 // ******************************//
@@ -100,7 +104,6 @@ MD_Parola P = MD_Parola(HARDWARE_TYPE, DATA_PIN, CLK_PIN, CS_PIN, MAX_DEVICES);
 // *************************
 // init dht
 DHTesp dht;
-ComfortState cf;
       
 
 // Structure fichier config
@@ -136,7 +139,7 @@ Config config;                         // <- global configuration object
 
 //Init JSON
 //StaticJsonBuffer<1600> jsonBuffer; 
-DynamicJsonBuffer jsonBuffer(512);
+DynamicJsonBuffer jsonBuffer(500);
 JsonObject& JSONRoot = jsonBuffer.createObject();
 JsonObject& JSONSystem = JSONRoot.createNestedObject("system");
 JsonObject& JSONOptions = JSONRoot.createNestedObject("Options");
@@ -212,13 +215,14 @@ byte NZtime , NZmsg;
 bool Fnotif=false;
 
 // variable DHT
-boolean DHTsensor=false;
-  float humidity=0;
-  float temperature=0;
-  float heatIndex=0;
-  float dewPoint=0;
-  byte per=0;
-  String comfortStatus="";     
+bool DHTsensor=false;
+  float humidity;
+  float temperature;
+  float heatIndex;
+  float dewPoint;
+  byte per;
+ 
+  //String comfortStatus="";     
    char date_stamp[18];
    
 //variable systemes
@@ -560,7 +564,7 @@ void loadConfiguration(const char *filename, Config &config) {
   AutoIn = rootcfg["AutoIn"] | true; 
   TimeOn = rootcfg["TimeOn"] | true; 
   DisSec = rootcfg["DisSec"] | true; 
-  Intensite = rootcfg["intensite"] | 2;
+  Intensite = rootcfg["intensite"] | 1;
   
   raz = rootcfg["raz"] | false; 
   msgTemp = rootcfg["ddht"] | false;
@@ -615,83 +619,52 @@ void luminosite() {
 }
 
 void GetTemp() {
+  String Statusdht;
+  int ModelDHT;
+  Statusdht=dht.getStatusString();
+  ModelDHT=dht.getModel();
    temperature = dht.getTemperature();
-   delay(50);
-  if (temperature != temperature) {
+    DHTsensor=true;
+    humidity= dht.getHumidity();
+   heatIndex = dht.computeHeatIndex(temperature, humidity, false);
+   dewPoint = dht.computeDewPoint(temperature,humidity,false);
+   //float cr = dht.getComfortRatio(cf,temperature,humidity);
+    per = dht.computePerception(temperature, humidity,false);
+    Notif_date(date_stamp);
+
+  if (isnan(humidity) || isnan(temperature)) {
     DHTsensor=false;
     temperature = 0;
     humidity= 0;
     heatIndex = 0;
     dewPoint = 0;
     per = 0;
-    comfortStatus="Erreur DHT";
-        }  else {
-    DHTsensor=true;
-    humidity= dht.getHumidity();
-    heatIndex = dht.computeHeatIndex(temperature,humidity);
-    dewPoint = dht.computeDewPoint(temperature,humidity);
-    float cr = dht.getComfortRatio(cf,temperature,humidity);
-    per = dht.computePerception(temperature, humidity);
-    Notif_date(date_stamp);
-   switch(cf) {
-    case Comfort_OK:
-      comfortStatus = "OK";
-      break;
-    case Comfort_TooHot:
-      comfortStatus = "Trop Chaud";
-      break;
-    case Comfort_TooCold:
-      comfortStatus = "Trop froid";
-      break;
-    case Comfort_TooDry:
-      comfortStatus = "Trop Sec";
-      break;
-    case Comfort_TooHumid:
-      comfortStatus = "Trop humide";
-      break;
-    case Comfort_HotAndHumid:
-      comfortStatus = "Chaud et Humide";
-      break;
-    case Comfort_HotAndDry:
-      comfortStatus = "Chaud et Sec";
-      break;
-    case Comfort_ColdAndHumid:
-      comfortStatus = "Froid et humide";
-      break;
-    case Comfort_ColdAndDry:
-      comfortStatus = "Froid et Sec";
-      break;
-    default:
-      comfortStatus = "Inconnu - Erreur";
-      break;
   }
 
-  if ( msgTemp) { 
-          char MSGt[BUF_SIZE];
-          char str_temp[6];
-          char str_hum[6];
-          dtostrf(heatIndex, 3, 1, str_temp);
-          dtostrf(humidity, 3, 0, str_hum);
-          sprintf(MSGt,"Temp : %s °C - Hum : %s%%", str_hum);
-          message=String(MSGt);
-      //message = "Temp : "+String(temperature)+" °C";
-       NotifMsg(message,Intensite,false);
-     }
-  }
 
-  // Mise a jour des valeurs dht dans JSON
+   // Mise a jour des valeurs dht dans JSON
     //DHTsensor
-
-   if (config.DEBUG) Serial.println("Valeur Sensor DHT :"+String(DHTsensor));
+    String Modele;
+    switch(ModelDHT) {
+      case 1 : Modele="DHT11";
+      break;
+      case 2 : Modele="DHT22";
+      break;
+      default : Modele="Inconnu";
+      break;
+    }
+  
+  if (config.DEBUG) Serial.println("Valeur Sensor DHT :"+String(DHTsensor));
   JSONDht["T"] = temperature;
   JSONDht["H"] = humidity;
   JSONDht["Hi"] = String(heatIndex);
   JSONDht["P"] = String(dewPoint);
   JSONDht["per"] = per;
-  JSONDht["Confort"] = comfortStatus;
+  JSONDht["Modele"] =Modele;
+  JSONDht["Status"] = dht.getStatusString();
   JSONSystem["dhtsensor"] = DHTsensor;
   JSONDht["dht_date"] = date_stamp;
-if (config.DEBUG) Serial.println(" T:" + String(temperature) + "°C  H:" + String(humidity) + "%  I:" + String(heatIndex) + " D:" + String(dewPoint) + " " + comfortStatus+" et per :"+ String(per));
+if (config.DEBUG) Serial.println(" T:" + String(temperature) + "°C  H:" + String(humidity) + "%  I:" + String(heatIndex) + " D:" + String(dewPoint) + "  et per :"+ String(per));
 }
 
 
@@ -732,6 +705,7 @@ void flashlight() {
 // Traitement des notifications
 void handleNotif(){
 String InfoNotif="Erreur";
+ BkIntensite=Intensite; 
 // on recupere les parametre dans l'url dans la partie /Notification?msg="notification a affiocher"&type="PAC"
      if ( server.hasArg("msg")) {
           message=server.arg("msg");
@@ -739,11 +713,9 @@ String InfoNotif="Erreur";
               if (server.arg("type")) type=server.arg("type");
               if (server.hasArg("intnotif") && server.arg("intnotif").length() > 0 ) 
                 {
-              BkIntensite=Intensite;  
-              Intensite = server.arg("intnotif").toInt();
-              if (Intensite < 1 ) Intensite = 0 ;
-              if (Intensite > 14 ) Intensite = MAX_INTENSITY;
-              
+                   Intensite = server.arg("intnotif").toInt();
+                  if (Intensite < 1 ) Intensite = 0 ;
+                   if (Intensite > 14 ) Intensite = MAX_INTENSITY;
                  } 
               if (server.arg("flash")=="true" || server.arg("flash")=="1") Fnotif=true;
               if ( server.hasArg("txt"))   { 
@@ -895,7 +867,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
            else if ( s=="RESET") {
            raz=true;
            saveConfiguration(filename, config);
-            delay(400);
+            delay(1000);
             ESP.restart();
           }
           
@@ -1109,8 +1081,10 @@ sensorValue = analogRead(A0); // init du sensor luminosite
  // Initialize temperature sensor
  // dht.setup(dhtPin, DHTType);
  int pin(dhtpin);
-  dht.setup(pin, DHTesp::DHT11);
-  delay(1000);
+ 
+ dht.setup(pin,DHTTYPE);
+  //dht.begin();
+  delay(2000);
 
 
 P.begin();  // init matrice
@@ -1132,12 +1106,12 @@ P.print("Start ...");
     // wifiManager.autoConnect("AutoConnectAP");
     //Si rien indiqué le nom par defaut est  ESP + ChipID
     //wifiManager.autoConnect();
-      if(!wifiManager.autoConnect("Notifheure")) {
+      if(!wifiManager.autoConnect("WIFI-Notifheure")) {
               P.print("erreur AP");
               delay(2000);
               //reset and try again, or maybe put it to deep sleep
               ESP.reset();
-              delay(5000);
+              delay(2000);
         } 
     
 // ****** Fin config WIFI Manager ************
@@ -1184,10 +1158,8 @@ ArduinoOTA.setHostname((const char *)hostname.c_str());
 
   ArduinoOTA.onStart([]() {
         String type;
-        if (ArduinoOTA.getCommand() == U_FLASH)
-        type = "sketch";
-          else // U_SPIFFS
-         type = "SPIFFS";
+        if (ArduinoOTA.getCommand() == U_FLASH) type = "sketch";
+          else  type = "SPIFFS";
     if ((type)=="SPIFFS") SPIFFS.end();   // NOTE: demontage disque SPIFFS pour mise a jour over the Air
     P.begin();
      P.setFont(ExtASCII);
@@ -1296,6 +1268,8 @@ String  mdnsName = config.Name;
   MDNS.addService("ws", "tcp", 81);
   MDNS.addService("notifeur", "tcp", 8888); // Announce notifeur service port 8888 TCP
 
+
+//***************************
 //******* Service NTP ********
    NTP.onNTPSyncEvent ([](NTPSyncEvent_t event) {
         ntpEvent = event;
@@ -1307,35 +1281,12 @@ String  mdnsName = config.Name;
 NTP.begin(config.NTPSERVER, config.timeZone, config.DLS);
 NTP.setInterval(60);
 
-
-
-//***************************
-
-
     
 //************ Initialisation *********
 P.print("init");
 delay(200);
 // *********  des Zones
-/*
-if (config.multiZone) P.begin(2);
-      else P.begin(1);
-//  P.setInvert(false);
-  if (config.DEBUG) Serial.println("Initialisation des Zones");
 
-byte zoneMsg;
-if (maxdisplay>4) zoneMsg=maxdisplay-4;
-  else zoneMsg=2;
-if (config.multiZone) {
-   P.setZone(0, 0, (zoneMsg-1));
-   P.setZone(1, zoneMsg,(maxdisplay -1));
-} else {
-   P.setZone(0, 0, MAX_DEVICES);
-}
-
-P.displayZoneText(0, "", PA_LEFT, config.SPEED_TIME, config.PAUSE_TIME, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
-
-*/
 
 if (config.multiZone) {
   P.begin(2);
@@ -1373,7 +1324,7 @@ P.setSpriteData(pacman1, W_PMAN1, F_PMAN1,pacman2, W_PMAN2, F_PMAN2);   // charg
 // DHT
   GetTemp();
 // led
-    pinMode(LEDPin,OUTPUT);
+  pinMode(LEDPin,OUTPUT);
   digitalWrite(LEDPin,ledState);
 //************************************
 
@@ -1425,8 +1376,6 @@ JSONSystem["LED"] = config.LED;
 // box
 JSONSystem["box"] = config.JEEDOM;
 
-
-
   
 // Fin de Setup
   message = " Système OK - Adresse ip : ";
@@ -1439,6 +1388,8 @@ JSONSystem["box"] = config.JEEDOM;
     Serial.print(" ,valeur Affichage horloge "+String(TimeOn));
     Serial.println("");
 }
+
+
 
 }
 
@@ -1474,7 +1425,19 @@ void loop(void)
   if( millis() - previousMillisdht >= intervaldht) {
      previousMillisdht = millis();   
     GetTemp();
-   
+    if ( msgTemp) { 
+    
+          char MSGt[BUF_SIZE];
+          char str_temp[6];
+          char str_hum[6];
+          dtostrf(temperature, 3, 1, str_temp);
+          dtostrf(humidity, 3, 0, str_hum);
+          sprintf(MSGt,"Temp : %s °C - Hum : %s%%", str_temp,str_hum);
+          message=String(MSGt);
+      //message = "Temp : "+String(temperature)+" °C";
+       NotifMsg(message,Intensite,false);
+       
+       }
     }  
 
 // Tempo date
