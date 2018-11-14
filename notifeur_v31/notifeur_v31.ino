@@ -1,6 +1,4 @@
 
-
-
 //**************************
 // NOTIFEUR
 // OTA + Interface Web + API ( box domotique )
@@ -9,7 +7,7 @@
 //  -------------------------
 // Copyright Byfeel 2017-2018
 // *************************
-String Ver="3.1.1";
+String Ver="3.1.2";
 // *************************
 //**************************
 //****** CONFIG SKETCH *****
@@ -237,7 +235,7 @@ bool OTAerreur=false;
 
 //**********************//
 //interaction Jeedom
-boolean JEEDOM=false;                // Activation interaction avec Jeedom ( veuillez renseigner tous les champs )
+boolean JEEDOM=false;                
 String ipBox="x.x.x.x";
 String portBox="80";
 String ReqUpBox;
@@ -736,28 +734,35 @@ void handleOptions() {
 String result="ok";
     if ( server.hasArg("SEC")) { 
         String SEC = server.arg("SEC");
-         if ( SEC == "on" && !DisSec ) Option(&DisSec,true);
-          else if ( SEC == "off" && DisSec ) Option(&DisSec,false);
+         if ( (SEC == "on" || SEC =="1") && !DisSec ) Option(&DisSec,true);
+          else if ( (SEC == "off" || SEC=="0") && DisSec ) Option(&DisSec,false);
             else result="idem";
           }
      else if ( server.hasArg("HOR")) { 
         String HOR = server.arg("HOR");
-         if ( HOR == "on" && !TimeOn) Option(&TimeOn,true);
-         else if ( HOR == "off" && TimeOn) Option(&TimeOn,false);
+         if ( (HOR == "on" || HOR=="1") && !TimeOn) Option(&TimeOn,true);
+         else if ( (HOR == "off" || HOR=="0") && TimeOn) Option(&TimeOn,false);
          else result="idem";
     }
       else if ( server.hasArg("LUM")) {
           String LUM = server.arg("LUM");
-         if ( LUM == "auto" && !AutoIn) Option(&AutoIn,true);
-         else if ( LUM == "manu" && AutoIn) Option(&AutoIn,false);
+         if ( (LUM == "auto" || LUM == "1") && !AutoIn) Option(&AutoIn,true);
+         else if ( (LUM == "manu" || LUM == "0") && AutoIn) Option(&AutoIn,false);
          else result="idem";
           }
      else if ( server.hasArg("INT") && !AutoIn) { 
            Intensite=server.arg("INT").toInt();
             Option(&AutoIn,false);
          } 
+              else if ( server.hasArg("LED") && config.LED) { 
+                  if (server.arg("LED")=="1" || server.arg("LED")=="on" ) ledState = 0;
+                  else ledState=1;
+                  digitalWrite(LEDPin,ledState); // On-Off led
+                  JSONOptions["LEDstate"] = !ledState;
+         }
       else result="Erreur";
   server.send ( 200, "text/html",result);
+    webSocket.broadcastTXT("Update");
 }
 
 
@@ -1338,6 +1343,8 @@ JSONOptions["LUM"] = AutoIn;
 JSONOptions["INT"] = Intensite;
 JSONOptions["ddht"] = msgTemp;
 JSONOptions["txtAnim"] = txtAnim;
+JSONOptions["LEDstate"] = !ledState;
+
 //boutons
   JsonArray& btnclic = JSONSystem.createNestedArray("btnclic");
   btnclic.add(config.btnclic[1][1]);
@@ -1659,6 +1666,7 @@ switch (actionClick) {
           if (config.LED) {
           ledState = !ledState;
           digitalWrite(LEDPin,ledState); // envoie info à led
+          JSONOptions["LEDstate"] = !ledState;
           }   
           break;
       case 5 : //Action 1
