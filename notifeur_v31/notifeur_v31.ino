@@ -7,7 +7,7 @@
 //  -------------------------
 // Copyright Byfeel 2017-2018
 // *************************
-String Ver="3.1.2";
+String Ver="3.1.2b";
 // *************************
 //**************************
 //****** CONFIG SKETCH *****
@@ -126,10 +126,10 @@ struct Config {
   int interval_ddj;
   byte btnclic[3][4];
   bool JEEDOM;
-  char URL_Update[100];
-  char URL_Action1[100];
-  char URL_Action2[100];
-  char URL_Action3[100];
+  char URL_Update[130];
+  char URL_Action1[130];
+  char URL_Action2[130];
+  char URL_Action3[130];
 };
 
 const char *filename = "/config/config.json";  // fichier config
@@ -201,7 +201,7 @@ byte ledState = 1;
 #define  BUF_SIZE  60       // Taille max des notification ( nb de caractéres max )
 char Notif[BUF_SIZE];
 char Horloge[BUF_SIZE];
-char txtAnim[10];
+char txtAnim[20];
 boolean Alert=false;
 boolean FinMsg=false;
 String message="";    
