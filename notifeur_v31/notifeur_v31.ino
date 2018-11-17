@@ -7,7 +7,7 @@
 //  -------------------------
 // Copyright Byfeel 2017-2018
 // *************************
-String Ver="3.1.2b";
+String Ver="3.1.3";
 // *************************
 //**************************
 //****** CONFIG SKETCH *****
@@ -211,6 +211,7 @@ String mois[13]={"Erreur","Janvier","Février","Mars","Avril","Mai","Juin","Juil
 byte maxdisplay = MAX_DEVICES;
 byte NZtime , NZmsg;
 bool Fnotif=false;
+int fix_pause;
 
 // variable DHT
 bool DHTsensor=false;
@@ -427,7 +428,7 @@ static uint8_t pacman2[F_PMAN2 * W_PMAN2] =  // ghost pursued by a pacman
 // **************************************
 // Fonction Notif'heure
 // **************************************
-void NotifMsg(String Msg,byte lum,bool Info,bool U2A=true)
+void NotifMsg(String Msg,byte lum,bool Info,bool U2A=true,int fpause=3)
   {
      P.setFont(NZmsg,ExtASCII);
      Alert=true;
@@ -436,8 +437,12 @@ void NotifMsg(String Msg,byte lum,bool Info,bool U2A=true)
   if (Info) {
     //P.displayZoneText(0,Notif,PA_CENTER,config.SPEED_TIME, config.PAUSE_TIME,PA_PRINT,PA_NO_EFFECT);
    fx_center=true;
-    fx_in=1;
-    fx_out=4;
+    fx_in=8;
+    if (fpause==-1) fx_out=4;
+    else {
+      fix_pause=fpause;
+        fx_out=8;
+        }
     } else { 
       P.setTextAlignment(NZmsg,PA_LEFT) ;
      // P.displayZoneText(0, Notif, PA_LEFT, config.SPEED_TIME, config.PAUSE_TIME, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
@@ -453,7 +458,7 @@ String JsonConfig(bool NC=false) {
     // Allocate the memory pool on the stack
   // Don't forget to change the capacity to match your JSON document.
   // Use https://arduinojson.org/assistant/ to compute the capacity.
-  StaticJsonBuffer<1600> jsonBuffercfg;
+  StaticJsonBuffer<1700> jsonBuffercfg;
 
   // Parse the root object
   JsonObject &rootcfg = jsonBuffercfg.createObject();
@@ -525,7 +530,7 @@ void loadConfiguration(const char *filename, Config &config) {
   std::unique_ptr<char[]> buf(new char[size]);
   file.readBytes(buf.get(), size);
 
-  StaticJsonBuffer<1600> jsonBufferConfig;
+  StaticJsonBuffer<1700> jsonBufferConfig;
   JsonObject& rootcfg = jsonBufferConfig.parseObject(buf.get());
 
   if (!rootcfg.success()) {
@@ -703,12 +708,15 @@ void flashlight() {
 // Traitement des notifications
 void handleNotif(){
 String InfoNotif="Erreur";
+bool INFO=false;
+int fpause=3;
  BkIntensite=Intensite; 
 // on recupere les parametre dans l'url dans la partie /Notification?msg="notification a affiocher"&type="PAC"
      if ( server.hasArg("msg")) {
           message=server.arg("msg");
            if (message!="") {
               if (server.arg("type")) type=server.arg("type");
+              if (type=="INFO" || type=="FIX")  INFO=true;
               if (server.hasArg("intnotif") && server.arg("intnotif").length() > 0 ) 
                 {
                    Intensite = server.arg("intnotif").toInt();
@@ -716,6 +724,9 @@ String InfoNotif="Erreur";
                    if (Intensite > 14 ) Intensite = MAX_INTENSITY;
                  } 
               if (server.arg("flash")=="true" || server.arg("flash")=="1") Fnotif=true;
+              if (server.hasArg("pause") && type=="INFO" ) fpause=server.arg("pause").toInt();
+              if ( type=="FIX" ) fpause=-1;
+              
               if ( server.hasArg("txt"))   { 
                 server.arg("txt").toCharArray(txtAnim,sizeof(txtAnim));
                 JSONOptions["txtAnim"] = txtAnim;
@@ -723,7 +734,11 @@ String InfoNotif="Erreur";
               }
               P.setIntensity(Intensite); // regle intensite notif
               InfoNotif="ok"; 
-              NotifMsg(message,Intensite,false,false); // envoie de la notif pour traitement
+              if (message=="ClearFix!")  { 
+                message="";
+                type="";
+              }
+              NotifMsg(message,Intensite,INFO,false,fpause); // envoie de la notif pour traitement
               }
               else InfoNotif="vide";         
      }
@@ -1546,24 +1561,31 @@ if (P.displayAnimate())
       type="";
     }
     else {
-      P.displayClear(NZmsg);
+     // P.displayClear(NZmsg);
       P.displayZoneText(NZmsg, Notif, PA_LEFT,config.SPEED_TIME, config.PAUSE_TIME*1000, effect[fx_in], effect[fx_out]);
       if (fx_center) { 
         P.setTextAlignment(NZmsg,PA_CENTER);
+       // if (fix_pause<1) fix_pause=3;
+        P.setPause(NZmsg,fix_pause*1000);
        fx_center=false;
-       }
+        }
        else  FinMsg=true;
        Alert=false;
     }
-    }
+    P.displayClear(NZmsg);
+    } // fin zonestatus
     } // fin alert
     else {
-    if (!config.multiZone) DispZoneTime(flasher);
+    
+    if (!config.multiZone && type!="FIX" ) DispZoneTime(flasher);
+    
     }
    //P.displayReset(0);
 
 
  if (config.multiZone) DispZoneTime(flasher);
+
+ 
                         
 } // fin display animate
 
@@ -1634,7 +1656,8 @@ void Notif_date(char *jour) {
 void BoutonAction(byte btn , byte btnclic ) {
 int actionClick;
 if (btnclic < 4 ) actionClick=config.btnclic[btn][btnclic];
-else actionClick=btnclic;
+else if (btnclic>100)  actionClick=btnclic;
+else actionClick=0;
   
 switch (actionClick) {
     

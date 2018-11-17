@@ -372,13 +372,14 @@ function InitSocket(IP) {
                 $('#OptionINT').addClass("d-none");
             }
                 else if  (!jinfo.Options.LUM && $('#LUM').prop('checked')) {
-                    $('#LUM').bootstrapToggle('off');
-                  $('#OptionsINT').removeClass("d-none");
+                            $('#LUM').bootstrapToggle('off');
+                            $('#OptionsINT').removeClass("d-none");
+                   
                 }
             if (jinfo.Options.ddht) $('#check_ddht').prop('checked',true);
                 else $('#check_ddht').prop('checked',false);
             $('#int').text(jinfo.Options.INT);
-            $("#sliderIntensiteOption").roundSlider("option","value", jinfo.Options.INT);
+             $("#SliderIntensiteOption").roundSlider("option","value", jinfo.Options.INT);
             // init info
             if (init==1) {
             $('#lieu').text(jinfo.system.lieu);
