@@ -19,6 +19,10 @@ Plus de detail dans l'article DIY Horloge et Notification sur mon blog http://by
 
 Historique version :
 
+V3.1.4 : bug fix ( pause 0 S )
+
+V3.1.3 : bug fix + mode info et fix
+
 V3.1.2 : Correctifs et support nouveau script php pour jeedom
 
 V3.1.1 : Mise a jour bug dht
