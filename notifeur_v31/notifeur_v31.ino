@@ -7,7 +7,7 @@
 //  -------------------------
 // Copyright Byfeel 2017-2018
 // *************************
-String Ver="3.1.3";
+String Ver="3.1.4";
 // *************************
 //**************************
 //****** CONFIG SKETCH *****
@@ -63,6 +63,7 @@ const char* www_password = "notif";
 ///includes necessaires au fonctionnement de l'OTA :
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
+#include <SPI.h>
 // **** Bibliotheque Matrice LED
 #include <MD_Parola.h>
 #include <MD_MAX72xx.h>
@@ -233,6 +234,7 @@ String JeedomFile="/jeedom.json";
 boolean Reboot = false;
 boolean UptoBox=false;
 bool OTAerreur=false;
+bool notifOk;  // verif si notif
 
 //**********************//
 //interaction Jeedom
@@ -632,7 +634,7 @@ void GetTemp() {
    heatIndex = dht.computeHeatIndex(temperature, humidity, false);
    dewPoint = dht.computeDewPoint(temperature,humidity,false);
    //float cr = dht.getComfortRatio(cf,temperature,humidity);
-    per = dht.computePerception(temperature, humidity,false);
+    per = dht.computePerception(temperature, humidity,true);
     Notif_date(date_stamp);
 
   if (isnan(humidity) || isnan(temperature)) {
@@ -734,7 +736,9 @@ int fpause=3;
               }
               P.setIntensity(Intensite); // regle intensite notif
               InfoNotif="ok"; 
-              if (message=="ClearFix!")  { 
+              if (message=="!Clear!")  { 
+                P.setPause(NZmsg,0);
+                 P.displayReset(NZmsg);
                 message="";
                 type="";
               }
@@ -807,6 +811,7 @@ void handleIP() {
 
 
 // fonction edition
+/* A supprimer
 void handleEdit() {
 String result="ok";
 //  config.HOSTNAME = server.arg("inputhost") | config.HOSTNAME;
@@ -815,14 +820,16 @@ String result="ok";
   Serial.println("dls : "+ config.DLS);
  server.send ( 200, "text/html",result);
 }
-
+*/
 
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
   String InfoJson;
+  
     switch(type) {
         case WStype_DISCONNECTED:
            if (config.DEBUG) Serial.printf("[%u] Disconnected!\n", num);
+           webSocket.sendTXT(num, "Au revoir");
             break;
         case WStype_CONNECTED:
         {
@@ -830,7 +837,10 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
                 if (config.DEBUG)  Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
         
         // send message to client
-        //webSocket.sendTXT(num, "ok");
+        String bonjour;
+        bonjour = "hello , de ";
+        bonjour += config.Name;
+        webSocket.sendTXT(num, bonjour);
             break;
         }
         case WStype_TEXT:
@@ -838,6 +848,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
            if (config.DEBUG) Serial.printf("[%u] get Text: %s\n", num, payload);
           int c=0,set=0;
           String s((const __FlashStringHelper*) payload);
+          if (s=="notifheure") notifOk=true;
           c = s.indexOf("DEBUG");
           set = s.indexOf("SetOptions");
           if (config.DEBUG) Serial.println(" chaine paylod : "+s);
@@ -959,7 +970,15 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
                           Option(&TimeOn,val);
                           reponsetxt = "-Ok- Options Affichage Horloge Mis à jour , Nouvelle Valeur : "+String(val);
                           }
-            }           
+            }         
+                else if (O=="LED" && config.LED )  {
+                          if (val==true ) ledState = 0; 
+                          else ledState = 1;
+                           digitalWrite(LEDPin,ledState); // On-Off led
+                           JSONOptions["LEDstate"] = !ledState;
+                          reponsetxt = "-Ok- Options LED modifié , Nouvelle Valeur : "+String(val);
+                       
+            }   
  
       
             else if (O=="LUM")  {
@@ -978,6 +997,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
                           }
             
           if (reponsetxt!="")  webSocket.sendTXT(num,reponsetxt);
+          webSocket.broadcastTXT("Update");
           }
           
 
@@ -1227,7 +1247,7 @@ webSocket.onEvent(webSocketEvent);
   server.on("/getInfo",handleInfo); //Rpour récupérer info module ,si pas possible de se servir des websockets
   server.on("/getIP",handleIP); //envoie IP module
   //server.on("/SetAdmin",handleAdmin); // Page gestion Admin
-  server.on("/edit",handleEdit); //Requete test
+  //server.on("/edit",handleEdit); //Requete test
   server.serveStatic("/main.css", SPIFFS, "/config/main.css");
   server.on("/editconfig.html", []() {
        if (!server.authenticate(www_username, www_password)) {

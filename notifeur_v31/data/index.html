@@ -48,16 +48,23 @@
 <label for='type' class="text-primary">Animation : </label>
 <select class="form-control" name='type' id='type'>
  <option value=''>Aucune</option>
+ <option value='INFO'>INFO</option>
+ <option value='FIX'>FIX</option>
  <option value='PAC'>PAC MAN</option>
  <option value='BLINDS'>BLINDS</option>
  <option value='OPENING'>Opening</option>
  </select>
             </div>
-    <div class="form-group ">
-    <label for='TextType' class="text-primary">Texte pour info animation</label>
+    <div class="form-group" id="textfield">
+    <label for='TextType' class="text-primary">Texte pour type animation</label>
 <INPUT type='text' id='TextType' maxlength='20' placeholder='Notif' class="form-control" aria-describedby="tnhelp"/>
 <small id ="tnhelp" class="form-text text-muted">Texte pour info Animation</small>
-                 </div>
+     </div>
+    <div class="form-group d-none" id="pausefield">
+    <label for='TextType' class="text-primary">Temps de pause pour type Info</label>
+<INPUT step="1" value="3" min="0" max="60"  id='PauseType' maxlength='10' placeholder='3' class="form-control" aria-describedby="Phelp"/>
+<small id ="Phelp" class="form-text text-muted">Temps de pause en secondes ( de 0 à 60 )</small>
+     </div>
   </div>  
   </div>
  
@@ -101,9 +108,9 @@
     <input name='HOR' type="checkbox"  data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-size="small" id="HOR"  checked>
          <label class="form-check-label ml-3" for="HOR"> Affichage Horloge </label>
         </div>
-      <div class="form-check mb-1 d-none" id="Night">
-    <input name='NIG' type="checkbox"  data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-size="small" id="NIG"  checked >
-         <label class="form-check-label ml-3" for="NIG"> Mode Nuit (Veilleuse) - en test</label>
+      <div class="form-check mb-1 d-none" id="blocled">
+    <input name='LED' type="checkbox"  data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-size="small" id="LED" >
+         <label class="form-check-label ml-3" for="LED"> On / Off LED</label>
         </div>
       <div class="form-check mb-1">
     <input name='LUM' type="checkbox"  data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-size="small" data-on="Auto" data-off="Manu" class="col-sm-3" id="LUM" checked>
@@ -181,7 +188,7 @@
   <tr><th scope="row" class="bg-dark text-white">Bouton 1</th><td id="bouton1"></td></tr>
 <tr><th scope="row" class="bg-dark text-white">Bouton 2</th><td id="bouton2"></td></tr>
 <tr><th scope="row" class="bg-dark text-white">DHT</th><td id="dht"></td></tr>
- <tr><th scope="row" class="bg-dark text-white">LED</th><td id="LED"></td></tr>
+ <tr><th scope="row" class="bg-dark text-white">LED</th><td id="StatutLED"></td></tr>
   <tr><th scope="row" class="bg-dark text-white">Box</th><td id="boxinfo"></td></tr>
           <tr><th scope="row" class="bg-dark text-white">Display </th><td id="display"></td></tr>
           <tr><th scope="row" class="bg-dark text-white">MultiZone </th><td id="multizone"></td></tr>
@@ -367,6 +374,12 @@ function InitSocket(IP) {
             }
                 else if (!jinfo.Options.HOR && $("#HOR").prop('checked'))
                     $('#HOR').bootstrapToggle('off');
+              if (jinfo.Options.LEDstate && !$("#LED").prop('checked')) {
+                $('#LED').bootstrapToggle('on');
+            }
+                else if (!jinfo.Options.LEDstate && $("#LED").prop('checked'))
+                    $('#LED').bootstrapToggle('off');
+            
             if (jinfo.Options.LUM && !$('#LUM').prop('checked')) {
                 $('#LUM').bootstrapToggle('on');
                 $('#OptionINT').addClass("d-none");
@@ -384,7 +397,7 @@ function InitSocket(IP) {
             if (init==1) {
             $('#lieu').text(jinfo.system.lieu);
             $('#version').text(jinfo.system.version);
-            $('#TextType').val(jinfo.Options.txtAnim);
+            
             $('#hostname').text(jinfo.system.hostname);
             $('#mdns').text(jinfo.system.mdnsname+".local");
             $('#channel').text(jinfo.system.channel);
@@ -397,22 +410,10 @@ function InitSocket(IP) {
             $('#masque').text(jinfo.system.masque);
             $('#MAC').text(jinfo.system.MAC);
             $('#NTP').text(jinfo.system.NTP);
-                }
-            $('#RSSI').text(jinfo.system.RSSI);
-            $('#SSID').text(jinfo.system.SSID);
-            $('#BSSID').text(jinfo.system.BSSID);
-            $('#last').text(jinfo.system.LastSynchroNTP);
-            $('#first').text(jinfo.system.FirstSynchroNTP);
-            
+            $('#display').text(jinfo.system.display);
             if(jinfo.system.multizone) $('#multizone').text("Activé");
                 else $('#multizone').text("Désactivé");
-            $('#display').text(jinfo.system.display);
-               
-            $('#uptime').text(jinfo.system.uptime);
-           
-            if(jinfo.system.Photocell) $('#photocell').text("Present");
-                else $('#photocell').text("Absent");
-             if(jinfo.system.Bouton1) {
+            if(jinfo.system.Bouton1) {
                  $('#bouton1').text("Present");
                   $('#cardbtn1').removeClass("d-none");  
              }
@@ -428,15 +429,15 @@ function InitSocket(IP) {
                 $('#cardbtn2').addClass("d-none"); 
             }
               if(jinfo.system.LED) { 
-                        $('#LED').text("Present");
+                        $('#StatutLED').text("Present");
                         $('#boxflash').removeClass("d-none");
-                        $('#Night').removeClass("d-none");
+                        $('#blocled').removeClass("d-none");
                         $("#flash").prop("disabled", false);         
                                    }
                 else { 
-                    $('#LED').text("Absent");
+                    $('#StatutLED').text("Absent");
                     $('#boxflash').addClass("d-none");
-                    $('#Night').addClass("d-none");
+                    $('#blocled').addClass("d-none");
                 }
             
             if (jinfo.system.Bouton1 || jinfo.system.Bouton2) {
@@ -451,6 +452,27 @@ function InitSocket(IP) {
             else $('#navbtns').addClass("disabled");
             if(jinfo.system.Debug) $('#debug').text("Actif");
                    else $('#debug').text("inactif");
+            if(jinfo.system.box==1) {
+                  $('#boxinfo').text("Actif");
+                }
+                else {
+                  $('#boxinfo').text("Inactif");
+                }
+                } // fin init
+            $('#RSSI').text(jinfo.system.RSSI);
+            $('#SSID').text(jinfo.system.SSID);
+            $('#BSSID').text(jinfo.system.BSSID);
+            $('#last').text(jinfo.system.LastSynchroNTP);
+            $('#first').text(jinfo.system.FirstSynchroNTP);
+            $('#TextType').val(jinfo.Options.txtAnim);
+
+          
+               
+            $('#uptime').text(jinfo.system.uptime);
+           
+            if(jinfo.system.Photocell) $('#photocell').text("Present");
+                else $('#photocell').text("Absent");
+             
              if(jinfo.system.dhtsensor) {
                     $('#dht_box').removeClass("d-none");
                     $("#navdht").removeClass("disabled");
@@ -477,12 +499,7 @@ function InitSocket(IP) {
                       $('#dht_box').addClass("d-none");
                       $("#navdht").addClass("disabled");
                 }
-             if(jinfo.system.box==1) {
-                  $('#boxinfo').text("Actif");
-                }
-                else {
-                  $('#boxinfo').text("Inactif");
-                }
+
 
             init=0;
             $(document).attr("title", "Notif'heure : "+jinfo.system.mdnsname);
@@ -531,24 +548,36 @@ function SliderAM(){
        Msg = escape($('#msg').val()).replace(/\+/g, "%2B");
        Msg = Msg.replace("%u20AC", "%80");  // pour Euro
        flash = $('#flash').prop('checked');
+       type = $('#type').val();
+       if (type=="INFO") {
+           posttype='&type='+type+'&pause='+$('#PauseType').val();
+       }
+       else { 
+           
+           posttype='&type='+type+'&txt='+$('#TextType').val();
+            }
        int = $("#SliderIntensite").roundSlider("option","value");
        if ($('#checkInt').prop('checked')) {
            postInt='';
        } else postInt='&intnotif='+int;
        
        if (debug) console.log("test int: "+int);
-       txt = $('#TextType').val();
-       mydata ='?msg='+Msg+'&type='+$('#type').val()+postInt+'&flash='+flash+'&txt='+txt;
+    
+       mydata ='?msg='+Msg+posttype+postInt+'&flash='+flash;
       if (debug) console.log(mydata);
       $.ajax({
                 url: '/Notification'+mydata,
                 type: 'get',
                 success: function(data) {
                 if (data =="ok" ) {
-                    if ($('#checkInt').prop('checked')) {
-                        result ="<p>Envoie notification avec valeur Intensité par défaut.</br>type : " +$('#type').val()+"</br> Text info Type : " +txt+"</br> flash : " +  flash+"</p>";
-                    } else result = "<p>Envoie notification avec Intensite = "+int+"</br> type : " +$('#type').val()+"</br> Text info Type : " +txt+"</br> flash : " +  flash+"</p>";
-                    //$.notify(result,"success");
+                    result ="<p>Message : "+$('#msg').val()+"</br>";
+                    if ($('#checkInt').prop('checked')) 
+                        result =result+"Intensité par défaut.</br>";
+                        else result = result + "Intensité : "+int+"</br>";
+                    result = result +"";
+                    if (type=="INFO") result = result + " type INFO , pause : "+$('#PauseType').val();
+                        else result=result + " type : " +$('#type').val();
+                    result=result+"</br> flash : " +  flash+"</p>";
                    $.notify({
 	                   title: '<strong>Envoie Notification : '+data+'</strong>',
 	                   message: result
@@ -599,11 +628,33 @@ $('#SEC').change(function() {
             SetOptions("HOR",$(this).prop('checked'));
     });
     
+      $('#LED').change(function() {
+            SetOptions("LED",$(this).prop('checked'));
+    });
+    
        $('#LUM').change(function() {
        SetOptions("LUM",$(this).prop('checked'));
        SliderAM();
     });
 
+    $('#type').change(function() {
+      type=$(this).val();
+        console.log(type);
+      if (type=="INFO")  {
+          $('#textfield').addClass("d-none");
+          $('#pausefield').removeClass("d-none");
+          
+      }
+        else if (type=="FIX" || type=="BLINDS")
+            {
+             $('#textfield').addClass("d-none");
+             $('#pausefield').addClass("d-none"); 
+            }
+    else {
+         $('#pausefield').addClass("d-none");
+          $('#textfield').removeClass("d-none");
+        }
+    });
     
     $("#SliderIntensiteOption").roundSlider({
             change: function (e) {
