@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <title>Notif'heure</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+      <link rel="stylesheet" href="bootstrap.min.css" media="screen">
+      <link rel="stylesheet" href="bootstrap-toggle.min.css" media="screen">
+      <link rel="stylesheet" href="animate.css" media="screen">
+      <link rel="stylesheet" href="roundslider.min.css" media="screen">
+      <link rel="stylesheet" href="notif.css" media="screen">
+      <link rel="shortcut icon" href="favicon.ico">
+      <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    </head>
+<body>
+            <!-- Header -->
+        <div class="container ">
+            <header class="page-header">
+                <h4 class="d-inline"><b>Notif'Heure <span id="lieu" class="text-primary"></span></b></h4><small>  Version : <span id="version" class="text-info"></span></small>
+            </header>
+        </div>
+     <!-- Message -->
+    <div class="jumbotron bg-secondary">
+        <div class="container col-md-8 col-lg-6">
+    <h3 class="text-center text-primary">Envoyer une Notification</h3>
+    <small id="lastnotif" class="text-info">derniére notification</small>
+     <hr class="my-2">
+        <form action='/Notification' method='post' id="FormMsg" >
+             <div class="form-group ">
+<label for='msg' class="text-primary">Message </label><br />
+<INPUT type='text' name='msg' id='msg' maxlength='59' placeholder='Votre Message ...' class="form-control" aria-describedby="msghelp"/>
+<small id ="msghelp" class="form-text text-muted">Notification limité à 60 caractéres.</small>
+                 </div>
+<div class="form-row">
+    <div class="col-6 col-sm-6 col-md-5 col-lg-4">
+        <p class="text-primary">Intensité d'affichage</p>
+        <div id="SliderIntensite"></div>
+      </div>
+    <div class="col-6 col-sm-6 col-md-7 col-lg-8">
+            <div class="form-group">
+   <div class="custom-control custom-checkbox">
+      <input type="checkbox" class="custom-control-input" id="checkInt" >
+      <label class="custom-control-label" for="checkInt">Intensité par défaut</label>
+    </div>
+</div>
+        <div class="form-group">
+<label for='type' class="text-primary">Animation : </label>
+<select class="form-control" name='type' id='type'>
+ <option value=''>Aucune</option>
+ <option value='INFO'>INFO</option>
+ <option value='FIX'>FIX</option>
+ <option value='PAC'>PAC MAN</option>
+ <option value='BLINDS'>BLINDS</option>
+ <option value='OPENING'>Opening</option>
+ </select>
+            </div>
+    <div class="form-group" id="textfield">
+    <label for='TextType' class="text-primary">Texte pour type animation</label>
+<INPUT type='text' id='TextType' maxlength='20' placeholder='Notif' class="form-control" aria-describedby="tnhelp"/>
+<small id ="tnhelp" class="form-text text-muted">Texte pour info Animation</small>
+     </div>
+    <div class="form-group d-none" id="pausefield">
+    <label for='TextType' class="text-primary">Temps de pause pour type Info</label>
+<INPUT step="1" value="3" min="0" max="60"  id='PauseType' maxlength='10' placeholder='3' class="form-control" aria-describedby="Phelp"/>
+<small id ="Phelp" class="form-text text-muted">Temps de pause en secondes ( de 0 à 60 )</small>
+     </div>
+  </div>  
+  </div>
+ 
+
+<div class="form-group d-none" id="boxflash">
+    <div class="custom-control custom-checkbox">
+      <input type="checkbox" class="custom-control-input" id="flash"  aria-describedby="flashHelp" disabled>
+      <label class="custom-control-label" for="flash">Notification lumineuse ( si LED activé )</label>
+    </div>
+  <small id="flashHelp" class="form-text text-muted">Activer ou désactiver la notification lumineuse</small>
+</div>
+    <INPUT type='submit' value='Envoyer Message' class="btn btn-primary d-block mx-auto"/>
+ </form>
+    </div>
+</div>
+    <!-- Fin Message -->
+    <!-- bandeau -->
+<div class="container">
+<div class="row">
+    <!-- DHT-->
+    <div class="col-10 col-sm-10 col-md-7 col-lg-4 d-none mx-auto" id="dht_box">
+    <div class="card bg-dark text-white mb-3 text-center" style="max-width: 20rem;">
+        <div class="card-header" id="thermo"><h4><span id="Modele">DHT</span></h4></div>
+  <div class="card-body tex-center">
+
+        <h2 class="display-3"><span id="Temp"></span> &deg;C</h2>
+         <h2 class="display-4"><span id="Hum"></span> %</h2>
+    <p class="card-text" >Statut :<span id="Status"></span> </p>
+    </div>
+          </div>
+    </div>
+    <!-- Options -->
+    <div class=" col-10 col-sm-8 col-md-5 col-lg-4 mx-auto">
+    <form name="FormOptions" action='/Options' method='POST' class="my-3 mx-2">
+        <legend class="text-primary">Options :</legend>
+     <div class="form-check mb-1">
+     <input name='SEC' type="checkbox"  data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-size="small"  id="SEC" checked >
+          <label class="form-check-label ml-3" for="SEC"> Affichage secondes </label>
+    </div>
+    <div class="form-check mb-1">
+    <input name='HOR' type="checkbox"  data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-size="small" id="HOR"  checked>
+         <label class="form-check-label ml-3" for="HOR"> Affichage Horloge </label>
+        </div>
+      <div class="form-check mb-1 d-none" id="blocled">
+    <input name='LED' type="checkbox"  data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-size="small" id="LED" >
+         <label class="form-check-label ml-3" for="LED"> On / Off LED</label>
+        </div>
+      <div class="form-check mb-1">
+    <input name='LUM' type="checkbox"  data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-size="small" data-on="Auto" data-off="Manu" class="col-sm-3" id="LUM" checked>
+    <label class="form-check-label ml-2" for="LUM">Mode Auto / Manuel <span class="badge badge-info" id="int"></span></label>    
+    </div>
+         <div id="OptionsINT" class="d-none">
+        <p class="text-danger">Réglage Intensité en Mode Manuel</p>
+       <div id="SliderIntensiteOption" class="mx-auto"></div>
+    </div>
+        </div>
+   
+        </form>
+</div>
+</div>
+<!-- navbar -->
+<div class="container-fluid bg-light">
+    <ul class="nav nav-tabs">
+  <li class="nav-item">
+    <a class="nav-link active show" data-toggle="tab" href="#Info">Information</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" data-toggle="tab" href="#boutons" id="navbtns">Bouton(s)</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link " data-toggle="tab" href="#dhtpanel" id="navdht">DHT</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" data-toggle="tab" href="#Admin">Admin</a>
+        </li>
+</ul>
+<div id="myTabContent" class="tab-content mt-4">
+  <div class="tab-pane fade active show" id="Info">
+      <div class="container-fluid">
+      <div class="card-deck ">
+      <div class="card  border-primary m-1" style="min-width:300px;">
+          <div class="card-header text-center"><H3>Systéme</H3></div>
+  <div class="card-body ">
+      <table class="table table-bordered table-sm table-md">
+          <tr><th scope="row" class="bg-dark text-white">Hostname</th><td id="hostname"></td></tr>
+  <tr><th scope="row" class="bg-dark text-white">mDNS</th><td id="mdns"></td></tr>
+  <tr><th scope="row" class="bg-dark text-white">Demarrage</th><td id="uptime"></td></tr>
+  <tr><th scope="row" class="bg-dark text-white">Serveur NTP</th><td id="NTP"></td></tr>
+  <tr><th scope="row" class="bg-dark text-white">1er Synchro</th><td id="first"></td></tr>
+   <tr><th scope="row" class="bg-dark text-white">Derniére Synchro </th><td id="last"></td></tr>
+   <tr><th scope="row" class="bg-dark text-white">Mode Debug </th><td id="debug"></td></tr>
+      </table>
+          </div></div>
+ <div class="card border-danger  m-1" style="min-width:300px;">
+  <div class="card-header text-center"><H3>Reseau</H3></div>
+  <div class="card-body">
+      <table class="table table-bordered table-sm table-md">
+<tr><th scope="row" class="bg-dark text-white">Mac adr.</th><td id="MAC"></td></tr>
+  <tr><th scope="row" class="bg-dark text-white">IP</th><td id="IP"></td></tr>
+  <tr><th scope="row" class="bg-dark text-white">Masque</th><td id="masque"></td></tr>
+  <tr><th scope="row" class="bg-dark text-white">Passerelle</th><td id="passerelle"></td></tr>
+  <tr><th scope="row" class="bg-dark text-white">DNS 1</th><td id="DNS"></td></tr>
+   <tr><th scope="row" class="bg-dark text-white">DNS 2</th><td id="DNS2"></td></tr>
+      </table>
+                    </div></div>
+      <div class="card border-warning  m-1" style="min-width:300px;"  >
+  <div class="card-header text-center"><H3>WIFI</H3></div>
+  <div class="card-body">
+      <table class="table table-bordered table-sm table-md">
+<tr><th scope="row" class="bg-dark text-white">SSID</th><td id="SSID"></td></tr>
+  <tr><th scope="row" class="bg-dark text-white">Signal Wifi</th><td id="RSSI"></td></tr>
+<tr><th scope="row" class="bg-dark text-white">Canal</th><td id="channel"></td></tr>
+  <tr><th scope="row" class="bg-dark text-white">BSSID</th><td id="BSSID"></td></tr>
+      </table>
+          </div></div>
+          <div class="card border-info  m-1" style="min-width:300px;">
+  <div class="card-header text-center"><H3>Matériel</H3></div>
+  <div class="card-body">
+      <table class="table table-bordered table-sm table-md">
+<tr><th scope="row" class="bg-dark text-white">PhotoCell</th><td id="photocell"></td></tr>
+  <tr><th scope="row" class="bg-dark text-white">Bouton 1</th><td id="bouton1"></td></tr>
+<tr><th scope="row" class="bg-dark text-white">Bouton 2</th><td id="bouton2"></td></tr>
+<tr><th scope="row" class="bg-dark text-white">DHT</th><td id="dht"></td></tr>
+ <tr><th scope="row" class="bg-dark text-white">LED</th><td id="StatutLED"></td></tr>
+  <tr><th scope="row" class="bg-dark text-white">Box</th><td id="boxinfo"></td></tr>
+          <tr><th scope="row" class="bg-dark text-white">Display </th><td id="display"></td></tr>
+          <tr><th scope="row" class="bg-dark text-white">MultiZone </th><td id="multizone"></td></tr>
+      </table>
+          </div></div>
+          </div></div>
+  </div>
+  <div class="tab-pane fade" id="boutons">
+    <p>Ci dessous listes des actions associés à chaque bouton - Si présent</p>
+      <div class="card-deck ">
+      <div class="card text-white bg-success mb-3" style="max-width: 20rem;" id="cardbtn1">
+  <div class="card-header text-center"><H2>Bouton 1</H2></div>
+  <div class="card-body">
+    <h4 class="card-title">Simple Clic</h4>
+    <p class="card-text">Action définie : <span id="btn1clic1"></span></p>
+        <h4 class="card-title">Double Clic</h4>
+    <p class="card-text">Action définie : <span id="btn1clic2"></span></p>
+        <h4 class="card-title">Triple Clic</h4>
+ <p class="card-text">Action définie : <span id="btn1clic3"></span></p>
+  </div>
+  </div>
+ <div class="card text-white bg-danger mb-3" style="max-width: 20rem;" id="cardbtn2">
+  <div class="card-header text-center"><H2>Bouton 2</H2></div>
+  <div class="card-body">
+    <h4 class="card-title">Simple Clic</h4>
+    <p class="card-text">Action définie : <span id="btn2clic1"></span></p>
+        <h4 class="card-title">Double Clic</h4>
+    <p class="card-text">Action définie : <span id="btn2clic2"></span></p>
+        <h4 class="card-title">Triple Clic</h4>
+ <p class="card-text">Action définie : <span id="btn2clic3"></span></p>
+  </div>
+  </div>
+      </div>
+    </div>
+  <div class="tab-pane fade" id="dhtpanel">
+     <div class="card border-primary mb-3">
+          <div class="card-header">Info DHT</div>
+            <div class="card-body">
+        <h5 class="card-title"> Dernier relevé DHT :<span id="dhtdate"></span></h5>
+        <ul class="list-group list-group-flush">
+  <li class="list-group-item">Température : <span id="dht_t"></span> °C</li>
+  <li class="list-group-item">Température Ressentie : <span id="dht_hi"></span>  °C</li>
+  <li class="list-group-item">Humiditée : <span id="dht_h"></span> %</li>
+  <li class="list-group-item">Point de Rosée : <span id="dht_p"></span> °C</li>
+</ul>
+ <hr class="my-2"> 
+    <div class="row">
+        <div class=" col-lg-4">
+      <div class="form-check">
+  <input class="form-check-input" type="checkbox" value="" id="check_ddht" aria-describedby="ddhtHelp">
+  <label class="form-check-label" for="check_ddht">
+    Afficher Info temperature sur Notif'heure
+  </label>
+<small id="ddhtHelp" class="form-text text-muted">Permet l'affichage des infos températures , relevé par le DHT , directement sur l'écran du notif'heure.Les infos sont affichés à chaque relevé de la température ( Programmé sur page configuration ). </small>      
+          </div></div> 
+         <div class=" col-lg-4">
+</div></div>
+ </div> </div>
+  </div>
+  <div class="tab-pane fade" id="Admin">
+      <div class="card border-info mb-3">
+          <div class="card-header">Configuration Systéme</div>
+            <div class="card-body">
+        <h4 class="card-title"></h4>
+            <p>Ci dessous , lien vers la page de configuration du systéme Notif'Heure : </p>
+     
+         <a href="editconfig.html"> Page Configuration</a>
+          </div></div>      
+     
+      
+    </br>
+    <div class="card border-primary mb-3">
+          <div class="card-header">Liste des Notif'Heure sur le reseau <span class="text-primary" id="inforafraichir"></span></div>
+            <div class="card-body">
+        <h5 class="card-title text-center" >
+                <button type="button" class="btn btn-primary btn-sm" onclick="Socket.send('MDNS');">Rafraichir</button></h5>
+        <table class="table table-hover">
+        <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Nom</th>
+          <th scope="col">IP</th>
+          <th scope="col">Version</th>
+          <th scope="col">Uptime</th>
+          <th scope="col">Signal</th>
+        </tr>
+      </thead>
+        <tbody id="mdnslist">
+        </tbody>
+        </table>    
+            </div>
+    </div>
+    <hr class="my-2">
+    <div class="card border-secondary mb-3">
+          <div class="card-header">Historique Notification  <span class="badge badge-primary badge-pill" id="badgehist"></span><span id="imphist"></span></div>
+            <div class="card-body">
+        <h3 class="card-title"></h3>
+    <div id="histNotif"></div> </div>
+    </div>
+
+</div>
+    <div class="clearfix">
+    <span>
+    </br>
+    </br>
+    </br>
+
+    </span>
+    </div>
+    <!-- Footer -->
+<footer class="footer">
+     <div class="container-fluid bg-secondary text-center fixed-bottom">
+        <span class="text-muted"> © 2018
+    <a href="https:/byfeel.info"> byfeel.info</a></span>
+      </div>
+</footer>
+<!-- Footer -->
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript" src="bootstrap.min.js"></script>
+    <script type="text/javascript" src="bootstrap-toggle.min.js"></script>
+   <script type="text/javascript" src="bootstrap-notify.min.js"></script>
+    <script type="text/javascript" src="roundslider.min.js"></script>
+    
+
+<script>
+    // init
+    var Socket;
+$.ajax({
+         url: "/getIP",
+         type: "GET",
+         success: function(data) {
+            var IP=data;
+            $( "#IP" ).text(IP);
+            InitSocket(IP);
+         }
+});
+    var init=1;
+    var debug=false;
+    var immp=false;
+    var Actions = ['Aucune','Afficher / Masquer les Secondes', 'Activer / desactiver Horloge','Mode Manuel ( Mini ) - Manuel ( Maxi ) - Automatique','On / Off LED','Action 1','Action 2','Action 3','Action 4','Action 5','Action 6','Afficher Historique message'];
+    
+    var jours = ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
+    var mois = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+    var ddj;
+    var listnotif;
+    var tabnotif = new Array();
+    var Socketmdns;
+
+    
+    function IsJsonString(str) {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
+function notifheure(n,i,v,u,s) {
+    this.nom=n;
+    this.ip=i;
+    this.version=v;
+    this.up=u;
+    this.signal=s;
+}
+
+function SetOptions(opt,val) {
+    var obj = { file : "SetOptions",
+                option : opt,
+                valeur : val
+                   };
+        var JSONcfg = JSON.stringify(obj);
+        Socket.send(JSONcfg);
+        if (debug) console.log(JSONcfg);
+}
+    
+$("#SliderIntensite").roundSlider({
+    sliderType: "min-range",
+    min: 0,
+    max: 15,
+    value: 14,
+    editableTooltip: false,
+    radius: 70,
+    handleSize: "24,12",
+    handleShape: "square",
+    tooltipFormat: "changeTooltip"
+});
+    
+function changeTooltip(e) {
+    var val = e.value;
+    return "<div><h2> "+val+" </h2></div>";
+}
+    
+
+    
+    $("#SliderIntensiteOption").roundSlider({
+    sliderType: "min-range",
+    min: 0,
+    max: 15,
+    value: 4,
+    editableTooltip: false,
+    radius: 67,
+    handleSize: "24,12",
+    handleShape: "square",
+    tooltipFormat: "changeTooltip"
+});
+    
+String.prototype.encode = function() {
+    return unescape(encodeURIComponent(this));
+}
+
+function Ftime(i) {
+  if (i < 10) {
+    i = "0" + i;
+  }
+  return i;
+}
+  
+function ddjh(stamp,hist) {
+   // console.log("valeur stamp : "+stamp)
+        var d = new Date(stamp*1000);
+        var h=d.getUTCHours();
+        var m=Ftime(d.getMinutes());
+        var s=Ftime(d.getSeconds());
+        var nj=jours[d.getUTCDay()];
+        var j=d.getUTCDate();
+        var y=d.getUTCFullYear();
+        var mo=mois[d.getUTCMonth()];
+       
+        
+    if (hist==true) {
+        ddj =nj+", "+j+" "+mo+" "+y+" : "+h+":"+m+":"+s;
+    }
+    else {
+        ddj = nj+", "+j+" à "+h+":"+m;
+    }
+    return ddj;
+}
+    
+
+    
+function InitSocket(IP) {  
+    if ("WebSocket" in window)
+{
+    var url = "ws://"+IP+":81";
+    Socket = new WebSocket(url);
+    Socket.onerror = function (event) {
+      $('#lastnotif').text("Erreur fichier config , surement problème encodage UTF8 !!!");
+    };
+    Socket.onopen = function (event) {
+    Socket.send("notifheure"); 
+    Socket.send("GetInfo");
+    setTimeout( function() {Socket.send("MDNS");}, 1000);
+    setTimeout( function() {Socket.send("HistNotif");}, 100);
+    };
+    
+    Socket.onmessage = function (event) {
+        
+        if (debug) console.log(event.data);
+        if (IsJsonString(event.data)){
+            var jinfo = JSON.parse(event.data);
+        // Parse fichier system
+        if (jinfo.hasOwnProperty('system')) 
+        {
+            if (jinfo.system.Debug) debug=true;
+            else debug=false;
+            if (jinfo.system.Imp) imp=true;
+            else imp=false;
+            // init options
+            if (jinfo.Options.SEC && !$("#SEC").prop('checked')) {
+                $('#SEC').bootstrapToggle('on');
+            }
+                else if (!jinfo.Options.SEC && $("#SEC").prop('checked')) $('#SEC').bootstrapToggle('off');
+            
+            if (jinfo.Options.HOR && !$("#HOR").prop('checked')) {
+                $('#HOR').bootstrapToggle('on');
+            }
+                else if (!jinfo.Options.HOR && $("#HOR").prop('checked'))
+                    $('#HOR').bootstrapToggle('off');
+              if (jinfo.Options.LEDstate && !$("#LED").prop('checked')) {
+                $('#LED').bootstrapToggle('on');
+            }
+                else if (!jinfo.Options.LEDstate && $("#LED").prop('checked'))
+                    $('#LED').bootstrapToggle('off');
+            
+            if (jinfo.Options.LUM && !$('#LUM').prop('checked')) {
+                $('#LUM').bootstrapToggle('on');
+                $('#OptionINT').addClass("d-none");
+            }
+                else if  (!jinfo.Options.LUM && $('#LUM').prop('checked')) {
+                            $('#LUM').bootstrapToggle('off');
+                            $('#OptionsINT').removeClass("d-none");
+                   
+                }
+            if (jinfo.Options.ddht) $('#check_ddht').prop('checked',true);
+                else $('#check_ddht').prop('checked',false);
+            $('#int').text(jinfo.Options.INT);
+             $("#SliderIntensiteOption").roundSlider("option","value", jinfo.Options.INT);
+            // init info
+            if (init==1) {
+            $('#lieu').text(jinfo.system.lieu);
+            $('#version').text(jinfo.system.version);
+            
+            $('#hostname').text(jinfo.system.hostname);
+            $('#mdns').text(jinfo.system.mdnsname+".local");
+            $('#channel').text(jinfo.system.channel);
+            $('#DNS').text(jinfo.system.DNS);
+            $('#DNS2').text(jinfo.system.DNS2);
+            $('#passerelle').text(jinfo.system.passerelle);
+            $('#IP').text(jinfo.system.IP);
+            $('#DNS2').text(jinfo.system.DNS2);
+            $('#DNS2').text(jinfo.system.DNS2);
+            $('#masque').text(jinfo.system.masque);
+            $('#MAC').text(jinfo.system.MAC);
+            $('#NTP').text(jinfo.system.NTP);
+            $('#display').text(jinfo.system.display);
+            if(jinfo.system.multizone) $('#multizone').text("Activé");
+                else $('#multizone').text("Désactivé");
+            if(jinfo.system.Bouton1) {
+                 $('#bouton1').text("Present");
+                  $('#cardbtn1').removeClass("d-none");  
+             }
+                else { 
+                    $('#bouton1').text("Absent");
+                    $('#cardbtn1').addClass("d-none"); 
+                }
+            if(jinfo.system.Bouton2) {
+                $('#bouton2').text("Present");
+                 $('#cardbtn2').removeClass("d-none");
+            } else {
+                $('#bouton2').text("Absent");
+                $('#cardbtn2').addClass("d-none"); 
+            }
+              if(jinfo.system.LED) { 
+                        $('#StatutLED').text("Present");
+                        $('#boxflash').removeClass("d-none");
+                        $('#blocled').removeClass("d-none");
+                        $("#flash").prop("disabled", false);         
+                                   }
+                else { 
+                    $('#StatutLED').text("Absent");
+                    $('#boxflash').addClass("d-none");
+                    $('#blocled').addClass("d-none");
+                }
+            
+            if (jinfo.system.Bouton1 || jinfo.system.Bouton2) {
+                $('#navbtns').removeClass("disabled");
+                $('#btn1clic1').text(Actions[jinfo.system.btnclic[0]]);
+                $('#btn1clic2').text(Actions[jinfo.system.btnclic[1]]);
+                $('#btn1clic3').text(Actions[jinfo.system.btnclic[2]]);
+                $('#btn2clic1').text(Actions[jinfo.system.btnclic[3]]);
+                $('#btn2clic2').text(Actions[jinfo.system.btnclic[4]]);
+                $('#btn2clic3').text(Actions[jinfo.system.btnclic[5]]);
+            }
+            else $('#navbtns').addClass("disabled");
+            if(jinfo.system.Debug) $('#debug').text("Actif");
+                   else $('#debug').text("inactif");
+            if(jinfo.system.box==1) {
+                  $('#boxinfo').text("Actif");
+                }
+                else {
+                  $('#boxinfo').text("Inactif");
+                }
+                } // fin init
+            $('#RSSI').text(jinfo.system.RSSI+" dBm");
+            $('#SSID').text(jinfo.system.SSID);
+            $('#BSSID').text(jinfo.system.BSSID);
+            $('#last').text(jinfo.system.LastSynchroNTP);
+            $('#first').text(jinfo.system.FirstSynchroNTP);
+            $('#TextType').val(jinfo.Options.txtAnim);
+
+          
+               
+            $('#uptime').text(jinfo.system.uptime);
+           
+            if(jinfo.system.Photocell) $('#photocell').text("Present");
+                else $('#photocell').text("Absent");
+             
+             if(jinfo.system.dhtsensor) {
+                    $('#dht_box').removeClass("d-none");
+                    $("#navdht").removeClass("disabled");
+                    $('#dht').text("Present - "+jinfo.dht.Modele);
+                 // info dht
+                    $('#Temp').text(jinfo.dht.T);
+                    $('#Hum').text(jinfo.dht.H);
+                    $('#dht_t').text(jinfo.dht.T);
+                    $('#dht_h').text(jinfo.dht.H);
+                    $('#dht_hi').text(jinfo.dht.Hi);
+                    $('#dht_p').text(jinfo.dht.P);
+                    $('#dhtdate').text(jinfo.dht.dht_date);
+                    if (jinfo.dht.Status=="OK")  {
+                    $('#thermo').attr('class','card-header bg-success')
+                        }
+                    else {
+                    $('#thermo').attr('class','card-header bg-danger')
+                        }
+                    $('#Modele').text(jinfo.dht.Modele);
+                    $('#Status').text(jinfo.dht.Status);
+             }  // fin presence dht
+                else {
+                      $('#dht').text("Absent");
+                      $('#dht_box').addClass("d-none");
+                      $("#navdht").addClass("disabled");
+                }
+
+
+            init=0;
+            $(document).attr("title", "Notif'heure : "+jinfo.system.mdnsname);
+            }  // fin par json system
+        // Parse fichier system
+        
+            if (jinfo.hasOwnProperty('msgNOTIF')) 
+        {
+            if ($.isEmptyObject(jinfo.msgNOTIF)) 
+            {
+                LastNotif ="Aucun historique de message";
+                histnotif=LastNotif;
+                NbNotif=0;
+            }else{
+                NbNotif=jinfo.msgNOTIF.length;
+                LastNotif="Dernier Message :"+ddjh(jinfo.timeNOTIF[NbNotif-1],false)+" - "+jinfo.msgNOTIF[NbNotif-1];
+                if (debug) console.log(ddj);
+                histnotif='<ul class="list-group list-group-flush">';
+                for (i=NbNotif-1;i>=0;i--) {
+                    if (jinfo.typNOTIF[i]=="Imp") var couleur="list-group-item list-group-item-danger";
+                    else couleur="list-group-item ";
+                    histnotif +="<li class='"+couleur+"'>"+ddjh(jinfo.timeNOTIF[i],true)+" -> "+jinfo.msgNOTIF[i]+"</li>";
+                    if (debug) console.log("hist : "+i+" - "+histnotif);
+                }
+                histnotif+="</ul>";
+                histnotif+="<small class='text-center text-muted'>Message sans mention / </small><small class='text-center text-danger'>Messages avec mention Important </small>";
+            }
+             $('#lastnotif').text(LastNotif);
+             $('#histNotif').html("<p>"+histnotif+"<P>");
+            $('#badgehist').text(NbNotif);
+            if (imp) $("#imphist").text(" - Seul les messages important sont historisés -");
+        } // fin parse history notif
+
+        } //fin parseJson
+         
+        else if (event.data.search("MDNSreponse:")>=0) {
+             //console.log("Mdns");
+            $("#inforafraichir").text("( Recherche Notif'heure sur réseau en cours ...)");
+            var reponse = event.data.split(":");
+            if (reponse[1]=="0")  infonotif(0); 
+            else {
+                listnotif=reponse[1].split(",");
+                var n=listnotif.length;
+                for (i=0;i<n;i++) {
+                tabnotif[i]=new notifheure("",listnotif[i],"","","");
+                if (debug) console.log("adresse ip notifheure : "+ tabnotif[i].ip );
+                }
+                SocketMDNS(0,n);
+            
+            }
+             
+             }
+        
+        else if (event.data.search("-Ok- Options")>=0) {
+            $.notify({ title: '<strong>Modification Options</strong>',
+	               message:'<p>'+event.data+'</p>'
+                        });
+        }
+          else if (event.data="Update") {
+                Socket.send("GetInfo");
+              Socket.send("HistNotif");
+              
+             }
+    
+              
+    } // fin onmessage
+} // fin if test websocket
+else
+{
+    alert("Websocket n'est pas supporté par ce navigateur");
+    return;
+}
+
+}  // fin gosocket
+    
+function SocketMDNS(i,n) {
+    var urlnotif = "ws://"+tabnotif[i].ip+":81";  
+    Socketmdns= new WebSocket(urlnotif);
+       Socketmdns.onopen = function (event) {
+            Socketmdns.send("GetInfo");
+            }
+    Socketmdns.onmessage = function (event) {
+                if (IsJsonString(event.data)){
+                var jinfo = JSON.parse(event.data);
+                // Parse fichier system
+               if (jinfo.hasOwnProperty('system')) 
+            {
+                tabnotif[i].nom=jinfo.system.lieu;
+                tabnotif[i].version=jinfo.system.version;
+                tabnotif[i].up=jinfo.system.uptime;
+                tabnotif[i].signal= jinfo.system.RSSI;
+               
+             
+                if (debug) console.log("lieu : "+ tabnotif[i].nom)
+                //console.log("version : "+ tabnotif[i].version)
+                i++;
+                Socketmdns.close();      
+                if (i<n) SocketMDNS(i,n);
+                else infonotif(i);
+            }
+                   
+        }
+    }
+    } // fin socketmdns
+    
+function infonotif(n) {
+    var infolist="";
+    if (n==0) infolist="<tr colspan='5'>Pas de notif'heure sur le reseau</tr>";
+    else {
+        for (i=0;i<n;i++) {
+            var row=i+1;
+            infolist +="<tr onclick='tonotif("+i+");'><th scope='row'>"+row+"</th>";
+            infolist +="<td>"+tabnotif[i].nom+"</td>";
+            infolist +="<td class='text-primary'>"+tabnotif[i].ip+"</td>";
+            infolist +="<td>"+tabnotif[i].version+"</td>";
+            infolist +="<td>"+tabnotif[i].up+"</td>";
+             infolist +="<td>"+tabnotif[i].signal+" dBm</td>";
+            infolist +="</tr>";
+        }
+        
+    }
+    if (debug) console.log("test html " + infolist);
+    $("#mdnslist").html(infolist);
+    $("#inforafraichir").text("");
+}
+    
+function tonotif(n) {
+    window.location.href='http://'+tabnotif[n].ip;
+}
+    
+$.notifyDefaults({
+	type: 'success',
+	allow_dismiss: true,
+	offset: 10,
+	delay: 5000,
+	timer: 1000,
+	animate: {
+		enter: 'animated fadeInRight',
+		exit: 'animated fadeOutRight'
+	}
+});
+ 
+
+function SliderAM(){
+        if  ($('#LUM').prop('checked')) {
+               $('#OptionsINT').addClass("d-none");
+            }
+        else $('#OptionsINT').removeClass("d-none");
+}
+   
+
+
+   $("#FormMsg").submit(function(){
+       // formatage envoie ISO
+      // Msg = escape($('#msg').val()).replace(/\+/g, "%2B");
+       //Msg = Msg.replace("%u20AC", "%80");  // pour Euro
+       Msg=$('#msg').val();
+       flash = $('#flash').prop('checked');
+       type = $('#type').val();
+       if (type=="INFO") {
+           posttype='&type='+type+'&pause='+$('#PauseType').val();
+       }
+       else { 
+           
+           posttype='&type='+type+'&txt='+$('#TextType').val();
+            }
+       int = $("#SliderIntensite").roundSlider("option","value");
+       if ($('#checkInt').prop('checked')) {
+           postInt='';
+       } else postInt='&intnotif='+int;
+       
+       if (debug) console.log("test int: "+int);
+    
+       mydata ='?msg='+Msg+posttype+postInt+'&flash='+flash;
+      if (debug) console.log(mydata);
+      $.ajax({
+                url: '/Notification'+mydata,
+                type: 'get',
+                success: function(data) {
+                if (data =="ok" ) {
+                    result ="<p>Message : "+$('#msg').val()+"</br>";
+                    if ($('#checkInt').prop('checked')) 
+                        result =result+"Intensité par défaut.</br>";
+                        else result = result + "Intensité : "+int+"</br>";
+                    result = result +"";
+                    if (type=="INFO") result = result + " type INFO , pause : "+$('#PauseType').val();
+                        else result=result + " type : " +$('#type').val();
+                    result=result+"</br> flash : " +  flash+"</p>";
+                   $.notify({
+	                   title: '<strong>Envoie Notification : '+data+'</strong>',
+	                   message: result
+                        },{
+	                   type: 'success'
+                        });
+                }
+                 $("#FormMsg")[0].reset();
+                $('#SliderIntensite').removeClass("invisible");
+                }
+        });
+    return false;
+
+});
+
+
+
+
+SliderAM();
+
+setInterval(function(){
+    Socket.send("GetInfo"); // rappel toutes les 30 secondes 
+}, 30000);
+    /*
+
+
+// Surveillance des actions  ( mode ajax)
+/*
+$('#SEC').change(function() {
+        dissec=$(this).prop('checked');
+    if(dissec) sec="on" ;
+    else sec="off";
+    $.post( "/Options", { SEC: sec} ).done(function( data ) {
+    //$.post( "/Options?SEC="+sec, function( data ) {
+       // alert(data);
+    if (data=="ok")  //alertify.success('Modification Affichage Secondes : '+ alertify.get('notifier','position'));
+        $.notify("Modification Affichage Secondes : "+data,"success");
+});
+    });
+*/
+    $('#SEC').change(function() {
+                SetOptions("SEC",$(this).prop('checked'));
+    });
+
+    $('#HOR').change(function() {
+            SetOptions("HOR",$(this).prop('checked'));
+    });
+    
+      $('#LED').change(function() {
+            SetOptions("LED",$(this).prop('checked'));
+    });
+    
+       $('#LUM').change(function() {
+       SetOptions("LUM",$(this).prop('checked'));
+       SliderAM();
+    });
+
+    $('#type').change(function() {
+      type=$(this).val();
+        console.log(type);
+      if (type=="INFO")  {
+          $('#textfield').addClass("d-none");
+          $('#pausefield').removeClass("d-none");
+          
+      }
+        else if (type=="FIX" || type=="BLINDS")
+            {
+             $('#textfield').addClass("d-none");
+             $('#pausefield').addClass("d-none"); 
+            }
+    else {
+         $('#pausefield').addClass("d-none");
+          $('#textfield').removeClass("d-none");
+        }
+    });
+    
+    $("#SliderIntensiteOption").roundSlider({
+            change: function (e) {
+                if (debug) console.log(e.value);
+                 var obj = { file : "SetOptions",
+                    option : "INT",
+                    intensite:e.value,
+                   };
+                var JSONcfg = JSON.stringify(obj);
+                Socket.send(JSONcfg);
+                if (debug) console.log(JSONcfg);
+                $('#int').text(e.value);
+                }
+});
+    
+    $('#check_ddht').change(function() {
+        SetOptions("DHT",$(this).prop('checked'));
+});
+
+$('#checkInt').change(function() {
+    if ($(this).prop('checked'))  $('#SliderIntensite').addClass("invisible");
+    else  $('#SliderIntensite').removeClass("invisible");
+});
+
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,800 @@
+<html lang="fr">
+  <head>
+     <title>Configuration Notif'heure</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="bootstrap.min.css" media="screen">
+  
+  <link rel="stylesheet" href="roundslider.min.css" media="screen">
+      <link rel="stylesheet" href="config.css" media="screen">
+    <title>Configuration Notif'heure</title>
+  </head>
+  <body>
+    <div class="jumbotron text-center">
+      <div class="container col-lg-8">
+      <h1 class="display-4">Configuration Notif'Heure</h1>
+      <h4 class="display-4"><span id="nom" class="text-info"></span></h4>
+      <p class="lead">Permet d'editer le fichier de configuration pour le module Notif'Heure </p>
+      <hr class="my-4">
+    <p>
+      IP : <span id="IP" class="text-primary"></span> </p>
+ <p>A modifier avec prudence !! Votre Module , peut ne plus fonctionner , si vous vous trompez</p>
+    
+    <button type="button" class="btn btn-outline-primary" onclick="getconfig();">Exporter Config</button>
+    <button type="button" class="btn btn-outline-warning" onclick="window.location='/Upload'">Importer Config</button>
+    <button type="button" class="btn btn-outline-danger" onclick="Reboot();">Reboot</button>
+ <p></p>
+    <button type="button" class="btn btn-secondary btn-sm" onclick="window.location='/'">Retour page Accueil</button>
+  </div>
+</div>
+<div class="alert alert-primary  text-center" id="BoxInit">
+  <h4 class="alert-heading">Veuillez attendre ..</h4>
+  <p class="mb-0">La fin du téléchargement de la page .... </p>
+</div>
+<div class="alert alert-warning d-none text-center" id="BoxAlert">
+  <h4 class="alert-heading">Attention!</h4>
+  <p class="mb-0">Votre sauvegarde c'est bien effectué, Pour prendre en compte les changements , veuillez redemarrer </p>
+    <button type="button" class="btn btn-warning mx-auto" onclick="Reboot();">Reboot Notif'heure</button>
+</div>
+      
+<div class="container col-md-8 ">
+     <form id="Config">
+    <div class="row">
+    <div class="col">
+    <h4>
+  Parametrage Systéme
+  <small class="text-muted">Modification nom et zone.</small>
+</h4>
+    <div class="input-group">
+      <div class="input-group-prepend">
+    <div class="input-group-text text-info">NOM : </div>
+  </div>
+   <input type="text" class="form-control" id="inputnom" aria-describedby="nomlHelp" placeholder="salon">
+   </div>
+   <small id="nomlHelp" class="form-text text-muted">Personaliser nom notif'heure</small>
+    <div class="input-group">
+      <div class="input-group-prepend">
+    <div class="input-group-text text-info">Suffixe Hostname : </div>
+  </div>
+   <input type="text" class="form-control" id="inputhost" aria-describedby="hostHelp" placeholder="Notif">
+   </div>
+   <small id="hostHelp" class="form-text text-muted">Personaliser suffixe hostname</small>
+</br>
+<div class="form-group">
+    <div class="custom-control custom-checkbox">
+      <input type="checkbox" class="custom-control-input" id="multizone"  aria-describedby="zoneHelp">
+      <label class="custom-control-label text-info" for="multizone">Multizone</label>
+        <small id="zoneHelp" class="form-text text-muted">Activer ou désactiver affichage sur deux Zones ( une pour horloge et l'autre pour les notifications)</small>
+    </div>
+</div>
+<div class="card border-info mx-auto mb-3 d-none" style="max-width: 40rem;" id="boxzone">
+    <div class="card-header text-center bg-info text-white">Paramétrage MultiZones ( Largeur & position )</div>
+    <div class="card-body ">
+<div class="float-right ml-3 mb-3">
+    <div id="sliderlargeurzone"></div>
+<small>Largeur affichage ( bleu -> zone horloge - Rouge -> Zone Notification) </small>
+</div> 
+<h5 class="mr-5 my-3"><span id="matrices" class="text-info"></span> Matrices Led</h5>
+<div class="clearfix"></div>
+<div class="form-group ml-4">
+    <div class="custom-control custom-checkbox">
+      <input type="checkbox" class="custom-control-input" id="DispRight"  aria-describedby="dprHelp">
+      <label class="custom-control-label text-info" for="DispRight">Affichage de l'horloge à Droite</label>
+    </div>
+  <small id="dprHelp" class="form-text text-muted">Activer affichage de l'horloge à droite , sinon affichage de l'horloge à gauche</small>
+</div>
+</div>
+         </div>
+        </br>
+<div class="form-group">
+    <div class="custom-control custom-checkbox">
+      <input type="checkbox" class="custom-control-input" id="AutoMsg"  aria-describedby="amsgHelp">
+      <label class="custom-control-label text-info" for="AutoMsg">Adapter Affichage Message</label>
+    </div>
+  <small id="amsgHelp" class="form-text text-muted">Le message basculera en mode scrolling , si celui ci depasse la capacité d'affichage de la Zone Message.</small>
+</div>
+<div class="form-group">
+    <div class="custom-control custom-checkbox">
+      <input type="checkbox" class="custom-control-input" id="impbtn"  aria-describedby="impgHelp">
+      <label class="custom-control-label text-info" for="impbtn">Historiser uniquement les messages important</label>
+    </div>
+  <small id="impHelp" class="form-text text-muted">Permet de gerder dans l'historique , uniquement les messages indiqués comme important</small>
+</div>
+<div class="form-group">
+    <div class="custom-control custom-checkbox">
+      <input type="checkbox" class="custom-control-input" id="DEBUG"  aria-describedby="debugHelp">
+      <label class="custom-control-label text-info" for="DEBUG">DEBUG</label>
+    </div>
+  <small id="debugHelp" class="form-text text-muted">Activer les infos de Debug sur le module ( à valider si module brancher sur port USB ) - Sinon ne pas Activer</small>
+</div>
+
+<h4>
+  Parametrage Horloge
+  <small class="text-muted">TimeZone ( UTC ) et gestion heure été</small>
+</h4>
+        </div>
+</div> <!-- fin row -->
+<div class="row">
+    <div class=" col-md-6">
+<div class="form-group mx-5">
+<div id="slidertimezone"></div>
+  </div>
+   <p class="m-2 text-info">TimeZone</p>
+   <p class="m-2 text-primary" id="stamp"></p>
+    </div>
+    <div class=" col-md-6">
+<div class="form-group  mx-2">
+    <div class="custom-control custom-checkbox">
+      <input type="checkbox" class="custom-control-input" id="dls"  aria-describedby="dlsHelp" checked="">
+      <label class="custom-control-label text-info" for="dls">Heure été / Hiver</label>
+    </div>
+  <small id="dlsHelp" class="form-text text-muted">Activer ou désactiver le changement automatique a l'heure d'été et l'heure d'hiver</small>
+</div>
+    </div>
+</div> <!-- fin row -->
+<div class="row">
+    <div class="col-md-12">
+   <div class="input-group">
+     <div class="input-group-prepend">
+   <div class="input-group-text text-info">Serveur NTP : </div>
+ </div>
+<input type="text" class="form-control" id="inputNTP" aria-describedby="NTPlHelp" placeholder="pool.ntp.org">
+</div>
+<small id="NTPlHelp" class="form-text text-muted">Adresse serveur NTP non de domaine ou ip</small>
+</br>
+
+
+<h4>
+  Parametrage Matériel
+  <small class="text-muted">Valider les options matériels disponible</small>
+</h4>
+<div class="form-group">
+    <div class="custom-control custom-checkbox">
+      <input type="checkbox" class="custom-control-input" id="bouton1"  aria-describedby="bout1Help">
+      <label class="custom-control-label text-info" for="bouton1">Bouton 1</label>
+    </div>
+  <small id="bout1Help" class="form-text text-muted">Activer si presence bouton 1 (Qui permet affichage secondes , horloge , auto/manu ...)</small>
+</div>
+<div class="card border-success mx-auto mb-3 d-none" style="max-width: 40rem;" id="btn1">
+    <div class="card-header text-center bg-success text-white">Actions pour Bouton 1</div>
+    <div class="card-body">
+  <div class="form-group">
+    <label for="btn1_1">Action Pour Simple Clic</label>
+    <select class="custom-select" id="btn1_1">
+    <option selected value=0>Auncune</option>
+    <option value=1>Afficher / Masquer les Secondes</option>
+    <option value=2>Activer / desactiver Horloge</option>
+    <option value=3>Mode Manuel ( Mini ) - Manuel ( Maxi ) - Automatique</option>
+    <option value=4>On / Off LED</option>
+    <option value=5>Action 1</option>
+    <option value=6>Action 2</option>
+    <option value=7>Action 3</option>
+    <option value=8>Action 4</option>
+    <option value=9>Action 5</option>
+    <option value=10>Action 6</option>
+    <option value=11>Historique Message</option>
+    </select>
+  </div>
+    <div class="form-group">
+    <label for="btn1_2">Action Pour Double Clic</label>
+    <select class="custom-select" id="btn1_2">
+    <option selected value=0>Auncune</option>
+    <option value=1>Afficher / Masquer les Secondes</option>
+    <option value=2>Activer / desactiver Horloge</option>
+    <option value=3>Mode Manuel ( Mini ) - Manuel ( Maxi ) - Automatique</option>
+    <option value=4>On / Off LED</option>
+    <option value=5>Action 1</option>
+    <option value=6>Action 2</option>
+    <option value=7>Action 3</option>
+    <option value=8>Action 4</option>
+    <option value=9>Action 5</option>
+    <option value=10>Action 6</option>
+    <option value=11>Historique Message</option>
+    </select>
+  </div>
+    <div class="form-group">
+    <label for="btn1_3">Action Pour Triple Clic</label>
+    <select class="custom-select" id="btn1_3">
+    <option selected value=0>Auncune</option>
+    <option value=1>Afficher / Masquer les Secondes</option>
+    <option value=2>Activer / desactiver Horloge</option>
+    <option value=3>Mode Manuel ( Mini ) - Manuel ( Maxi ) - Automatique</option>
+    <option value=4>On / Off LED</option>
+    <option value=5>Action 1</option>
+    <option value=6>Action 2</option>
+    <option value=7>Action 3</option>
+    <option value=8>Action 4</option>
+    <option value=9>Action 5</option>
+    <option value=10>Action 6</option>
+    <option value=11>Historique Message</option>
+    </select>
+  </div>
+    </div>
+</div>
+
+<div class="form-group">
+    <div class="custom-control custom-checkbox">
+      <input type="checkbox" class="custom-control-input" id="bouton2"  aria-describedby="bout2Help">
+      <label class="custom-control-label text-info" for="bouton2">Bouton 2</label>
+    </div>
+  <small id="bout2Help" class="form-text text-muted">Activer si presence bouton 2 (Qui permet interaction avec jeedom ...)</small>
+</div>
+<div class="card border-danger mx-auto mb-3 d-none" style="max-width: 40rem;" id="btn2">
+    <div class="card-header text-center bg-danger text-white">Actions pour Bouton 2</div>
+    <div class="card-body">
+  <div class="form-group">
+    <label for="btn1_2">Action Pour Simple Clic</label>
+    <select class="custom-select" id="btn2_1">
+    <option selected value=0>Auncune</option>
+    <option value=1>Afficher / Masquer les Secondes</option>
+    <option value=2>Activer / desactiver Horloge</option>
+    <option value=3>Mode Manuel ( Mini ) - Manuel ( Maxi ) - Automatique</option>
+    <option value=4>On / Off LED</option>
+    <option value=5>Action 1</option>
+    <option value=6>Action 2</option>
+    <option value=7>Action 3</option>
+    <option value=8>Action 4</option>
+    <option value=9>Action 5</option>
+    <option value=10>Action 6</option>
+    <option value=11>Historique Message</option>
+    </select>
+  </div>
+    <div class="form-group">
+    <label for="btn2_2">Action Pour Double Clic</label>
+    <select class="custom-select" id="btn2_2">
+    <option selected value=0>Auncune</option>
+    <option value=1>Afficher / Masquer les Secondes</option>
+    <option value=2>Activer / desactiver Horloge</option>
+    <option value=3>Mode Manuel ( Mini ) - Manuel ( Maxi ) - Automatique</option>
+    <option value=4>On / Off LED</option>
+    <option value=5>Action 1</option>
+    <option value=6>Action 2</option>
+    <option value=7>Action 3</option>
+    <option value=8>Action 4</option>
+    <option value=9>Action 5</option>
+    <option value=10>Action 6</option>
+    <option value=11>Historique Message</option>
+    </select>
+  </div>
+    <div class="form-group">
+    <label for="btn2_3">Action Pour Triple Clic</label>
+    <select class="custom-select" id="btn2_3">
+    <option selected value=0>Auncune</option>
+    <option value=1>Afficher / Masquer les Secondes</option>
+    <option value=2>Activer / desactiver Horloge</option>
+    <option value=3>Mode Manuel ( Mini ) - Manuel ( Maxi ) - Automatique</option>
+    <option value=4>On / Off LED</option>
+    <option value=5>Action 1</option>
+    <option value=6>Action 2</option>
+    <option value=7>Action 3</option>
+    <option value=8>Action 4</option>
+    <option value=9>Action 5</option>
+    <option value=10>Action 6</option>
+    <option value=11>Historique Message</option>
+    </select>
+  </div>
+    </div>
+</div>
+<div class="form-group">
+    <div class="custom-control custom-checkbox">
+      <input type="checkbox" class="custom-control-input" id="LED"  aria-describedby="ledHelp">
+      <label class="custom-control-label text-info" for="LED">LED</label>
+    </div>
+  <small id="ledHelp" class="form-text text-muted">Activer si presence LED </small>
+</div>
+    </br>
+   <h4>
+  Tempo Affichage Notification
+  <small class="text-muted">vitesse défilement et pause</small>
+</h4> 
+    </div>
+</div> <!-- fin row -->
+<div class="row">
+    <div class="col-md-6">
+    <div class="form-group  mx-2">
+    
+    <div id="sliderspeedtime"></div>
+    <p class="m-1">Speed Time</p>
+    </div>
+    </div>
+    <div class=" col-md-6">
+        <div class="form-group mx-2">
+    
+    <div id="sliderpause"></div>
+            <p class="m-2">Pause Time</p>
+  </div>
+    </div>
+</div> <!-- fin row -->
+<div class="row">
+    <div class=" col-md-12">
+        <h4>
+  Parametrage Box Domotique 
+  <small class="text-muted">Activer les actions vers box domotique ( exemple JEEDOM )</small>
+</h4>
+    <div class="form-group">
+    <div class="custom-control custom-checkbox">
+      <input type="checkbox" class="custom-control-input"  id="JEEDOM"  aria-describedby="jeedomHelp">
+      <label class="custom-control-label text-info" for="JEEDOM">Domotique</label>
+    </div>
+  <small id="jeedomHelp" class="form-text text-muted">Activer les urls , vers des actions vers votre box ( comme jeedom ) ou la mise à jour auto des infos</small>
+</div>
+     <div class="card border-primary mx-auto mb-3 d-none " id="box">
+    <div class="card-header text-center bg-primary text-white">Actions URL</div>
+    <div class="card-body small">   
+        
+        <div class="input-group">
+      <div class="input-group-prepend">
+    <div class="input-group-text text-info">URL Update : </div>
+  </div>
+   <input type="text" class="form-control " id="URL_update" aria-describedby="upHelp" placeholder="http://ipbox/update.php" style="font-size:1em;">
+        </div>
+<small id="upHelp" class="form-text text-muted">Renseigner l'URL qui servira à mettre à jour les infos du notif'heure</small>
+          <div class="input-group">
+      <div class="input-group-prepend">
+    <div class="input-group-text text-info">URL Action 1 : </div>
+  </div>
+   <input type="text" class="form-control" id="URL_action1" aria-describedby="ac1lHelp" placeholder="http://ipbox/action.php">
+        </div>
+<small id="ac1Help" class="form-text text-muted">Renseigner l'URL qui servira à lancer l'Action 1 sur votre domotique</small>
+              <div class="input-group">
+      <div class="input-group-prepend">
+    <div class="input-group-text text-info">URL Action 2 : </div>
+  </div>
+   <input type="text" class="form-control" id="URL_action2" aria-describedby="ac2lHelp" placeholder="http://ipbox/action.php">
+        </div>
+<small id="ac2Help" class="form-text text-muted">Renseigner l'URL qui servira lancer l'Action 2 sur votre domotique</small>
+ <div class="input-group">
+      <div class="input-group-prepend">
+    <div class="input-group-text text-info">URL Action 3 : </div>
+  </div>
+   <input type="text" class="form-control" id="URL_action3" aria-describedby="ac3lHelp" placeholder="http://ipbox/action.php">
+        </div>
+<small id="ac3Help" class="form-text text-muted">Renseigner l'URL qui servira lancer l'Action 3 sur votre domotique</small>
+<div class="input-group">
+      <div class="input-group-prepend">
+    <div class="input-group-text text-info">URL Action 4 : </div>
+  </div>
+   <input type="text" class="form-control" id="URL_action4" aria-describedby="ac4lHelp" placeholder="http://ipbox/action.php">
+        </div>
+<small id="ac4Help" class="form-text text-muted">Renseigner l'URL qui servira lancer l'Action 4 sur votre domotique</small>
+<div class="input-group">
+      <div class="input-group-prepend">
+    <div class="input-group-text text-info">URL Action 5 : </div>
+  </div>
+   <input type="text" class="form-control" id="URL_action5" aria-describedby="ac5lHelp" placeholder="http://ipbox/action.php">
+        </div>
+<small id="ac5Help" class="form-text text-muted">Renseigner l'URL qui servira lancer l'Action 5 sur votre domotique</small>
+<div class="input-group">
+      <div class="input-group-prepend">
+    <div class="input-group-text text-info">URL Action 6 : </div>
+  </div>
+   <input type="text" class="form-control" id="URL_action6" aria-describedby="ac6lHelp" placeholder="http://ipbox/action.php">
+        </div>
+<small id="ac6Help" class="form-text text-muted">Renseigner l'URL qui servira lancer l'Action 6 sur votre domotique</small>
+         </div>
+        </div>
+        
+    <h4>
+  Parametrage Timer systéme 
+  <small class="text-muted">Modifier que si vous avez besoin</small>
+</h4>
+    </div>
+</div> <!-- fin row -->
+<div class="row">
+    <div class="col-md-4">
+    
+    <div class="form-group">
+    
+    <div id="sliderlux"></div>
+        <p class="m-2">Photocell Timer ( Secondes )</p>
+  </div>
+    </div>
+    <div class="col-md-4">
+    
+      <div class="form-group ">
+   
+        <div id="sliderdht"></div>
+           <p class="m-2">DHT Timer ( Minutes )</p>
+  </div>
+    </div>
+    <div class="col-md-4">
+    
+         <div class="form-group ">
+  
+        <div id="sliderdebug"></div>
+               <p class="m-2">Debug Timer ( Secondes )</p>
+  </div>
+    </div>
+    </div> <!-- fin row -->
+    <div class="row">
+        <div class="col-md-12 text-center my-4">          
+  
+     <button type="submit" class="btn btn-primary">Sauvegarder</button>
+              </div>
+</div>  <!-- fin row -->
+  </form>
+ <div class="row">
+        <div class="col-md-12 text-center">
+         <hr class="my-4">
+        <div class="alert alert-dark" role="alert" id="raz">
+            <h2>Remise à Zero</h2>
+              <hr class="my-4">
+            <p>Cette action remet à zero le Notif'Heure ...</p>
+            <ul class="text-left">
+            <li>Remise à zero des identifiants wifi</li>
+            <li>Valeur configuration par défaut</li>
+            </ul>
+            <button type="button" class="btn btn-danger" onclick="Reset();">Remise à Zero</button>
+</div>
+            
+    
+     </div>
+    </div>
+</div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript" src="bootstrap.min.js"></script>
+      <script type="text/javascript" src="roundslider.min.js"></script>
+    <script>
+    var Socket;
+    var debug=true;
+    var maxdisplay;
+    $.ajax({
+         url: "/getIP",
+         type: "GET",
+         success: function(data) {
+            var IP=data;
+            $( "#IP" ).text(IP);
+            InitSocket(IP);
+         }
+});
+          
+        
+function IsJsonString(str) {
+        try {
+        JSON.parse(str);
+        } catch (e) {
+        return false;
+        }
+        return true;
+        }
+   
+$("#sliderspeedtime").roundSlider({
+    sliderType: "min-range",
+    editableTooltip: false,
+    radius: 105,
+    width: 16,
+    value: 35,
+    min: 10,
+    max:80,
+    handleSize: 0,
+    handleShape: "square",
+    circleShape: "pie",
+    startAngle: 315,
+    tooltipFormat: "changeTooltipSpeed"
+});
+        
+function changeTooltipSpeed(e) {
+    var val = e.value,speed;
+    if (val<20 ) speed="Tres Rapide";
+        else if (val < 30) speed = "Rapide";
+        else if (val < 45) speed = "Normal";
+        else if (val < 65) speed = "Lent";
+            else speed=" Trés Lent";
+    return val + "<div> "  + speed + "<div>";
+}
+        
+$("#sliderpause").roundSlider({
+    radius:105,
+    sliderType: "min-range",
+    editableTooltip: false,
+    value: 2,
+    min : 0,
+    max : 30,
+    step : 1,
+    handleSize: 0,
+    handleShape: "square",
+    circleShape: "pie",
+    startAngle: 315,
+    tooltipFormat: "changeTooltipPause"
+});
+        
+function changeTooltipPause(e) {
+    var val = e.value,speed;
+    return "<div> Pause de " + val +" secondes<div>";
+}
+        
+$("#sliderlargeurzone").roundSlider({
+  sliderType: "min-range",
+    radius: 120,
+    width:30,
+    editableTooltip: false,
+    min:0,
+    max:7,
+    value: 2,
+    handleSize: "24,12",
+    circleShape: "half-top",
+    handleShape: "square",
+    tooltipFormat: "changeTooltiplargeur"
+});
+
+function changeTooltiplargeur(e) {
+    var val = e.value;
+    if (maxdisplay-val<1) { 
+        $("#sliderlargeurzone").roundSlider("option","value", maxdisplay-1);
+        val=maxdisplay-1;
+    }
+    if (val<1 ) {
+      $("#sliderlargeurzone").roundSlider("option","value", 1);
+        val=1;  
+    }
+    return "<div style='color:white;background:#2e4cc4;margin:2px;padding:2px'> Zone Time = " + val +" </div><div style='color:white;background:red;margin:2px;padding:2px'> Zone Notif = "+(maxdisplay-val) +" </div>";
+}
+        
+        
+$("#slidertimezone").roundSlider({
+  sliderType: "min-range",
+    radius: 130,
+    width: 16,
+    editableTooltip: false,
+    min:-11,
+    max:13,
+    value: 0,
+    handleSize: 0,
+    handleShape: "square",
+    circleShape: "half-top",
+    tooltipFormat: "changeTooltip"
+});
+
+function changeTooltip(e) {
+    var val = e.value,signe;
+    if (val>0 ) signe="+";
+        else signe="";
+    return "<div>UTC : "+signe+ val + "</div>";
+}
+    
+$("#sliderlux").roundSlider({
+    radius: 80,
+    circleShape: "half-top",
+    sliderType: "min-range",
+    value: 20,
+    max:120,
+    min:10,
+    step:1
+});
+
+    $("#sliderdht").roundSlider({
+    radius: 80,
+    circleShape: "half-top",
+    sliderType: "min-range",
+    value: 5,
+    max:60,
+    min:1,
+    step:1
+});
+
+
+    $("#sliderdebug").roundSlider({
+    radius: 80,
+    circleShape: "half-top",
+    sliderType: "min-range",
+    value: 45,
+    max:120,
+    min:10,
+    step:1
+});
+        
+function InitSocket(IP) {
+        if ("WebSocket" in window)
+{
+    var url = "ws://"+IP+":81";  
+   if (debug) console.log(url);
+    Socket = new WebSocket(url);
+    Socket.onerror = function (event) {
+     alert("Erreur fichier config , surement problème encodage UTF8 !!!");
+    };
+    Socket.onopen = function (event) {
+    Socket.send("notifheure"); 
+    Socket.send("Config");
+    };
+     Socket.onmessage = function (event) {
+        
+          if (IsJsonString(event.data)){
+            var jinfo = JSON.parse(event.data);
+            if(jinfo.DEBUG) debug=true;
+            else debug=false;
+            maxdisplay=jinfo.maxdisplay;
+            $('#nom').text(jinfo.Name);
+            $('#matrices').text(maxdisplay);
+            $('#inputnom').val(jinfo.Name);
+            $('#inputhost').val(jinfo.Hostname);
+            $('#inputNTP').val(jinfo.NTPserver);
+            $('#stamp').text(jinfo.date);
+            $("#slidertimezone").roundSlider("option","value", jinfo.timeZone);
+            if (jinfo.DLS) $("#dls").prop("checked",true) ;
+              else $("#dls").prop("checked",false);
+              
+            if (jinfo.DEBUG) $("#DEBUG").prop("checked",true) ;
+              else $("#DEBUG").prop("checked",false);
+               if (jinfo.AutoMsg) $("#AutoMsg").prop("checked",true) ;
+              else $("#AutoMsg").prop("checked",false);
+                 if (jinfo.Imp) $("#impbtn").prop("checked",true) ;
+              else $("#impbtn").prop("checked",false);
+            if (jinfo.multizone) { 
+                $("#multizone").prop("checked",true) ;
+                $('#boxzone').removeClass("d-none");
+                $("#sliderlargeurzone").roundSlider("option","max",maxdisplay);
+            } else {
+                $("#multizone").prop("checked",false);
+                 $('#boxzone').addClass("d-none");
+            }
+            $("#sliderlargeurzone").roundSlider("option","value", jinfo.LZTime);
+            
+            if (jinfo.DispRight) $("#DispRight").prop("checked",true) ;
+              else $("#DispRight").prop("checked",false);
+            if (jinfo.BOUTON1)  { 
+                $("#bouton1").prop("checked",true) ;
+                $('#btn1').removeClass("d-none");              
+                    }
+              else  {
+                  $("#bouton1").prop("checked",false);
+                  $('#btn1').addClass("d-none");  
+              }
+            if (jinfo.BOUTON2) {
+                $("#bouton2").prop("checked",true) ;
+                $('#btn2').removeClass("d-none");
+            } else {
+                $("#bouton2").prop("checked",false);
+                 $('#btn2').addClass("d-none");  
+                    }
+              if (jinfo.LED) $("#LED").prop("checked",true) ;
+              else $("#LED").prop("checked",false);
+             $("#sliderspeedtime").roundSlider("option","value", jinfo.speed_time);
+              $("#sliderpause").roundSlider("option","value", jinfo.pause_time);
+             $("#sliderlux").roundSlider("option","value", jinfo.interval_lux);
+            $("#sliderdht").roundSlider("option","value", jinfo.interval_dht);
+            $("#sliderdebug").roundSlider("option","value", jinfo.interval_debug);
+            $('#btn1_1').val(jinfo.btn1[0]);
+            $('#btn1_2').val(jinfo.btn1[1]);
+            $('#btn1_3').val(jinfo.btn1[2]);
+            $('#btn2_1').val(jinfo.btn2[0]);
+            $('#btn2_2').val(jinfo.btn2[1]);
+            $('#btn2_3').val(jinfo.btn2[2]);
+            if (jinfo.JEEDOM)  {
+                $("#JEEDOM").prop("checked",true) ;
+                $('#box').removeClass("d-none");
+            }
+              else  {
+                  $("#JEEDOM").prop("checked",false);
+                   $('#box').addClass("d-none");
+              }
+            $('#URL_update').val(jinfo.URL_Update);
+            $('#URL_action1').val(jinfo.URL_Action1);
+            $('#URL_action2').val(jinfo.URL_Action2);
+            $('#URL_action3').val(jinfo.URL_Action3);
+            $('#URL_action4').val(jinfo.URL_Action4);
+            $('#URL_action5').val(jinfo.URL_Action5);
+            $('#URL_action6').val(jinfo.URL_Action6);
+             // console.log(jinfo.URL_Update);
+              // fin mise a jour page
+            $("#BoxInit").addClass("d-none");
+          }
+         else if (event.data.search("config")>1) {
+             $("#BoxAlert").removeClass("d-none");
+             $('html, body').animate({scrollTop:0}, 'slow');
+             if (debug) console.log( event.data );
+             }
+         else if (event.data.search("Reboot")>1) {
+             $("#BoxAlert").text("Reboot en cours ....");
+             setTimeout(
+                    function() 
+                            {
+                            window.location='/';
+                                }, 3000);
+                }
+     if (debug) console.log(event.data);
+     }
+} // fin if test websocket
+else
+{
+    alert("Websocket n'est pas supporté par ce navigateur");
+    return;
+}
+     
+} // fin fonction socket
+        
+$('#bouton1').change(function() {
+    if ($(this).prop('checked'))  $('#btn1').removeClass("d-none");
+    else  $('#btn1').addClass("d-none");
+});
+
+$('#bouton2').change(function() {
+    if ($(this).prop('checked'))  $('#btn2').removeClass("d-none");
+    else  $('#btn2').addClass("d-none");
+});
+
+$('#JEEDOM').change(function() {
+    if ($(this).prop('checked'))  $('#box').removeClass("d-none");
+    else  $('#box').addClass("d-none");
+});
+
+$('#multizone').change(function() {
+    if ($(this).prop('checked'))  {
+        $('#boxzone').removeClass("d-none");
+        $("#sliderlargeurzone").roundSlider("option","max",maxdisplay);
+    }
+    else  $('#boxzone').addClass("d-none");
+});
+        
+    $("form").on( "submit", function( event ) {
+        event.preventDefault();
+        var obj = { Name: $('#inputnom').val(), 
+                   Hostname:$('#inputhost').val(), 
+                   DEBUG : $("#DEBUG").prop('checked'),
+                   BOUTON1 : $("#bouton1").prop("checked"),
+                   BOUTON2 : $("#bouton2").prop("checked"),
+                   LED : $("#LED").prop("checked"),
+                   JEEDOM :  $("#JEEDOM").prop("checked") ,
+                   NTPserver : $('#inputNTP').val(),
+                   timeZone : $("#slidertimezone").roundSlider("option","value") ,
+                   DLS : $("#dls").prop("checked"),
+                   multizone :$("#multizone").prop("checked"),
+                   AutoMsg :$("#AutoMsg").prop("checked"),
+                   Imp :$("#impbtn").prop("checked"),
+                   DispRight :$("#DispRight").prop("checked"),
+                   LZTime :$("#sliderlargeurzone").roundSlider("option","value") ,
+                   speed_time :$("#sliderspeedtime").roundSlider("option","value"),
+                   pause_time : $("#sliderpause").roundSlider("option","value"),
+                   interval_lux:$("#sliderlux").roundSlider("option","value"),
+                   interval_dht:$("#sliderdht").roundSlider("option","value"),
+                   interval_debug:$("#sliderdebug").roundSlider("option","value"),
+                   btn1 : [$('#btn1_1').val(),$('#btn1_2').val(),$('#btn1_3').val()],
+                   btn2 : [$('#btn2_1').val(),$('#btn2_2').val(),$('#btn2_3').val()],
+                   URL_Update :$('#URL_update').val(),
+                   URL_Action1 : $('#URL_action1').val(),
+                   URL_Action2 : $('#URL_action2').val(),
+                   URL_Action3 :$('#URL_action3').val(),
+                   URL_Action4 :$('#URL_action4').val(),
+                   URL_Action5 :$('#URL_action5').val(),
+                   URL_Action6 :$('#URL_action6').val()
+                  };
+        var JSONcfg = JSON.stringify(obj);
+        console.log(JSONcfg);
+        Socket.send(JSONcfg);
+       
+        });
+
+function Reboot() {
+    var r = confirm("Etes vous sur de vouloir effectué un Reboot ?");
+if (r == true) {
+      Socket.send("REBOOT");
+}
+};
+        
+function Reset() {
+    var r = confirm("Confirmez vous votre demande de Remise à zéro !");
+if (r == true) {
+    $("#raz").html("<h1>Remise à Zero du Notif'Heure en cours ....</h1>");
+     Socket.send("RESET");
+    setTimeout( function() {window.location.href='http://byfeel.info';}, 5000);
+}    
+};
+
+
+function getconfig() {
+    $.ajax("/config/config.json").done(function() { 
+       window.location='/config/config.json';
+    }).fail(function() { 
+        alert("Le fichier de configuration , n'a pas encore été créé .");
+    })
+};
+
+
+    </script>
+
+  </body>
+</html>

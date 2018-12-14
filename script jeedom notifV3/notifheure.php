@@ -1,13 +1,14 @@
 <?php
-  // maj 17-11-2018
+  // maj 25-11-2018 
+  // Script pour notif'heure ( validé pour version  V3.2 ) 
   if (isset($argv)) {
   	$IP=$argv[1];
 	$MOO=$argv[2];
 	 // debuggage
-/*	 include('/var/www/html/core/class/scenario.class.php');
-	log::add('script','error','Argument 2 :'.$MOO); 
-	log::add('script','error','Argument 3 :'.urlencode(utf8_encode($argv[2])) ); 
-*/
+ //include('/var/www/html/core/class/scenario.class.php');
+	
+//	log::add('script','error','Argument 3 :'.urlencode(utf8_encode($argv[2])) ); 
+
 	if ($MOO=="HOR" || $MOO=="SEC" ||  $MOO=="LUM" ||  $MOO=="INT" || $MOO=="NIG" || $MOO=="LED")
     {
      // Options 
@@ -28,8 +29,7 @@
 			$result = file_get_contents($url, false, $context);
     } else {
       // Notifications
-      $notif=iconv("UTF-8", "CP1252",$argv[2]);  // conversion utf8 en ISO 8859-15 - gestion de €
-      $notif=urlencode($notif);
+      $notif=urlencode($argv[2]);
 
 	// Decoupage des options transmis dans titre sous la forme type = Animation ; lum = intensite de la lumiére  ; etc
 	//$Options = explode(";",str_replace(' ', '', $argv[3]));
@@ -45,15 +45,29 @@
 	$lum=$result["lum"];
     $flash=$result["flash"];
     $txt=$result["txt"];
+    $imp=$result["important"];
     if ( $type == "INFO") { 
-      $pause=$result["pause"];         
-      $argtype="&type=".$type."&pause=".$pause;              
+      $pause=$result["pause"];
+      	$fi=$result["fi"];
+    	$fo=$result["fo"];
+    	$fio=$result["fio"];
+      	if (!is_numeric($fi)) $fi=8;
+    	if (!is_numeric($fo)) $fo=1;
+      	if (is_numeric($fio)) {
+          	$fi=$fio;
+      		$fo=$fio;
+        }
+      	if (!is_numeric($pause)) $pause=3;
+      	$argtype="&type=".$type."&pause=".$pause."&fi=".$fi."&fo=".$fo;              
         } else {
         $argtype="&type=".$type;
       }
+    
+    
 
 /* Lit un fichier distant sur le serveur www.example.com avec le protocole HTTP */
-$url="http://".$IP."/Notification?msg=".$notif.$argtype."&intnotif=".$lum."&flash=".$flash."&txt=".$txt;
+$url="http://".$IP."/Notification?msg=".$notif.$argtype."&intnotif=".$lum."&flash=".$flash."&txt=".$txt."&important=".$imp;
+//log::add('script','error','url :'.$url); 
 $httpfile  = file_get_contents($url);
     } 
   }
