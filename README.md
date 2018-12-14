@@ -12,9 +12,29 @@ Plus de detail dans l'article DIY Horloge et Notification sur mon blog [pour la 
 
 ## Historique version :
 
+<<<<<<< HEAD
 **V3.1.2** : Correctifs et support nouveau script php pour jeedom  
 **V3.1.1** : Mise a jour bug dht  
 **V3.1** : Nouvelle version ( Novembre 2018 )
+=======
+#define ACTIVCAPTLUM true              // Si capteur luminosité installé
+
+#define  BUF_SIZE  60                    // Taille max des notification ( nb de caractéres max )
+
+Plus de detail dans l'article DIY Horloge et Notification sur mon blog http://byfeel.info
+
+Historique version :
+
+V3.1.4 : bug fix ( pause 0 S )
+
+V3.1.3 : bug fix + mode info et fix
+
+V3.1.2 : Correctifs et support nouveau script php pour jeedom
+
+V3.1.1 : Mise a jour bug dht
+
+V3.1 : Nouvelle version ( Novembre 2018 )
+>>>>>>> 008014a6660d6b4f42b310471b4f8c6a99df8b7c
 
 
 --------------------------------------------
