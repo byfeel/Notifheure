@@ -15,19 +15,20 @@ Plus de detail dans l'article DIY Horloge et Notification sur mon blog [pour la 
 
 Plus de detail dans l'article DIY Horloge et Notification sur mon blog http://byfeel.info
 
-Historique version :
+Historique version :  
+**V3.2** : Gestion des effets pour le type INFO et FIX , Historisation des messages , corrections .....  
 **V3.1.2** : Correctifs et support nouveau script php pour jeedom  
 **V3.1.1** : Mise a jour bug dht    
 **V3.1** : Nouvelle version ( Novembre 2018 )  
 **V3.1.4** : bug fix ( pause 0 S )  
 
-V3.1.3 : bug fix + mode info et fix
+**V3.1.3** : bug fix + mode info et fix
 
-V3.1.2 : Correctifs et support nouveau script php pour jeedom
+**V3.1.2** : Correctifs et support nouveau script php pour jeedom
 
-V3.1.1 : Mise a jour bug dht
+**V3.1.1** : Mise a jour bug dht
 
-V3.1 : Nouvelle version ( Novembre 2018 )
+**V3.1** : Nouvelle version ( Novembre 2018 )
 
 --------------------------------------------
 Si pas intéressé par fonction avançés interface web - V2.6 suffit
