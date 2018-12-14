@@ -12,7 +12,6 @@ Plus de detail dans l'article DIY Horloge et Notification sur mon blog [pour la 
 
 ## Historique version :
 
-<<<<<<< HEAD
 **V3.1.2** : Correctifs et support nouveau script php pour jeedom  
 **V3.1.1** : Mise a jour bug dht  
 **V3.1** : Nouvelle version ( Novembre 2018 )
@@ -34,8 +33,6 @@ V3.1.2 : Correctifs et support nouveau script php pour jeedom
 V3.1.1 : Mise a jour bug dht
 
 V3.1 : Nouvelle version ( Novembre 2018 )
->>>>>>> 008014a6660d6b4f42b310471b4f8c6a99df8b7c
-
 
 --------------------------------------------
 Si pas intéressé par fonction avançés interface web - V2.6 suffit
