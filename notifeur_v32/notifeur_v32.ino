@@ -568,17 +568,16 @@ bk=true;
 if (config.LED ) digitalWrite(LEDPin,HIGH);
  int n=JSONmsgNOTIF.size();
  if (n>0) {
-         numh ++;     
+         numh ++; 
+         if( millis() - timerhist >= 60000) {
+            numh=1;
+            timerhist = millis();   
+          }
           if (numh>n) numh=1;
              time_t t=JSONtimeNOTIF[n-numh];
             sprintf(djh,"%u: %02d/%02d à %02d:%02d:%02d -> ",numh,day(t),month(t),hour(t),minute(t),second(t));
             message=djh; 
             message+=JSONmsgNOTIF[n-numh].as<String>();
-          
-       if( millis() - timerhist >= 60000) {
-       numh==0;
-      timerhist = millis();   
-          }
   }
  else message="Aucun Enregistrement";
   
