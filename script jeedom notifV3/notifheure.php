@@ -1,5 +1,5 @@
 <?php
-  // maj 25-11-2018 
+  // maj 15-12-2018 
   // Script pour notif'heure ( validé pour version  V3.2 ) 
   if (isset($argv)) {
   	$IP=$argv[1];
@@ -8,11 +8,12 @@
  //include('/var/www/html/core/class/scenario.class.php');
 	
 //	log::add('script','error','Argument 3 :'.urlencode(utf8_encode($argv[2])) ); 
+  //$argv[2]=html_entity_decode($argv[2]);
 
 	if ($MOO=="HOR" || $MOO=="SEC" ||  $MOO=="LUM" ||  $MOO=="INT" || $MOO=="NIG" || $MOO=="LED")
     {
      // Options 
-      		$commande=urlencode(utf8_decode($argv[2]));
+      		$commande=urlencode(($argv[2]));
   			$etat=urlencode(utf8_decode($argv[3]));
 
 			$url = 'http://'.$IP.'/Options';
@@ -29,8 +30,9 @@
 			$result = file_get_contents($url, false, $context);
     } else {
       // Notifications
-      $notif=urlencode($argv[2]);
-
+  //log::add('script','error','message avant:'.$notif);
+      $notif=rawurlencode(html_entity_decode($argv[2],ENT_QUOTES));
+	//log::add('script','error','message :'.$notif);
 	// Decoupage des options transmis dans titre sous la forme type = Animation ; lum = intensite de la lumiére  ; etc
 	//$Options = explode(";",str_replace(' ', '', $argv[3]));
 	$Options=preg_split("/[\,\;\.\:\-]/", str_replace(' ', '', $argv[3]));
