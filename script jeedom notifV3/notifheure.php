@@ -1,6 +1,7 @@
 <?php
-  // maj 15-12-2018 
+  // maj 29-12-2018 
   // Script pour notif'heure ( validé pour version  V3.2 ) 
+  // Byfeel.info
   if (isset($argv)) {
   	$IP=$argv[1];
 	$MOO=$argv[2];
@@ -47,7 +48,8 @@
 	$lum=$result["lum"];
     $flash=$result["flash"];
     $txt=$result["txt"];
-    $imp=$result["important"];
+   if (array_key_exists("important",$result)) $imp="&important=";
+           else $imp="";
     if ( $type == "INFO") { 
       $pause=$result["pause"];
       	$fi=$result["fi"];
@@ -68,7 +70,7 @@
     
 
 /* Lit un fichier distant sur le serveur www.example.com avec le protocole HTTP */
-$url="http://".$IP."/Notification?msg=".$notif.$argtype."&intnotif=".$lum."&flash=".$flash."&txt=".$txt."&important=".$imp;
+$url="http://".$IP."/Notification?msg=".$notif.$argtype."&intnotif=".$lum."&flash=".$flash."&txt=".$txt.$imp;
 //log::add('script','error','url :'.$url); 
 $httpfile  = file_get_contents($url);
     } 
