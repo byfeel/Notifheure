@@ -7,7 +7,7 @@
 //  -------------------------
 // Copyright Byfeel 2017-2018
 // *************************
-String Ver="3.2.0";
+String Ver="3.2.2";
 // *************************
 //**************************
 //****** CONFIG SKETCH *****
@@ -24,7 +24,7 @@ String Ver="3.2.0";
 //#define HARDWARE_TYPE MD_MAX72XX::GENERIC_HW   //***
 // ***************************************************
 //****************************************************
-#define MAX_DEVICES 8  // nombre de matrice  
+#define MAX_DEVICES 8 // nombre de matrice  
 // PIN de raccordement matrice ( si different )
 #define CLK_PIN   D5
 #define DATA_PIN  D7
@@ -148,7 +148,7 @@ struct Config {
   char URL_Action6[130];
 };
 
-const char *filename = "/config/config.json";  // fichier config
+const char *fileconfig = "/config/config.json";  // fichier config
 const char *fileHistNotif = "/config/histnotif.json";  // fichier config
 Config config;                         // <- global configuration object
 
@@ -163,7 +163,7 @@ JsonObject& JSONOptions = JSONRoot.createNestedObject("Options");
 JsonObject& JSONDht = JSONRoot.createNestedObject("dht");
 
 // JSON pour historique notif
-      const size_t bufferhistsize = 2*JSON_ARRAY_SIZE(10) + JSON_OBJECT_SIZE(3) + 1000;
+      const size_t bufferhistsize = 2*JSON_ARRAY_SIZE(10) + JSON_OBJECT_SIZE(3) + 600;
       DynamicJsonBuffer jsonBufferNotif(bufferhistsize);
       JsonObject& JSONNOTIF = jsonBufferNotif.createObject();
       JsonArray& JSONtimeNOTIF = JSONNOTIF.createNestedArray("timeNOTIF");
@@ -189,8 +189,8 @@ ClickButton bouton2(PINbouton2, LOW, CLICKBTN_PULLUP);
 
 // variable systeme
 // -- luminosté
-int sensorValue;
-boolean PhotoCell=false;
+int sensorValue=0;
+bool PhotoCell=false;
 byte Intensite;    // valeur par defaut au premier demmarrage
 byte BkIntensite;
 
@@ -210,7 +210,7 @@ unsigned long intervalddj= 600000;  // tempo date ( 10 mn )
 unsigned long timerhist=0; // timer pour historique
 int numh=0;
 
-unsigned long timersys=10000; // timer pour action systeme (10s)
+unsigned long timersys=60000; // timer pour action systeme (60s)
 unsigned long previousMillissys=0 ;
 bool bk=false;
  
@@ -367,7 +367,7 @@ uint8_t utf8Ascii(uint8_t ascii)
     {
     case 0xC2: c = ascii;  break;
     case 0xC3: c = ascii | 0xC0;  break;
-   case 0x82: if (ascii==0xAC )   c = 0x80; // Euro symbol special case
+    case 0x82: if (ascii==0xAC )   c = 0x80; // Euro symbol special case
 
     }
     cPrev = ascii;   // save last char
@@ -569,19 +569,17 @@ if (config.LED ) digitalWrite(LEDPin,HIGH);
  int n=JSONmsgNOTIF.size();
  if (n>0) {
          numh ++;     
+              if( millis() - timerhist >= 60000) {
+              numh = 1;
+               timerhist = millis();   
+              }
           if (numh>n) numh=1;
              time_t t=JSONtimeNOTIF[n-numh];
             sprintf(djh,"%u: %02d/%02d à %02d:%02d:%02d -> ",numh,day(t),month(t),hour(t),minute(t),second(t));
             message=djh; 
             message+=JSONmsgNOTIF[n-numh].as<String>();
-          
-       if( millis() - timerhist >= 60000) {
-       numh==0;
-      timerhist = millis();   
-          }
-  }
- else message="Aucun Enregistrement";
-  
+            }
+            else message="Aucun Enregistrement";
   NotifMsg(message,Intensite,false);
  }
 
@@ -655,9 +653,9 @@ return configjson;
 }
 
 // Chargement fichier config
-void loadConfiguration(const char *filename, Config &config) {
+void loadConfiguration(const char *fileconfig, Config &config) {
   // Open file for reading
-  File file = SPIFFS.open(filename, "r");
+  File file = SPIFFS.open(fileconfig, "r");
    if (!file) {
      InfoDebugtInit=InfoDebugtInit+" Fichier config Jeedom absent -";
   }
@@ -710,7 +708,7 @@ DynamicJsonBuffer jsonBufferconfig;
   config.btnclic[1][3] = btn1[2] | 3;
   JsonArray& btn2 = rootcfg["btn2"];
   config.btnclic[2][1] = btn2[0] | 4;
-  config.btnclic[2][2] = btn2[1] | 5;
+  config.btnclic[2][2] = btn2[1] | 11;
   config.btnclic[2][3] = btn2[2] | 6;
   AutoIn = rootcfg["AutoIn"] | true; 
   TimeOn = rootcfg["TimeOn"] | true; 
@@ -737,8 +735,8 @@ DynamicJsonBuffer jsonBufferconfig;
 
 
 // sauvegarde fichier config
-void saveConfiguration(const char *filename, const Config &config) {
- File file = SPIFFS.open(filename, "w");
+void saveConfiguration(const char *fileconfig, const Config &config) {
+ File file = SPIFFS.open(fileconfig, "w");
   if (!file) {
    if (config.DEBUG)  Serial.println("Impossible d'ecrire fichier de config");
    return;
@@ -764,9 +762,13 @@ void ToBox(char* Url) {
 // fonction reglage auto luminosite
 void luminosite() {
   byte bkint = Intensite; // memorise la valeur d'entree
-  sensorValue = analogRead(A0); // read analog input pin 0
-  Intensite =round((sensorValue*1.5)/100);
-  Intensite = constrain(Intensite,0,15);
+  sensorValue = analogRead(0); // read analog input pin 0
+  if (config.DEBUG) Serial.println("valeur photocell dans boucle auto : "+String(sensorValue));
+   JSONSystem["PhotoValue"] = sensorValue;
+   Intensite =round((sensorValue*1.5)/100);
+   Intensite = constrain(Intensite,0,15);
+
+ 
 }
 
 void GetTemp() {
@@ -887,11 +889,12 @@ Important=false;
               if (server.arg("flash") == "true" || server.arg("flash") == "1") Fnotif=true;
               if (server.hasArg("pause") && type=="INFO" ) fpause=server.arg("pause").toInt();
               if ( type=="FIX" ) fpause=-1;
-              if (server.arg("important") == "1" || server.arg("important") == "true")  Important=true;
+              if (server.hasArg("important")) Important=true;
+                else Important=false;
               if ( server.hasArg("txt"))   { 
                 server.arg("txt").toCharArray(txtAnim,sizeof(txtAnim));
                 JSONOptions["txtAnim"] = txtAnim;
-                saveConfiguration(filename, config);
+                saveConfiguration(fileconfig, config);
               }
               P.setIntensity(Intensite); // regle intensite notif
               InfoNotif="ok"; 
@@ -931,7 +934,8 @@ String result="ok";
          else if ( (LUM == "manu" || LUM == "0") && AutoIn) Option(&AutoIn,false);
          else result="idem";
           }
-     else if ( server.hasArg("INT") && !AutoIn) { 
+     //else if ( server.hasArg("INT") && !AutoIn) { 
+       else if ( server.hasArg("INT")) { 
            Intensite=server.arg("INT").toInt();
             Option(&AutoIn,false);
          } 
@@ -971,7 +975,18 @@ void handleIP() {
   server.send(200, "text/html",WiFi.localIP().toString());
 }
 
-
+// envoie IP module
+void handleTool() {
+  String reponse="Erreur";  
+   if ( server.hasArg("debug")) { 
+      if (server.arg("debug")=="1") {
+       if  (SPIFFS.exists(fileHistNotif)) SPIFFS.remove(fileHistNotif);
+        delay(100);
+      }
+   reponse = server.arg("debug");
+   }
+  server.send(200, "text/html",reponse);
+}
 
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
@@ -1052,6 +1067,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
           else if ( s=="HistNotif") {
             String histJSON;
            JSONNOTIF.printTo(histJSON);
+           delay(10);
             webSocket.sendTXT(num,histJSON);
           }
 
@@ -1060,10 +1076,15 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
             delay(500);
             ESP.restart();
           }
+          else if ( s=="PURGE") {
+          SPIFFS.remove(fileHistNotif);
+            delay(100);
+          }
+
 
            else if ( s=="RESET") {
            raz=true;
-           saveConfiguration(filename, config);
+           saveConfiguration(fileconfig, config);
             delay(1000);
             ESP.restart();
           }
@@ -1110,7 +1131,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
               strlcpy(config.URL_Action5,jsoncfg["URL_Action5"] | config.URL_Action5,sizeof(config.URL_Action5));
               strlcpy(config.URL_Action6,jsoncfg["URL_Action6"] | config.URL_Action6,sizeof(config.URL_Action6));
             
-             saveConfiguration(filename, config);
+             saveConfiguration(fileconfig, config);
             
              
             webSocket.sendTXT(num,"ok fichier config sauvegardé de :  "+ String(config.HOSTNAME));
@@ -1222,7 +1243,7 @@ void Option(bool *Poption, bool etat) {
                     }
            }
         
-  saveConfiguration(filename, config);
+  saveConfiguration(fileconfig, config);
 
   if (config.DEBUG) {
     int i;
@@ -1250,7 +1271,7 @@ void setup(void)
     InfoDebugtInit=InfoDebugtInit+" Demarrage fileSystem -";
  // saveConfig();
   InfoDebugtInit=InfoDebugtInit+" Chargement configuration -";
-  loadConfiguration(filename, config);
+  loadConfiguration(fileconfig, config);
   
   } else {
     InfoDebugtInit=InfoDebugtInit+" Erreur fileSystem -";
@@ -1290,21 +1311,6 @@ if (config.DEBUG)  {
 }
 
 
-//init demmarrage
-sensorValue = analogRead(A0); // init du sensor luminosite
-
-
-
-
- // Initialize temperature sensor
- // dht.setup(dhtPin, DHTType);
- int pin(dhtpin);
- 
- dht.setup(pin,DHTTYPE);
-  //dht.begin();
-  delay(2000);
-
-
 P.begin();  // init matrice
 P.print("Start ...");
 
@@ -1342,7 +1348,7 @@ P.print("Start ...");
 
 if (raz) {
   P.print( "RAZ Config");
-  SPIFFS.remove(filename);
+  SPIFFS.remove(fileconfig);
   delay(400);
   ESP.restart();
 }
@@ -1424,7 +1430,7 @@ webSocket.onEvent(webSocketEvent);
   server.on("/Options",handleOptions); //page gestion Options
   server.on("/getInfo",handleInfo); //Rpour récupérer info module ,si pas possible de se servir des websockets
   server.on("/getIP",handleIP); //envoie IP module
-  //server.on("/SetAdmin",handleAdmin); // Page gestion Admin
+  server.on("/tool",handleTool); // Page gestion Admin
   //server.on("/edit",handleEdit); //Requete test
   server.serveStatic("/main.css", SPIFFS, "/config/main.css");
   server.on("/editconfig.html", []() {
@@ -1539,8 +1545,16 @@ P.setSpriteData(pacman1, W_PMAN1, F_PMAN1,pacman2, W_PMAN2, F_PMAN2);   // charg
 
 // Verif des options Physiques ( photocell , dht , bouton ... si presentes
  // ------- Capteur Photocell 
-   if (sensorValue >20) PhotoCell=true;
-   if (config.DEBUG) Serial.println("Verif presence photocell "+String(sensorValue)+" - Capteur Photocell = "+PhotoCell);
+sensorValue = analogRead(0); // init du sensor luminosite
+delay(100);
+ if (sensorValue >11) PhotoCell=true;
+ if (config.DEBUG) Serial.println("Verif presence photocell "+String(sensorValue)+" - Capteur Photocell = "+PhotoCell);
+ if (!PhotoCell) AutoIn=false;
+// Initialize temperature sensor
+ // dht.setup(dhtPin, DHTType);
+ int pin(dhtpin);
+ dht.setup(pin,DHTTYPE);
+ delay(2000); 
 // DHT
   GetTemp();
 // led
@@ -1589,6 +1603,7 @@ JSONSystem["NTP"] = config.NTPSERVER;
 JSONSystem["uptime"] = NTP.getUptimeString();
 JSONSystem["Debug"] = config.DEBUG;
 JSONSystem["Photocell"] = PhotoCell;
+JSONSystem["PhotoValue"] = sensorValue;
 JSONSystem["Bouton1"] = config.BOUTON_1;
 JSONSystem["Bouton2"] = config.BOUTON_2;
 JSONSystem["multizone"] = config.multiZone;
@@ -1637,7 +1652,9 @@ void loop(void)
   if (bk) {
     File histNotif = SPIFFS.open(fileHistNotif,"w");
     JSONNOTIF.printTo(histNotif);
+    delay(50);
     histNotif.close();
+    delay(50);
     webSocket.broadcastTXT("Update");
     bk=false;
   }
@@ -1689,7 +1706,6 @@ void loop(void)
 // Temporisation luminosite 
   if( millis() - previousMillis >= interval) {
     previousMillis = millis();
-   
     // ******** Gestion luminosite
     if (TimeOn) {   // Si Horloge activé
     if (AutoIn) luminosite();  // gestion luminosité auto si activé
@@ -1958,6 +1974,19 @@ String formatBytes(size_t bytes) {
   }
 }
 
+String getContentType(String filename){
+  if (server.hasArg("download")) return "application/octet-stream";
+  else if(filename.endsWith(".html")) return "text/html";
+  else if (filename.endsWith(".htm")) return "text/html";
+  else if(filename.endsWith(".css")) return "text/css";
+  else if(filename.endsWith(".js")) return "application/javascript";
+  else if(filename.endsWith(".ico")) return "image/x-icon";
+  else if(filename.endsWith(".gz")) return "application/x-gzip";
+  else if (filename.endsWith(".xml")) return "text/xml";
+  else if (filename.endsWith(".png")) return "image/png";
+  return "text/plain";
+}
+/*
 String getContentType(String filename) {
   if (server.hasArg("download")) {
     return "application/octet-stream";
@@ -1988,7 +2017,8 @@ String getContentType(String filename) {
   }
   return "text/plain";
 }
-
+*/
+/*
 bool handleFileRead(String path) {
   
     if (path.endsWith("/")) {
@@ -2010,6 +2040,25 @@ bool handleFileRead(String path) {
 }
 return false;
 }
+*/
+bool handleFileRead(String path){  // send the right file to the client (if it exists)
+  Serial.println("handleFileRead: " + path);
+  if(path.endsWith("/")) path += "index.html";           // If a folder is requested, send the index file
+  String contentType = getContentType(path);             // Get the MIME type
+  String pathWithGz = path + ".gz";
+  if(SPIFFS.exists(pathWithGz) || SPIFFS.exists(path)){  // If the file exists, either as a compressed archive, or normal
+    if(SPIFFS.exists(pathWithGz))                          // If there's a compressed version available
+      path += ".gz";                                         // Use the compressed version
+    File file = SPIFFS.open(path, "r");                    // Open the file
+    size_t sent = server.streamFile(file, contentType);    // Send it to the client
+    file.close();                                          // Close the file again
+    Serial.println(String("\tSent file: ") + path);
+    return true;
+  }
+  Serial.println(String("\tFile Not Found: ") + path);
+  return false;                                          // If the file doesn't exist, return false
+}
+
 
 void handleFileUpload() {
  if (config.DEBUG)  Serial.println("fonction file upload");
@@ -2018,7 +2067,7 @@ void handleFileUpload() {
   if (upload.status == UPLOAD_FILE_START) {
     String filecfg = upload.filename;
     if (filecfg.endsWith(".json")) {
-     filecfg = filename;
+     filecfg = fileconfig;
       if (config.DEBUG)  Serial.print("handleFileUpload Name: "); Serial.println(filecfg);
     fsUploadFile = SPIFFS.open(filecfg, "w");
     }

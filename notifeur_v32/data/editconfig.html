@@ -416,6 +416,16 @@
               </div>
 </div>  <!-- fin row -->
   </form>
+
+<div class="row">
+    <div class="col-md-12 text-center">
+    <hr class="my-2">
+    <h3>Fichier historique</h3>
+    <p>Permet de supprimer ou exporter le fichier historique , en cas d'erreur de lecture sur le fichier.Dans le cas ou le fichier serait corrompus. Tant que le notif'heure ne redemarre pas l'historique reste en mémoire.</p>
+    <button type="button" class="btn btn-outline-warning" onclick="window.location='/config/histnotif.json';">Voir fichier Historique</button>
+    <button type="button" class="btn btn-outline-danger" onclick="Purge();">Effacer fichier Historique</button>
+    </div>
+</div>
  <div class="row">
         <div class="col-md-12 text-center">
          <hr class="my-4">
@@ -784,6 +794,12 @@ if (r == true) {
 }    
 };
 
+function Purge() {
+    var r = confirm("Etes vous sur de vouloir effacer l'historique");
+if (r == true) {
+      Socket.send("PURGE");
+}
+};
 
 function getconfig() {
     $.ajax("/config/config.json").done(function() { 

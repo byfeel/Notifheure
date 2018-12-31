@@ -438,7 +438,7 @@ function InitSocket(IP) {
     var url = "ws://"+IP+":81";
     Socket = new WebSocket(url);
     Socket.onerror = function (event) {
-      $('#lastnotif').text("Erreur fichier config , surement problème encodage UTF8 !!!");
+      $('#lastnotif').text("Erreur fichier historique , le fichier semble corrompus.");
     };
     Socket.onopen = function (event) {
     Socket.send("notifheure"); 
