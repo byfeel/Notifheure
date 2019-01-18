@@ -7,7 +7,7 @@
 //  -------------------------
 // Copyright Byfeel 2017-2018
 // *************************
-String Ver="3.2.2";
+String Ver="3.2.3";
 // *************************
 //**************************
 //****** CONFIG SKETCH *****
@@ -18,9 +18,9 @@ String Ver="3.2.2";
 // d'affichage ( inversé , effet miroir , etc .....) *
 // ***************************************************
 // matrix   - decocher selon config matrix    ********     
-#define HARDWARE_TYPE MD_MAX72XX::FC16_HW        //***
+//#define HARDWARE_TYPE MD_MAX72XX::FC16_HW        //***
 //#define HARDWARE_TYPE MD_MAX72XX::PAROLA_HW    //***
-//#define HARDWARE_TYPE MD_MAX72XX::ICSTATION_HW //***
+#define HARDWARE_TYPE MD_MAX72XX::ICSTATION_HW //***
 //#define HARDWARE_TYPE MD_MAX72XX::GENERIC_HW   //***
 // ***************************************************
 //****************************************************
@@ -146,6 +146,7 @@ struct Config {
   char URL_Action4[130];
   char URL_Action5[130];
   char URL_Action6[130];
+  bool off;
 };
 
 const char *fileconfig = "/config/config.json";  // fichier config
@@ -251,7 +252,8 @@ bool Fnotif=false;
 int fix_pause;
 byte LZMsg;
 bool Important=false;
-
+int minuteur=0;
+bool cR=false;
 
 // variable DHT
 bool DHTsensor=false;
@@ -472,6 +474,7 @@ static uint8_t pacman2[F_PMAN2 * W_PMAN2] =  // ghost pursued by a pacman
 // **************************************
 void NotifMsg(String Msg,byte lum,bool Info,bool U2A=true,int fpause=3,int fxIn=8,int fxOut=8)
   {
+     fx_center=false;
     if (Msg.length() >round(LZMsg*1.4) && config.AutoMsg) Info=false;  // force affichage scroll si texte plus grand que display
      P.setFont(NZmsg,ExtASCII);
      Alert=true;
@@ -626,7 +629,7 @@ JsonArray& btn1 = rootcfg.createNestedArray("btn1");
 btn1.add(config.btnclic[1][1]);
 btn1.add(config.btnclic[1][2]);
 btn1.add(config.btnclic[1][3]);
-
+ rootcfg["off"] = config.off;  
 JsonArray& btn2 = rootcfg.createNestedArray("btn2");
 btn2.add(config.btnclic[2][1]);
 btn2.add(config.btnclic[2][2]);
@@ -714,7 +717,7 @@ DynamicJsonBuffer jsonBufferconfig;
   TimeOn = rootcfg["TimeOn"] | true; 
   DisSec = rootcfg["DisSec"] | true; 
   Intensite = rootcfg["intensite"] | 1;
-  
+ config.off = rootcfg["off"] | false;
   raz = rootcfg["raz"] | false; 
   msgTemp = rootcfg["ddht"] | false;
   dj =  rootcfg["dj"] | 0;
@@ -939,12 +942,25 @@ String result="ok";
            Intensite=server.arg("INT").toInt();
             Option(&AutoIn,false);
          } 
-              else if ( server.hasArg("LED") && config.LED) { 
+        else if ( server.hasArg("LED") && config.LED) { 
                   if (server.arg("LED")=="1" || server.arg("LED")=="on" ) ledState = 0;
                   else ledState=1;
                   digitalWrite(LEDPin,ledState); // On-Off led
                   JSONOptions["LEDstate"] = !ledState;
          }
+       else if ( server.hasArg("MIN") ) { 
+                  minuteur=server.arg("MIN").toInt();
+                   minuteur = constrain(minuteur,0,3599);
+                  if (minuteur >0) cR=true;
+                  else { 
+                    cR=false;
+                    NotifMsg("Anulation Minuteur ",Intensite,false);
+                  }
+         }
+        else if (server.hasArg("CR")) {
+                if  (server.arg("CR")=="1" && minuteur>0 ) cR=true;
+                else cR=false;
+        }
       else result="Erreur";
   server.send ( 200, "text/html",result);
     webSocket.broadcastTXT("Update");
@@ -1121,7 +1137,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
             config.btnclic[2][1] = jsoncfg["btn2"][0];
             config.btnclic[2][2] = jsoncfg["btn2"][1];
             config.btnclic[2][3] = jsoncfg["btn2"][2];
-
+            config.off = jsoncfg["off"];
             config.JEEDOM = jsoncfg["JEEDOM"];
             strlcpy(config.URL_Update,jsoncfg["URL_Update"] | config.URL_Update,sizeof(config.URL_Update));
               strlcpy(config.URL_Action1,jsoncfg["URL_Action1"] | config.URL_Action1,sizeof(config.URL_Action1));
@@ -1662,11 +1678,11 @@ void loop(void)
       ++CPTReboot;
        NotifMsg("Reboot",15,true);
     }
-    if (CPTReboot>1 && Reboot) ESP.restart();
+    if (CPTReboot>=1 && Reboot) ESP.restart();
       
  }
 
- // Tempo debug  // reboot
+ // Tempo debug  
    if (config.DEBUG) {
       if( millis() - previousMillisdebug >= intervaldebug) {
       previousMillisdebug = millis();   
@@ -1767,6 +1783,10 @@ if (millis() - lastTime >= 1000)
   {
     lastTime = millis();
     flasher = !flasher;
+    if (minuteur>0) {
+        minuteur--;
+        if (minuteur==0) cR=true;
+    }
   }
 
 
@@ -1798,10 +1818,11 @@ if (P.displayAnimate())
         P.setTextAlignment(NZmsg,PA_CENTER);
        // if (fix_pause<1) fix_pause=3;
         P.setPause(NZmsg,fix_pause*1000);
-       fx_center=false;
+      // fx_center=false;
         }
        else  FinMsg=true;
-       Alert=false;
+      if (!fx_center && type=="FIX" ) Alert=true;
+      else Alert=false;
     }
     P.displayClear(NZmsg);
     } // fin zonestatus
@@ -1841,8 +1862,23 @@ void DispZoneTime(bool flasher) {
 // Fonction clockformat ( ajoute les zeros devant les unités )
 void digitalClockDisplay(char *heure,bool flash)
     {
+     char secondes[2];  // pour affichage des secondes
    // Si affichage de l'heure      
   if (TimeOn) { 
+    if (cR) {
+      int h,m,s;
+      h  = minuteur / 60 / 60 % 24;
+      m = minuteur / 60 % 60;
+      s = minuteur % 60;
+      sprintf(secondes,"%02d",s);
+      smallSec(secondes);
+       sprintf(heure,"%02d:%02d %c%c",h,m,secondes[0],secondes[1]);
+       if (minuteur==0) {
+         NotifMsg("Fin Minuteur ...",Intensite,false);
+        cR=false;
+       }
+    }
+    else {
        if (FinMsg) { 
         Intensite=BkIntensite;
         FinMsg=false;
@@ -1850,10 +1886,11 @@ void digitalClockDisplay(char *heure,bool flash)
      P.setIntensity(Intensite);
   if ( DisSec ) 
   {  // si affichage des Secondes  00:00 (secondes en petit )
-    char secondes[2];  // pour affichage des secondes
+  //  char secondes[2];  // pour affichage des secondes
    sprintf(secondes,"%02d",second());
-    secondes[0]=secondes[0]+23;  // permutation codes AScci 71 à 80
-    secondes[1]=secondes[1]+23;
+   smallSec(secondes);
+   // secondes[0]=secondes[0]+23;  // permutation codes AScci 71 à 80
+   // secondes[1]=secondes[1]+23;
     sprintf(heure,"%02d:%02d %c%c",hour(),minute(),secondes[0],secondes[1]);
     //sprintf(heure,"%02d%c%02d%c%c",hour(),(flash ? ':' : ' '),minute(),secondes[0],secondes[1]);
   }
@@ -1861,14 +1898,22 @@ void digitalClockDisplay(char *heure,bool flash)
    else sprintf(heure,"%02d%c%02d",hour(),(flash ? ':' : ' '),minute());
    if (config.DEBUG) InfoDebugBoucle=heure;
   }
+  } // fin timeon
   else  // sinon point clignottant uniquement
     {
       if (config.DEBUG) InfoDebugBoucle="Horloge désactivé";
-       P.setIntensity(0);
-      sprintf(heure,"%c",(flash ? '.' : ' '));
+      if (config.off) {
+         P.setIntensity(0);
+        sprintf(heure,"%c",(flash ? '.' : ' '));
+      }
+      else sprintf(heure," ");
     }
   }
 
+void smallSec(char *secondes) {
+     secondes[0]=secondes[0]+23;  // permutation codes AScci 71 à 80
+    secondes[1]=secondes[1]+23;
+}
 
 String ddj() {
   String jour = jours[weekday()]+" , "+String(day())+" "+mois[month()]+" "+String(year());

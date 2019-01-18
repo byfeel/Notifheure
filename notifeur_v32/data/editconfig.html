@@ -7,7 +7,7 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="bootstrap.min.css" media="screen">
-  
+
   <link rel="stylesheet" href="roundslider.min.css" media="screen">
       <link rel="stylesheet" href="config.css" media="screen">
     <title>Configuration Notif'heure</title>
@@ -22,7 +22,7 @@
     <p>
       IP : <span id="IP" class="text-primary"></span> </p>
  <p>A modifier avec prudence !! Votre Module , peut ne plus fonctionner , si vous vous trompez</p>
-    
+
     <button type="button" class="btn btn-outline-primary" onclick="getconfig();">Exporter Config</button>
     <button type="button" class="btn btn-outline-warning" onclick="window.location='/Upload'">Importer Config</button>
     <button type="button" class="btn btn-outline-danger" onclick="Reboot();">Reboot</button>
@@ -39,14 +39,14 @@
   <p class="mb-0">Votre sauvegarde c'est bien effectué, Pour prendre en compte les changements , veuillez redemarrer </p>
     <button type="button" class="btn btn-warning mx-auto" onclick="Reboot();">Reboot Notif'heure</button>
 </div>
-      
+
 <div class="container col-md-8 ">
      <form id="Config">
     <div class="row">
     <div class="col">
     <h4>
   Parametrage Systéme
-  <small class="text-muted">Modification nom et zone.</small>
+  <small class="text-muted">Options systémes et multizone</small>
 </h4>
     <div class="input-group">
       <div class="input-group-prepend">
@@ -76,7 +76,7 @@
 <div class="float-right ml-3 mb-3">
     <div id="sliderlargeurzone"></div>
 <small>Largeur affichage ( bleu -> zone horloge - Rouge -> Zone Notification) </small>
-</div> 
+</div>
 <h5 class="mr-5 my-3"><span id="matrices" class="text-info"></span> Matrices Led</h5>
 <div class="clearfix"></div>
 <div class="form-group ml-4">
@@ -102,6 +102,13 @@
       <label class="custom-control-label text-info" for="impbtn">Historiser uniquement les messages important</label>
     </div>
   <small id="impHelp" class="form-text text-muted">Permet de gerder dans l'historique , uniquement les messages indiqués comme important</small>
+</div>
+<div class="form-group">
+    <div class="custom-control custom-checkbox">
+      <input type="checkbox" class="custom-control-input" id="DispOff"  aria-describedby="offHelp">
+      <label class="custom-control-label text-info" for="DispOff">Point clignottant sur Off</label>
+    </div>
+  <small id="offHelp" class="form-text text-muted">Activer point clignottant quand l'horloge est placé en mode Off</small>
 </div>
 <div class="form-group">
     <div class="custom-control custom-checkbox">
@@ -289,20 +296,20 @@
    <h4>
   Tempo Affichage Notification
   <small class="text-muted">vitesse défilement et pause</small>
-</h4> 
+</h4>
     </div>
 </div> <!-- fin row -->
 <div class="row">
     <div class="col-md-6">
     <div class="form-group  mx-2">
-    
+
     <div id="sliderspeedtime"></div>
     <p class="m-1">Speed Time</p>
     </div>
     </div>
     <div class=" col-md-6">
         <div class="form-group mx-2">
-    
+
     <div id="sliderpause"></div>
             <p class="m-2">Pause Time</p>
   </div>
@@ -311,7 +318,7 @@
 <div class="row">
     <div class=" col-md-12">
         <h4>
-  Parametrage Box Domotique 
+  Parametrage Box Domotique
   <small class="text-muted">Activer les actions vers box domotique ( exemple JEEDOM )</small>
 </h4>
     <div class="form-group">
@@ -323,8 +330,8 @@
 </div>
      <div class="card border-primary mx-auto mb-3 d-none " id="box">
     <div class="card-header text-center bg-primary text-white">Actions URL</div>
-    <div class="card-body small">   
-        
+    <div class="card-body small">
+
         <div class="input-group">
       <div class="input-group-prepend">
     <div class="input-group-text text-info">URL Update : </div>
@@ -376,42 +383,42 @@
 <small id="ac6Help" class="form-text text-muted">Renseigner l'URL qui servira lancer l'Action 6 sur votre domotique</small>
          </div>
         </div>
-        
+
     <h4>
-  Parametrage Timer systéme 
+  Parametrage Timer systéme
   <small class="text-muted">Modifier que si vous avez besoin</small>
 </h4>
     </div>
 </div> <!-- fin row -->
 <div class="row">
     <div class="col-md-4">
-    
+
     <div class="form-group">
-    
+
     <div id="sliderlux"></div>
         <p class="m-2">Photocell Timer ( Secondes )</p>
   </div>
     </div>
     <div class="col-md-4">
-    
+
       <div class="form-group ">
-   
+
         <div id="sliderdht"></div>
            <p class="m-2">DHT Timer ( Minutes )</p>
   </div>
     </div>
     <div class="col-md-4">
-    
+
          <div class="form-group ">
-  
+
         <div id="sliderdebug"></div>
                <p class="m-2">Debug Timer ( Secondes )</p>
   </div>
     </div>
     </div> <!-- fin row -->
     <div class="row">
-        <div class="col-md-12 text-center my-4">          
-  
+        <div class="col-md-12 text-center my-4">
+
      <button type="submit" class="btn btn-primary">Sauvegarder</button>
               </div>
 </div>  <!-- fin row -->
@@ -439,8 +446,8 @@
             </ul>
             <button type="button" class="btn btn-danger" onclick="Reset();">Remise à Zero</button>
 </div>
-            
-    
+
+
      </div>
     </div>
 </div>
@@ -462,8 +469,8 @@
             InitSocket(IP);
          }
 });
-          
-        
+
+
 function IsJsonString(str) {
         try {
         JSON.parse(str);
@@ -472,7 +479,7 @@ function IsJsonString(str) {
         }
         return true;
         }
-   
+
 $("#sliderspeedtime").roundSlider({
     sliderType: "min-range",
     editableTooltip: false,
@@ -487,7 +494,7 @@ $("#sliderspeedtime").roundSlider({
     startAngle: 315,
     tooltipFormat: "changeTooltipSpeed"
 });
-        
+
 function changeTooltipSpeed(e) {
     var val = e.value,speed;
     if (val<20 ) speed="Tres Rapide";
@@ -497,7 +504,7 @@ function changeTooltipSpeed(e) {
             else speed=" Trés Lent";
     return val + "<div> "  + speed + "<div>";
 }
-        
+
 $("#sliderpause").roundSlider({
     radius:105,
     sliderType: "min-range",
@@ -512,12 +519,12 @@ $("#sliderpause").roundSlider({
     startAngle: 315,
     tooltipFormat: "changeTooltipPause"
 });
-        
+
 function changeTooltipPause(e) {
     var val = e.value,speed;
     return "<div> Pause de " + val +" secondes<div>";
 }
-        
+
 $("#sliderlargeurzone").roundSlider({
   sliderType: "min-range",
     radius: 120,
@@ -534,18 +541,18 @@ $("#sliderlargeurzone").roundSlider({
 
 function changeTooltiplargeur(e) {
     var val = e.value;
-    if (maxdisplay-val<1) { 
+    if (maxdisplay-val<1) {
         $("#sliderlargeurzone").roundSlider("option","value", maxdisplay-1);
         val=maxdisplay-1;
     }
     if (val<1 ) {
       $("#sliderlargeurzone").roundSlider("option","value", 1);
-        val=1;  
+        val=1;
     }
     return "<div style='color:white;background:#2e4cc4;margin:2px;padding:2px'> Zone Time = " + val +" </div><div style='color:white;background:red;margin:2px;padding:2px'> Zone Notif = "+(maxdisplay-val) +" </div>";
 }
-        
-        
+
+
 $("#slidertimezone").roundSlider({
   sliderType: "min-range",
     radius: 130,
@@ -566,7 +573,7 @@ function changeTooltip(e) {
         else signe="";
     return "<div>UTC : "+signe+ val + "</div>";
 }
-    
+
 $("#sliderlux").roundSlider({
     radius: 80,
     circleShape: "half-top",
@@ -597,22 +604,22 @@ $("#sliderlux").roundSlider({
     min:10,
     step:1
 });
-        
+
 function InitSocket(IP) {
         if ("WebSocket" in window)
 {
-    var url = "ws://"+IP+":81";  
+    var url = "ws://"+IP+":81";
    if (debug) console.log(url);
     Socket = new WebSocket(url);
     Socket.onerror = function (event) {
      alert("Erreur fichier config , surement problème encodage UTF8 !!!");
     };
     Socket.onopen = function (event) {
-    Socket.send("notifheure"); 
+    Socket.send("notifheure");
     Socket.send("Config");
     };
      Socket.onmessage = function (event) {
-        
+
           if (IsJsonString(event.data)){
             var jinfo = JSON.parse(event.data);
             if(jinfo.DEBUG) debug=true;
@@ -627,14 +634,16 @@ function InitSocket(IP) {
             $("#slidertimezone").roundSlider("option","value", jinfo.timeZone);
             if (jinfo.DLS) $("#dls").prop("checked",true) ;
               else $("#dls").prop("checked",false);
-              
+              if (jinfo.off) $("#DispOff").prop("checked",true) ;
+                else $("#DispOff").prop("checked",false);
+
             if (jinfo.DEBUG) $("#DEBUG").prop("checked",true) ;
               else $("#DEBUG").prop("checked",false);
                if (jinfo.AutoMsg) $("#AutoMsg").prop("checked",true) ;
               else $("#AutoMsg").prop("checked",false);
                  if (jinfo.Imp) $("#impbtn").prop("checked",true) ;
               else $("#impbtn").prop("checked",false);
-            if (jinfo.multizone) { 
+            if (jinfo.multizone) {
                 $("#multizone").prop("checked",true) ;
                 $('#boxzone').removeClass("d-none");
                 $("#sliderlargeurzone").roundSlider("option","max",maxdisplay);
@@ -643,23 +652,23 @@ function InitSocket(IP) {
                  $('#boxzone').addClass("d-none");
             }
             $("#sliderlargeurzone").roundSlider("option","value", jinfo.LZTime);
-            
+
             if (jinfo.DispRight) $("#DispRight").prop("checked",true) ;
               else $("#DispRight").prop("checked",false);
-            if (jinfo.BOUTON1)  { 
+            if (jinfo.BOUTON1)  {
                 $("#bouton1").prop("checked",true) ;
-                $('#btn1').removeClass("d-none");              
+                $('#btn1').removeClass("d-none");
                     }
               else  {
                   $("#bouton1").prop("checked",false);
-                  $('#btn1').addClass("d-none");  
+                  $('#btn1').addClass("d-none");
               }
             if (jinfo.BOUTON2) {
                 $("#bouton2").prop("checked",true) ;
                 $('#btn2').removeClass("d-none");
             } else {
                 $("#bouton2").prop("checked",false);
-                 $('#btn2').addClass("d-none");  
+                 $('#btn2').addClass("d-none");
                     }
               if (jinfo.LED) $("#LED").prop("checked",true) ;
               else $("#LED").prop("checked",false);
@@ -701,7 +710,7 @@ function InitSocket(IP) {
          else if (event.data.search("Reboot")>1) {
              $("#BoxAlert").text("Reboot en cours ....");
              setTimeout(
-                    function() 
+                    function()
                             {
                             window.location='/';
                                 }, 3000);
@@ -714,9 +723,9 @@ else
     alert("Websocket n'est pas supporté par ce navigateur");
     return;
 }
-     
+
 } // fin fonction socket
-        
+
 $('#bouton1').change(function() {
     if ($(this).prop('checked'))  $('#btn1').removeClass("d-none");
     else  $('#btn1').addClass("d-none");
@@ -739,11 +748,11 @@ $('#multizone').change(function() {
     }
     else  $('#boxzone').addClass("d-none");
 });
-        
+
     $("form").on( "submit", function( event ) {
         event.preventDefault();
-        var obj = { Name: $('#inputnom').val(), 
-                   Hostname:$('#inputhost').val(), 
+        var obj = { Name: $('#inputnom').val(),
+                   Hostname:$('#inputhost').val(),
                    DEBUG : $("#DEBUG").prop('checked'),
                    BOUTON1 : $("#bouton1").prop("checked"),
                    BOUTON2 : $("#bouton2").prop("checked"),
@@ -770,12 +779,13 @@ $('#multizone').change(function() {
                    URL_Action3 :$('#URL_action3').val(),
                    URL_Action4 :$('#URL_action4').val(),
                    URL_Action5 :$('#URL_action5').val(),
-                   URL_Action6 :$('#URL_action6').val()
+                   URL_Action6 :$('#URL_action6').val(),
+                   off:$('#DispOff').prop("checked")
                   };
         var JSONcfg = JSON.stringify(obj);
         console.log(JSONcfg);
         Socket.send(JSONcfg);
-       
+
         });
 
 function Reboot() {
@@ -784,14 +794,14 @@ if (r == true) {
       Socket.send("REBOOT");
 }
 };
-        
+
 function Reset() {
     var r = confirm("Confirmez vous votre demande de Remise à zéro !");
 if (r == true) {
     $("#raz").html("<h1>Remise à Zero du Notif'Heure en cours ....</h1>");
      Socket.send("RESET");
     setTimeout( function() {window.location.href='http://byfeel.info';}, 5000);
-}    
+}
 };
 
 function Purge() {
@@ -802,9 +812,9 @@ if (r == true) {
 };
 
 function getconfig() {
-    $.ajax("/config/config.json").done(function() { 
+    $.ajax("/config/config.json").done(function() {
        window.location='/config/config.json';
-    }).fail(function() { 
+    }).fail(function() {
         alert("Le fichier de configuration , n'a pas encore été créé .");
     })
 };
