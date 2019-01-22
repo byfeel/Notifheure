@@ -18,9 +18,9 @@ String Ver="3.3.0";
 // d'affichage ( inversé , effet miroir , etc .....) *
 // ***************************************************
 // matrix   - decocher selon config matrix    ********     
-//#define HARDWARE_TYPE MD_MAX72XX::FC16_HW        //***
+#define HARDWARE_TYPE MD_MAX72XX::FC16_HW        //***
 //#define HARDWARE_TYPE MD_MAX72XX::PAROLA_HW    //***
-#define HARDWARE_TYPE MD_MAX72XX::ICSTATION_HW //***
+//#define HARDWARE_TYPE MD_MAX72XX::ICSTATION_HW //***
 //#define HARDWARE_TYPE MD_MAX72XX::GENERIC_HW   //***
 // ***************************************************
 //****************************************************
