@@ -151,9 +151,51 @@
 <input type="text" class="form-control" id="inputNTP" aria-describedby="NTPlHelp" placeholder="pool.ntp.org">
 </div>
 <small id="NTPlHelp" class="form-text text-muted">Adresse serveur NTP non de domaine ou ip</small>
-</br>
-
-
+<br>
+<h4>
+  Parametrage Minuteur
+  <small class="text-muted">Options pour le minuteur</small>
+</h4>
+<div class="card border-light mb-3">
+  <div class="card-header">Actions déclenchement fin de Minuteur</div>
+  <div class="card-body">
+    <h4 class="card-title"></h4>
+    <div class="form-group">
+      <label for="CRACT">Action Domotique pour fin Minuteur</label><small> ( Actif si option domotique activé )</small>
+      <select class="custom-select" id="CRACT">
+      <option selected value=0>Auncune</option>
+      <option value=5>Action 1</option>
+      <option value=6>Action 2</option>
+      <option value=7>Action 3</option>
+      <option value=8>Action 4</option>
+      <option value=9>Action 5</option>
+      <option value=10>Action 6</option>
+      </select>
+    </div>
+    <div class="form-group">
+        <div class="custom-control custom-checkbox">
+          <input type="checkbox" class="custom-control-input" id="CRLED"  aria-describedby="crLedHelp">
+          <label class="custom-control-label text-info" for="CRLED">LED</label>
+        </div>
+      <small id="crLedHelp" class="form-text text-muted">Allume la Led en fin de Minuteur  ( Valider présence LED )</small>
+    </div>
+</div>
+</div>
+<div class="input-group">
+  <div class="input-group-prepend">
+<div class="input-group-text text-info">Message fin Minuteur : </div>
+</div>
+<input type="text" class="form-control" id="CRTEXT" aria-describedby="inpcrHelp" placeholder="Fin minuteur !">
+</div>
+<small id="impcrHelp" class="form-text text-muted">Texte à afficher en fin de minuteur.</small>
+<div class="input-group">
+  <div class="input-group-prepend">
+<div class="input-group-text text-info">Temps par défaut : </div>
+</div>
+<input type="number" class="form-control" id="CRTIME" aria-describedby="cdTimeHelp" placeholder="5"  min="1" max="60">
+</div>
+<small id="crTimeHelp" class="form-text text-muted">Temps par défaut ( en minutes ) pour le minuteur . Ce temps sera celui lançé par le bouton si option Start Minuteur est sélectionné.</small>
+<br>
 <h4>
   Parametrage Matériel
   <small class="text-muted">Valider les options matériels disponible</small>
@@ -176,13 +218,16 @@
     <option value=2>Activer / desactiver Horloge</option>
     <option value=3>Mode Manuel ( Mini ) - Manuel ( Maxi ) - Automatique</option>
     <option value=4>On / Off LED</option>
+    <option value=11>Historique Message</option>
+    <option value=12>Afficher / masquer Minuteur</option>
+    <option value=13>Lancer Minuteur</option>
     <option value=5>Action 1</option>
     <option value=6>Action 2</option>
     <option value=7>Action 3</option>
     <option value=8>Action 4</option>
     <option value=9>Action 5</option>
     <option value=10>Action 6</option>
-    <option value=11>Historique Message</option>
+
     </select>
   </div>
     <div class="form-group">
@@ -193,13 +238,16 @@
     <option value=2>Activer / desactiver Horloge</option>
     <option value=3>Mode Manuel ( Mini ) - Manuel ( Maxi ) - Automatique</option>
     <option value=4>On / Off LED</option>
+    <option value=11>Historique Message</option>
+    <option value=12>Afficher / masquer Minuteur</option>
+    <option value=13>Lancer Minuteur</option>
     <option value=5>Action 1</option>
     <option value=6>Action 2</option>
     <option value=7>Action 3</option>
     <option value=8>Action 4</option>
     <option value=9>Action 5</option>
     <option value=10>Action 6</option>
-    <option value=11>Historique Message</option>
+
     </select>
   </div>
     <div class="form-group">
@@ -210,13 +258,15 @@
     <option value=2>Activer / desactiver Horloge</option>
     <option value=3>Mode Manuel ( Mini ) - Manuel ( Maxi ) - Automatique</option>
     <option value=4>On / Off LED</option>
+    <option value=11>Historique Message</option>
+    <option value=12>Afficher / masquer Minuteur</option>
+    <option value=13>Lancer Minuteur</option>
     <option value=5>Action 1</option>
     <option value=6>Action 2</option>
     <option value=7>Action 3</option>
     <option value=8>Action 4</option>
     <option value=9>Action 5</option>
     <option value=10>Action 6</option>
-    <option value=11>Historique Message</option>
     </select>
   </div>
     </div>
@@ -240,13 +290,15 @@
     <option value=2>Activer / desactiver Horloge</option>
     <option value=3>Mode Manuel ( Mini ) - Manuel ( Maxi ) - Automatique</option>
     <option value=4>On / Off LED</option>
+    <option value=11>Historique Message</option>
+    <option value=12>Afficher / masquer Minuteur</option>
+    <option value=13>Lancer Minuteur</option>
     <option value=5>Action 1</option>
     <option value=6>Action 2</option>
     <option value=7>Action 3</option>
     <option value=8>Action 4</option>
     <option value=9>Action 5</option>
     <option value=10>Action 6</option>
-    <option value=11>Historique Message</option>
     </select>
   </div>
     <div class="form-group">
@@ -257,13 +309,15 @@
     <option value=2>Activer / desactiver Horloge</option>
     <option value=3>Mode Manuel ( Mini ) - Manuel ( Maxi ) - Automatique</option>
     <option value=4>On / Off LED</option>
+    <option value=11>Historique Message</option>
+    <option value=12>Afficher / masquer Minuteur</option>
+    <option value=13>Lancer Minuteur</option>
     <option value=5>Action 1</option>
     <option value=6>Action 2</option>
     <option value=7>Action 3</option>
     <option value=8>Action 4</option>
     <option value=9>Action 5</option>
     <option value=10>Action 6</option>
-    <option value=11>Historique Message</option>
     </select>
   </div>
     <div class="form-group">
@@ -274,13 +328,15 @@
     <option value=2>Activer / desactiver Horloge</option>
     <option value=3>Mode Manuel ( Mini ) - Manuel ( Maxi ) - Automatique</option>
     <option value=4>On / Off LED</option>
+    <option value=11>Historique Message</option>
+    <option value=12>Afficher / masquer Minuteur</option>
+    <option value=13>Lancer Minuteur</option>
     <option value=5>Action 1</option>
     <option value=6>Action 2</option>
     <option value=7>Action 3</option>
     <option value=8>Action 4</option>
     <option value=9>Action 5</option>
     <option value=10>Action 6</option>
-    <option value=11>Historique Message</option>
     </select>
   </div>
     </div>
@@ -652,7 +708,9 @@ function InitSocket(IP) {
                  $('#boxzone').addClass("d-none");
             }
             $("#sliderlargeurzone").roundSlider("option","value", jinfo.LZTime);
-
+            $('#CRTEXT').val(jinfo.CRTEXT);
+            $('#CRTIME').val(jinfo.CRTIME);
+            $('#CRACT').val(jinfo.CRACT);
             if (jinfo.DispRight) $("#DispRight").prop("checked",true) ;
               else $("#DispRight").prop("checked",false);
             if (jinfo.BOUTON1)  {
@@ -670,8 +728,16 @@ function InitSocket(IP) {
                 $("#bouton2").prop("checked",false);
                  $('#btn2').addClass("d-none");
                     }
-              if (jinfo.LED) $("#LED").prop("checked",true) ;
-              else $("#LED").prop("checked",false);
+              if (jinfo.LED) {
+                  $("#LED").prop("checked",true) ;
+                  $( "#CRLED" ).prop( "disabled", false );
+                  if (jinfo.CRLED) $("#CRLED").prop("checked",true) ;
+                    else $("#CRLED").prop("checked",false);
+                }
+              else  {
+                  $("#LED").prop("checked",false);
+                  $( "#CRLED" ).prop( "disabled", true );
+                }
              $("#sliderspeedtime").roundSlider("option","value", jinfo.speed_time);
               $("#sliderpause").roundSlider("option","value", jinfo.pause_time);
              $("#sliderlux").roundSlider("option","value", jinfo.interval_lux);
@@ -686,10 +752,12 @@ function InitSocket(IP) {
             if (jinfo.JEEDOM)  {
                 $("#JEEDOM").prop("checked",true) ;
                 $('#box').removeClass("d-none");
+                $( "#CRACT" ).prop( "disabled", false );
             }
               else  {
                   $("#JEEDOM").prop("checked",false);
                    $('#box').addClass("d-none");
+                   $( "#CRACT" ).prop( "disabled", true );
               }
             $('#URL_update').val(jinfo.URL_Update);
             $('#URL_action1').val(jinfo.URL_Action1);
@@ -725,6 +793,10 @@ else
 }
 
 } // fin fonction socket
+$('#LED').change(function() {
+    if ($(this).prop('checked'))  $( "#CRLED" ).prop( "disabled", false );
+    else  $( "#CRLED" ).prop( "disabled", true );
+});
 
 $('#bouton1').change(function() {
     if ($(this).prop('checked'))  $('#btn1').removeClass("d-none");
@@ -739,6 +811,8 @@ $('#bouton2').change(function() {
 $('#JEEDOM').change(function() {
     if ($(this).prop('checked'))  $('#box').removeClass("d-none");
     else  $('#box').addClass("d-none");
+    if ($(this).prop('checked'))  $( "#CRACT" ).prop( "disabled", false );
+    else  $( "#CRACT" ).prop( "disabled", true );
 });
 
 $('#multizone').change(function() {
@@ -780,7 +854,11 @@ $('#multizone').change(function() {
                    URL_Action4 :$('#URL_action4').val(),
                    URL_Action5 :$('#URL_action5').val(),
                    URL_Action6 :$('#URL_action6').val(),
-                   off:$('#DispOff').prop("checked")
+                   off:$('#DispOff').prop("checked"),
+                   CRACT:$('#CRACT').val(),
+                   CRLED:$("#CRLED").prop("checked"),
+                   CRTIME:$('#CRTIME').val(),
+                   CRTEXT:$('#CRTEXT').val()
                   };
         var JSONcfg = JSON.stringify(obj);
         console.log(JSONcfg);

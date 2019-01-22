@@ -1,0 +1,85 @@
+.no-padding > [class*='col-'] {
+    padding-right:0;
+    padding-left:0;
+}
+
+#SliderIntensite .rs-range-color  {
+    background-color: #0393ed;
+}
+#SliderIntensite  .rs-path-color  {
+    background-color: #c4e0f8;
+}
+#SliderIntensite  .rs-handle  {
+    background-color: #0b638b;
+}
+#SliderIntensite  .rs-border  {
+    border-color: skyblue;
+}
+
+#SliderIntensite  .rs-tooltip  {
+    top: 50%;
+    font-size: 20px;
+}
+#SliderIntensite  .rs-tooltip div  {
+    text-align: center;
+    background: #0393ed;
+    color: white;
+    border-radius: 4px;
+    padding: 5px;
+
+
+}
+
+#SliderMinuteur .rs-range-color  {
+    background-color: #0393ed;
+}
+#SliderMinuteur  .rs-path-color  {
+    background-color: #c4e0f8;
+}
+#SliderMinuteur  .rs-handle  {
+    background-color: #0b638b;
+}
+#SliderMinuteur  .rs-border  {
+    border-color: skyblue;
+}
+
+#SliderMinuteur  .rs-tooltip  {
+    top: 50%;
+    font-size: 8px;
+}
+#SliderMinuteur  .rs-tooltip div  {
+    text-align: center;
+    background: #0393ed;
+    color: white;
+    border-radius: 4px;
+    padding: 5px;
+
+
+}
+
+#SliderIntensiteOption .rs-range-color  {
+    background-color: #ff0000;
+}
+ #SliderIntensiteOption .rs-path-color  {
+    background-color: #f2c2c2;
+}
+ #SliderIntensiteOption  .rs-handle  {
+    background-color: #aa0b0b;
+}
+ #SliderIntensiteOption .rs-border  {
+    border-color:red;
+}
+
+ #SliderIntensiteOption .rs-tooltip  {
+    top: 50%;
+    font-size: 12px;
+}
+ #SliderIntensiteOption .rs-tooltip div  {
+    text-align: center;
+    background: #ff0000;
+    color: white;
+    border-radius: 2px;
+    padding: 2px;
+
+
+}

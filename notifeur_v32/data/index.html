@@ -22,9 +22,30 @@
             </header>
         </div>
      <!-- Message -->
-    <div class="jumbotron bg-secondary">
-        <div class="container col-md-8 col-lg-6">
-    <h3 class="text-center text-primary">Envoyer une Notification</h3>
+     <div class="jumbotron bg-secondary no-padding">
+         <div class="container col-md-8 col-lg-6">
+           <div class="panel with-nav-tabs nav-justified">
+            <div class="panel-heading light">
+   <ul class="nav nav-pills nav-fil">
+  <li class="nav-item">
+    <a class="nav-link show active bg" data-toggle="tab" href="#Notif">Notification</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link show" data-toggle="tab" href="#Minuteur">Minuteur</a>
+  </li>
+</ul>
+</div>
+<div class="my-2"></div>
+<div id="myMainTab" class="tab-content">
+  <div class="tab-pane fade active show" id="Notif">
+    <div class="card border-primary">
+      <div class="card-header bg-primary ">
+        <h3 class="text-center text-white">Envoyer une Notification</h3>
+      </div>
+      <div class="card-body">
+
+
+
     <small id="lastnotif" class="text-info">derniére notification</small>
      <hr class="my-2">
         <form action='/Notification' method='post' id="FormMsg" >
@@ -66,9 +87,9 @@
 <INPUT step="1" value="3" min="0" max="60"  id='PauseType' maxlength='10' placeholder='3' class="form-control" aria-describedby="Phelp"/>
 <small id ="Phelp" class="form-text text-muted">Temps de pause en secondes ( de 0 à 60 )</small>
      </div>
-  </div>  
   </div>
- 
+  </div>
+
 
 <div class="form-group d-none" id="boxflash">
     <div class="custom-control custom-checkbox">
@@ -80,8 +101,29 @@
     <INPUT type='submit' value='Envoyer Message' class="btn btn-primary d-block mx-auto"/>
  </form>
     </div>
+  </div>
 </div>
-    <!-- Fin Message -->
+    <!-- Fin panel Message -->
+    <!-- Fin panel minuteur -->
+      <div class="tab-pane fade" id="Minuteur">
+        <div class="card border-primary">
+          <div class="card-header bg-primary ">
+            <h3 class="text-center text-white">Demarrer un Minuteur</h3>
+          </div>
+          <div class="card-body text-center">
+        <p>Réglage Durée Minuteur en Minutes</p>
+       <div id="SliderMinuteur" class="mx-auto"></div>
+       <br >
+       <div class="text-center">
+       <button type="button" class="btn btn-outline-primary m-2" onclick="startMin(1);">Start</button>
+       <button type="button" class="btn btn-outline-warning m-2" onclick="startMin(0);">Stop</button>
+
+       <button type="button" class="btn btn-outline-info m-2" onclick="SetOptions('CR',true);"><span id="btnCr" >Masquer</span></button>
+     </div>
+  </div></div></div>
+  </div>
+</div></div></div>
+    <!-- Fin Main Tab-->
     <!-- bandeau -->
 <div class="container">
 <div class="row">
@@ -115,14 +157,14 @@
         </div>
       <div class="form-check mb-1">
     <input name='LUM' type="checkbox"  data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-size="small" data-on="Auto" data-off="Manu" class="col-sm-3" id="LUM" checked>
-    <label class="form-check-label ml-2" for="LUM">Mode Auto / Manuel <span class="badge badge-info" id="int"></span></label>    
+    <label class="form-check-label ml-2" for="LUM">Mode Auto / Manuel <span class="badge badge-info" id="int"></span></label>
     </div>
          <div id="OptionsINT" class="d-none">
         <p class="text-danger">Réglage Intensité en Mode Manuel</p>
        <div id="SliderIntensiteOption" class="mx-auto"></div>
     </div>
         </div>
-   
+
         </form>
 </div>
 </div>
@@ -235,7 +277,7 @@
   <li class="list-group-item">Humiditée : <span id="dht_h"></span> %</li>
   <li class="list-group-item">Point de Rosée : <span id="dht_p"></span> °C</li>
 </ul>
- <hr class="my-2"> 
+ <hr class="my-2">
     <div class="row">
         <div class=" col-lg-4">
       <div class="form-check">
@@ -243,8 +285,8 @@
   <label class="form-check-label" for="check_ddht">
     Afficher Info temperature sur Notif'heure
   </label>
-<small id="ddhtHelp" class="form-text text-muted">Permet l'affichage des infos températures , relevé par le DHT , directement sur l'écran du notif'heure.Les infos sont affichés à chaque relevé de la température ( Programmé sur page configuration ). </small>      
-          </div></div> 
+<small id="ddhtHelp" class="form-text text-muted">Permet l'affichage des infos températures , relevé par le DHT , directement sur l'écran du notif'heure.Les infos sont affichés à chaque relevé de la température ( Programmé sur page configuration ). </small>
+          </div></div>
          <div class=" col-lg-4">
 </div></div>
  </div> </div>
@@ -255,11 +297,11 @@
             <div class="card-body">
         <h4 class="card-title"></h4>
             <p>Ci dessous , lien vers la page de configuration du systéme Notif'Heure : </p>
-     
+
          <a href="editconfig.html"> Page Configuration</a>
-          </div></div>      
-     
-      
+          </div></div>
+
+
     </br>
     <div class="card border-primary mb-3">
           <div class="card-header">Liste des Notif'Heure sur le reseau <span class="text-primary" id="inforafraichir"></span></div>
@@ -279,7 +321,7 @@
       </thead>
         <tbody id="mdnslist">
         </tbody>
-        </table>    
+        </table>
             </div>
     </div>
     <hr class="my-2">
@@ -314,7 +356,7 @@
     <script type="text/javascript" src="bootstrap-toggle.min.js"></script>
    <script type="text/javascript" src="bootstrap-notify.min.js"></script>
     <script type="text/javascript" src="roundslider.min.js"></script>
-    
+
 
 <script>
     // init
@@ -332,7 +374,7 @@ $.ajax({
     var debug=false;
     var immp=false;
     var Actions = ['Aucune','Afficher / Masquer les Secondes', 'Activer / desactiver Horloge','Mode Manuel ( Mini ) - Manuel ( Maxi ) - Automatique','On / Off LED','Action 1','Action 2','Action 3','Action 4','Action 5','Action 6','Afficher Historique message'];
-    
+
     var jours = ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
     var mois = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
     var ddj;
@@ -340,7 +382,7 @@ $.ajax({
     var tabnotif = new Array();
     var Socketmdns;
 
-    
+
     function IsJsonString(str) {
     try {
         JSON.parse(str);
@@ -366,7 +408,7 @@ function SetOptions(opt,val) {
         Socket.send(JSONcfg);
         if (debug) console.log(JSONcfg);
 }
-    
+
 $("#SliderIntensite").roundSlider({
     sliderType: "min-range",
     min: 0,
@@ -378,14 +420,32 @@ $("#SliderIntensite").roundSlider({
     handleShape: "square",
     tooltipFormat: "changeTooltip"
 });
-    
+
 function changeTooltip(e) {
     var val = e.value;
-    return "<div><h2> "+val+" </h2></div>";
+    return "<div><h2> "+val+"</h2></div>";
 }
-    
 
-    
+function changeTooltipMin(e) {
+    var val = e.value;
+    return "<div><h5> "+val+"</h5></div>";
+}
+
+$("#SliderMinuteur").roundSlider({
+    sliderType: "min-range",
+    min: 1,
+    max: 120,
+  //  value: 5,
+    editableTooltip: true,
+    radius: 100,
+    startAngle: 5,
+    endAngle: 355,
+    handleSize: "24,12",
+    handleShape: "square",
+    tooltipFormat: "changeTooltipMin"
+});
+
+
     $("#SliderIntensiteOption").roundSlider({
     sliderType: "min-range",
     min: 0,
@@ -397,7 +457,7 @@ function changeTooltip(e) {
     handleShape: "square",
     tooltipFormat: "changeTooltip"
 });
-    
+
 String.prototype.encode = function() {
     return unescape(encodeURIComponent(this));
 }
@@ -408,7 +468,7 @@ function Ftime(i) {
   }
   return i;
 }
-  
+
 function ddjh(stamp,hist) {
    // console.log("valeur stamp : "+stamp)
         var d = new Date(stamp*1000);
@@ -419,8 +479,8 @@ function ddjh(stamp,hist) {
         var j=d.getUTCDate();
         var y=d.getUTCFullYear();
         var mo=mois[d.getUTCMonth()];
-       
-        
+
+
     if (hist==true) {
         ddj =nj+", "+j+" "+mo+" "+y+" : "+h+":"+m+":"+s;
     }
@@ -429,10 +489,10 @@ function ddjh(stamp,hist) {
     }
     return ddj;
 }
-    
 
-    
-function InitSocket(IP) {  
+
+
+function InitSocket(IP) {
     if ("WebSocket" in window)
 {
     var url = "ws://"+IP+":81";
@@ -441,19 +501,19 @@ function InitSocket(IP) {
       $('#lastnotif').text("Erreur fichier historique , le fichier semble corrompus.");
     };
     Socket.onopen = function (event) {
-    Socket.send("notifheure"); 
+    Socket.send("notifheure");
     Socket.send("GetInfo");
     setTimeout( function() {Socket.send("MDNS");}, 1000);
     setTimeout( function() {Socket.send("HistNotif");}, 100);
     };
-    
+
     Socket.onmessage = function (event) {
-        
+
         if (debug) console.log(event.data);
         if (IsJsonString(event.data)){
             var jinfo = JSON.parse(event.data);
         // Parse fichier system
-        if (jinfo.hasOwnProperty('system')) 
+        if (jinfo.hasOwnProperty('system'))
         {
             if (jinfo.system.Debug) debug=true;
             else debug=false;
@@ -464,7 +524,7 @@ function InitSocket(IP) {
                 $('#SEC').bootstrapToggle('on');
             }
                 else if (!jinfo.Options.SEC && $("#SEC").prop('checked')) $('#SEC').bootstrapToggle('off');
-            
+
             if (jinfo.Options.HOR && !$("#HOR").prop('checked')) {
                 $('#HOR').bootstrapToggle('on');
             }
@@ -475,7 +535,7 @@ function InitSocket(IP) {
             }
                 else if (!jinfo.Options.LEDstate && $("#LED").prop('checked'))
                     $('#LED').bootstrapToggle('off');
-            
+
             if (jinfo.Options.LUM && !$('#LUM').prop('checked')) {
                 $('#LUM').bootstrapToggle('on');
                 $('#OptionINT').addClass("d-none");
@@ -483,17 +543,20 @@ function InitSocket(IP) {
                 else if  (!jinfo.Options.LUM && $('#LUM').prop('checked')) {
                             $('#LUM').bootstrapToggle('off');
                             $('#OptionsINT').removeClass("d-none");
-                   
+
                 }
             if (jinfo.Options.ddht) $('#check_ddht').prop('checked',true);
                 else $('#check_ddht').prop('checked',false);
             $('#int').text(jinfo.Options.INT);
              $("#SliderIntensiteOption").roundSlider("option","value", jinfo.Options.INT);
+             $("#SliderMinuteur").roundSlider("option","value", jinfo.system.CRTIME);
+             if (jinfo.system.CR) $("#btnCr").text("Masquer");
+              else $("#btnCr").text("Afficher");
             // init info
             if (init==1) {
             $('#lieu').text(jinfo.system.lieu);
             $('#version').text(jinfo.system.version);
-            
+
             $('#hostname').text(jinfo.system.hostname);
             $('#mdns').text(jinfo.system.mdnsname+".local");
             $('#channel').text(jinfo.system.channel);
@@ -511,31 +574,31 @@ function InitSocket(IP) {
                 else $('#multizone').text("Désactivé");
             if(jinfo.system.Bouton1) {
                  $('#bouton1').text("Present");
-                  $('#cardbtn1').removeClass("d-none");  
+                  $('#cardbtn1').removeClass("d-none");
              }
-                else { 
+                else {
                     $('#bouton1').text("Absent");
-                    $('#cardbtn1').addClass("d-none"); 
+                    $('#cardbtn1').addClass("d-none");
                 }
             if(jinfo.system.Bouton2) {
                 $('#bouton2').text("Present");
                  $('#cardbtn2').removeClass("d-none");
             } else {
                 $('#bouton2').text("Absent");
-                $('#cardbtn2').addClass("d-none"); 
+                $('#cardbtn2').addClass("d-none");
             }
-              if(jinfo.system.LED) { 
+              if(jinfo.system.LED) {
                         $('#StatutLED').text("Present");
                         $('#boxflash').removeClass("d-none");
                         $('#blocled').removeClass("d-none");
-                        $("#flash").prop("disabled", false);         
+                        $("#flash").prop("disabled", false);
                                    }
-                else { 
+                else {
                     $('#StatutLED').text("Absent");
                     $('#boxflash').addClass("d-none");
                     $('#blocled').addClass("d-none");
                 }
-            
+
             if (jinfo.system.Bouton1 || jinfo.system.Bouton2) {
                 $('#navbtns').removeClass("disabled");
                 $('#btn1clic1').text(Actions[jinfo.system.btnclic[0]]);
@@ -562,13 +625,13 @@ function InitSocket(IP) {
             $('#first').text(jinfo.system.FirstSynchroNTP);
             $('#TextType').val(jinfo.Options.txtAnim);
 
-          
-               
+
+
             $('#uptime').text(jinfo.system.uptime);
-           
+
             if(jinfo.system.Photocell) $('#photocell').text("Present");
                 else $('#photocell').text("Absent");
-             
+
              if(jinfo.system.dhtsensor) {
                     $('#dht_box').removeClass("d-none");
                     $("#navdht").removeClass("disabled");
@@ -601,10 +664,10 @@ function InitSocket(IP) {
             $(document).attr("title", "Notif'heure : "+jinfo.system.mdnsname);
             }  // fin par json system
         // Parse fichier system
-        
-            if (jinfo.hasOwnProperty('msgNOTIF')) 
+
+            if (jinfo.hasOwnProperty('msgNOTIF'))
         {
-            if ($.isEmptyObject(jinfo.msgNOTIF)) 
+            if ($.isEmptyObject(jinfo.msgNOTIF))
             {
                 LastNotif ="Aucun historique de message";
                 histnotif=LastNotif;
@@ -630,12 +693,12 @@ function InitSocket(IP) {
         } // fin parse history notif
 
         } //fin parseJson
-         
+
         else if (event.data.search("MDNSreponse:")>=0) {
              //console.log("Mdns");
             $("#inforafraichir").text("( Recherche Notif'heure sur réseau en cours ...)");
             var reponse = event.data.split(":");
-            if (reponse[1]=="0")  infonotif(0); 
+            if (reponse[1]=="0")  infonotif(0);
             else {
                 listnotif=reponse[1].split(",");
                 var n=listnotif.length;
@@ -644,11 +707,12 @@ function InitSocket(IP) {
                 if (debug) console.log("adresse ip notifheure : "+ tabnotif[i].ip );
                 }
                 SocketMDNS(0,n);
-            
+
             }
-             
+
              }
-        
+
+            // retour options
         else if (event.data.search("-Ok- Options")>=0) {
             $.notify({ title: '<strong>Modification Options</strong>',
 	               message:'<p>'+event.data+'</p>'
@@ -657,10 +721,10 @@ function InitSocket(IP) {
           else if (event.data="Update") {
                 Socket.send("GetInfo");
               Socket.send("HistNotif");
-              
+
              }
-    
-              
+
+
     } // fin onmessage
 } // fin if test websocket
 else
@@ -670,9 +734,9 @@ else
 }
 
 }  // fin gosocket
-    
+
 function SocketMDNS(i,n) {
-    var urlnotif = "ws://"+tabnotif[i].ip+":81";  
+    var urlnotif = "ws://"+tabnotif[i].ip+":81";
     Socketmdns= new WebSocket(urlnotif);
        Socketmdns.onopen = function (event) {
             Socketmdns.send("GetInfo");
@@ -681,26 +745,26 @@ function SocketMDNS(i,n) {
                 if (IsJsonString(event.data)){
                 var jinfo = JSON.parse(event.data);
                 // Parse fichier system
-               if (jinfo.hasOwnProperty('system')) 
+               if (jinfo.hasOwnProperty('system'))
             {
                 tabnotif[i].nom=jinfo.system.lieu;
                 tabnotif[i].version=jinfo.system.version;
                 tabnotif[i].up=jinfo.system.uptime;
                 tabnotif[i].signal= jinfo.system.RSSI;
-               
-             
+
+
                 if (debug) console.log("lieu : "+ tabnotif[i].nom)
                 //console.log("version : "+ tabnotif[i].version)
                 i++;
-                Socketmdns.close();      
+                Socketmdns.close();
                 if (i<n) SocketMDNS(i,n);
                 else infonotif(i);
             }
-                   
+
         }
     }
     } // fin socketmdns
-    
+
 function infonotif(n) {
     var infolist="";
     if (n==0) infolist="<tr colspan='5'>Pas de notif'heure sur le reseau</tr>";
@@ -715,17 +779,17 @@ function infonotif(n) {
              infolist +="<td>"+tabnotif[i].signal+" dBm</td>";
             infolist +="</tr>";
         }
-        
+
     }
     if (debug) console.log("test html " + infolist);
     $("#mdnslist").html(infolist);
     $("#inforafraichir").text("");
 }
-    
+
 function tonotif(n) {
     window.location.href='http://'+tabnotif[n].ip;
 }
-    
+
 $.notifyDefaults({
 	type: 'success',
 	allow_dismiss: true,
@@ -737,7 +801,7 @@ $.notifyDefaults({
 		exit: 'animated fadeOutRight'
 	}
 });
- 
+
 
 function SliderAM(){
         if  ($('#LUM').prop('checked')) {
@@ -745,7 +809,7 @@ function SliderAM(){
             }
         else $('#OptionsINT').removeClass("d-none");
 }
-   
+
 
 
    $("#FormMsg").submit(function(){
@@ -758,17 +822,17 @@ function SliderAM(){
        if (type=="INFO") {
            posttype='&type='+type+'&pause='+$('#PauseType').val();
        }
-       else { 
-           
+       else {
+
            posttype='&type='+type+'&txt='+$('#TextType').val();
             }
        int = $("#SliderIntensite").roundSlider("option","value");
        if ($('#checkInt').prop('checked')) {
            postInt='';
        } else postInt='&intnotif='+int;
-       
+
        if (debug) console.log("test int: "+int);
-    
+
        mydata ='?msg='+Msg+posttype+postInt+'&flash='+flash;
       if (debug) console.log(mydata);
       $.ajax({
@@ -777,7 +841,7 @@ function SliderAM(){
                 success: function(data) {
                 if (data =="ok" ) {
                     result ="<p>Message : "+$('#msg').val()+"</br>";
-                    if ($('#checkInt').prop('checked')) 
+                    if ($('#checkInt').prop('checked'))
                         result =result+"Intensité par défaut.</br>";
                         else result = result + "Intensité : "+int+"</br>";
                     result = result +"";
@@ -805,7 +869,7 @@ function SliderAM(){
 SliderAM();
 
 setInterval(function(){
-    Socket.send("GetInfo"); // rappel toutes les 30 secondes 
+    Socket.send("GetInfo"); // rappel toutes les 30 secondes
 }, 30000);
     /*
 
@@ -831,11 +895,11 @@ $('#SEC').change(function() {
     $('#HOR').change(function() {
             SetOptions("HOR",$(this).prop('checked'));
     });
-    
+
       $('#LED').change(function() {
             SetOptions("LED",$(this).prop('checked'));
     });
-    
+
        $('#LUM').change(function() {
        SetOptions("LUM",$(this).prop('checked'));
        SliderAM();
@@ -847,19 +911,19 @@ $('#SEC').change(function() {
       if (type=="INFO")  {
           $('#textfield').addClass("d-none");
           $('#pausefield').removeClass("d-none");
-          
+
       }
         else if (type=="FIX" || type=="BLINDS")
             {
              $('#textfield').addClass("d-none");
-             $('#pausefield').addClass("d-none"); 
+             $('#pausefield').addClass("d-none");
             }
     else {
          $('#pausefield').addClass("d-none");
           $('#textfield').removeClass("d-none");
         }
     });
-    
+
     $("#SliderIntensiteOption").roundSlider({
             change: function (e) {
                 if (debug) console.log(e.value);
@@ -873,7 +937,21 @@ $('#SEC').change(function() {
                 $('#int').text(e.value);
                 }
 });
-    
+
+
+
+function startMin(state) {
+  if (state==0) tempo=0;
+  else tempo=$("#SliderMinuteur").roundSlider("option","value");
+  //console.log("minuteur test :"+tempo);
+  var obj = { file : "SetOptions",
+     option : "MIN",
+     minuteur:tempo
+    };
+    var JSONcfg = JSON.stringify(obj);
+    Socket.send(JSONcfg);
+}
+
     $('#check_ddht').change(function() {
         SetOptions("DHT",$(this).prop('checked'));
 });

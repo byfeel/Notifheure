@@ -7,7 +7,7 @@
 //  -------------------------
 // Copyright Byfeel 2017-2018
 // *************************
-String Ver="3.2.3";
+String Ver="3.3.0";
 // *************************
 //**************************
 //****** CONFIG SKETCH *****
@@ -147,6 +147,10 @@ struct Config {
   char URL_Action5[130];
   char URL_Action6[130];
   bool off;
+  byte CRACT;
+  bool CRLED;
+  char CRTEXT[60];
+  byte CRTIME;
 };
 
 const char *fileconfig = "/config/config.json";  // fichier config
@@ -474,7 +478,10 @@ static uint8_t pacman2[F_PMAN2 * W_PMAN2] =  // ghost pursued by a pacman
 // **************************************
 void NotifMsg(String Msg,byte lum,bool Info,bool U2A=true,int fpause=3,int fxIn=8,int fxOut=8)
   {
-     fx_center=false;
+    BkIntensite = Intensite; // memorise la valeur d'entree
+    Intensite=lum;
+    P.setIntensity(Intensite); // regle intensite 
+    fx_center=false;
     if (Msg.length() >round(LZMsg*1.4) && config.AutoMsg) Info=false;  // force affichage scroll si texte plus grand que display
      P.setFont(NZmsg,ExtASCII);
      Alert=true;
@@ -643,6 +650,10 @@ rootcfg["URL_Update"]=config.URL_Update;
   rootcfg["URL_Action5"]=config.URL_Action5;
   rootcfg["URL_Action6"]=config.URL_Action6;
   rootcfg["JEEDOM"] = config.JEEDOM ;
+  rootcfg["CRACT"]=config.CRACT;
+   rootcfg["CRLED"]=config.CRLED;
+   rootcfg["CRTIME"]=config.CRTIME;
+   rootcfg["CRTEXT"]=config.CRTEXT;
 
 if (NC) {
    Notif_date(date_stamp);
@@ -730,6 +741,10 @@ DynamicJsonBuffer jsonBufferconfig;
   strlcpy(config.URL_Action4, rootcfg["URL_Action4"] | "N/A",sizeof(config.URL_Action4));
   strlcpy(config.URL_Action5, rootcfg["URL_Action5"] | "N/A",sizeof(config.URL_Action5));
   strlcpy(config.URL_Action6, rootcfg["URL_Action6"] | "N/A",sizeof(config.URL_Action6));
+  config.CRACT=rootcfg["CRACT"] | 0;
+  config.CRLED=rootcfg["CRLED"] | false;
+  config.CRTIME=rootcfg["CRTIME"] | 5;
+   strlcpy(config.CRTEXT, rootcfg["CRTEXT"] | "Fin Minuteur !",sizeof(config.CRTEXT));
 
   // Close the file (File's destructor doesn't close the file)
   InfoDebugtInit=InfoDebugtInit+" valeur test : "+String( config.btnclic[2][3]);
@@ -764,7 +779,7 @@ void ToBox(char* Url) {
 
 // fonction reglage auto luminosite
 void luminosite() {
-  byte bkint = Intensite; // memorise la valeur d'entree
+  //byte bkint = Intensite; // memorise la valeur d'entree
   sensorValue = analogRead(0); // read analog input pin 0
   if (config.DEBUG) Serial.println("valeur photocell dans boucle auto : "+String(sensorValue));
    JSONSystem["PhotoValue"] = sensorValue;
@@ -852,6 +867,11 @@ void flashlight() {
    Fnotif=false;
 }
 
+void toggleCR() {
+  if (minuteur>0) cR=!cR;
+  JSONSystem["CR"] = cR;
+
+}
 
 //*************************************************
 //************* Gestion du serveur WEB ************
@@ -865,8 +885,9 @@ bool INFO=false;
 int fpause=3;
 int fxIn=8;
 int fxOut=8;
+int lum=Intensite;
 Important=false;
- BkIntensite=Intensite; 
+//BkIntensite=Intensite; 
 // on recupere les parametre dans l'url dans la partie /Notification?msg="notification a affiocher"&type="PAC"
      if ( server.hasArg("msg")) {
           message=server.arg("msg");
@@ -886,8 +907,8 @@ Important=false;
    
               if (server.hasArg("intnotif") && server.arg("intnotif").length() > 0 ) 
                 {
-                   Intensite = server.arg("intnotif").toInt();
-                  Intensite = constrain(Intensite,0,15);
+                   lum = server.arg("intnotif").toInt();
+                   lum = constrain(lum,0,15);
                  } 
               if (server.arg("flash") == "true" || server.arg("flash") == "1") Fnotif=true;
               if (server.hasArg("pause") && type=="INFO" ) fpause=server.arg("pause").toInt();
@@ -899,18 +920,19 @@ Important=false;
                 JSONOptions["txtAnim"] = txtAnim;
                 saveConfiguration(fileconfig, config);
               }
-              P.setIntensity(Intensite); // regle intensite notif
               InfoNotif="ok"; 
               if (message=="!Clear!")  { 
                 P.setPause(NZmsg,0);
                  P.displayReset(NZmsg);
                 message="";
                 type="";
-              }
+                  }
               if (config.DEBUG) {
-                Serial.println(" Info variable notif : int= "+String(Intensite) +" fx ="+String(fxIn));
+                Serial.println(" Info variable notif : int= "+String(lum) +" fx ="+String(fxIn));
               }
-              NotifMsg(message,Intensite,INFO,false,fpause,fxIn,fxOut); // envoie de la notif pour traitement
+              
+              P.setIntensity(lum); // regle intensite notif
+              NotifMsg(message,lum,INFO,false,fpause,fxIn,fxOut); // envoie de la notif pour traitement
               }
               else InfoNotif="vide";         
      }
@@ -950,7 +972,7 @@ String result="ok";
          }
        else if ( server.hasArg("MIN") ) { 
                   minuteur=server.arg("MIN").toInt();
-                   minuteur = constrain(minuteur,0,3599);
+                   minuteur = constrain(minuteur,0,35999);
                   if (minuteur >0) cR=true;
                   else { 
                     cR=false;
@@ -958,8 +980,9 @@ String result="ok";
                   }
          }
         else if (server.hasArg("CR")) {
-                if  (server.arg("CR")=="1" && minuteur>0 ) cR=true;
-                else cR=false;
+                //if  (server.arg("CR")=="1" && minuteur>0 ) cR=true;
+                //else cR=false;
+                toggleCR();
         }
       else result="Erreur";
   server.send ( 200, "text/html",result);
@@ -1004,6 +1027,7 @@ void handleTool() {
   server.send(200, "text/html",reponse);
 }
 
+// Websocket evenement
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
   String InfoJson;
@@ -1054,23 +1078,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
                 ReponseMdns+= MDNS.IP(i).toString();
                 if (n-1>i) ReponseMdns+=","; 
               }
-           /*  
-           String ReponseHTML="";
-              if (n == 0) {
-                    ReponseHTML += "<a href='#' class='list-group-item list-group-item-action'>Aucun Notif'Heure trouvé sur le réseau</a>";
-               } else {
-                
-               for (int i = 0; i < n; ++i) {
-                 ReponseHTML += "<a href='http://";
-                  ReponseHTML += MDNS.IP(i).toString();
-                  ReponseHTML +="' class='list-group-item list-group-item-action'>"+String(i+1)+" - ";
-                  ReponseHTML += MDNS.hostname(i);
-                  ReponseHTML += " ( ";
-                  ReponseHTML += MDNS.IP(i).toString();
-                  ReponseHTML += " )</a>";
-                 }
-                 webSocket.sendTXT(num, ReponseHTML);
-              }*/
+          
             webSocket.sendTXT(num, ReponseMdns);
           }
           // envoie fichier de config
@@ -1146,7 +1154,10 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
               strlcpy(config.URL_Action4,jsoncfg["URL_Action4"] | config.URL_Action4,sizeof(config.URL_Action4));
               strlcpy(config.URL_Action5,jsoncfg["URL_Action5"] | config.URL_Action5,sizeof(config.URL_Action5));
               strlcpy(config.URL_Action6,jsoncfg["URL_Action6"] | config.URL_Action6,sizeof(config.URL_Action6));
-            
+             config.CRLED = jsoncfg["CRLED"];
+             config.CRACT = jsoncfg["CRACT"];
+              config.CRTIME= jsoncfg["CRTIME"];
+             strlcpy(config.CRTEXT,jsoncfg["CRTEXT"] | config.CRTEXT,sizeof(config.CRTEXT));
              saveConfiguration(fileconfig, config);
             
              
@@ -1186,7 +1197,31 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
                           reponsetxt = "-Ok- Options LED modifié , Nouvelle Valeur : "+String(val);
                        
             }   
- 
+            else if (O=="MIN")
+            {
+                  int tempo;
+                  tempo=jsoncfg["minuteur"]; 
+                  minuteur = tempo*60;
+                  minuteur = constrain(minuteur,0,35999);
+                  if (minuteur >0) { 
+                     cR=true;
+                     if (config.LED)  digitalWrite(LEDPin,HIGH);
+                      JSONSystem["CR"] = cR;
+                      reponsetxt = "-Ok- Options Minuteur activé : "+String(tempo)+" min ";
+                  } else { 
+                    cR=false;
+                     JSONSystem["CR"] = cR;
+                    NotifMsg("Anulation Minuteur ",Intensite,false);
+                    reponsetxt = "-Ok- Options Minuteur désactivé";
+                  }
+                  
+            }
+
+            else  if  (O=="CR")  {
+              toggleCR();
+             // reponsetext="CR:"+String(cR)";
+            }
+                
       
             else if (O=="LUM")  {
                    if (AutoIn != val ) { 
@@ -1246,7 +1281,7 @@ void Option(bool *Poption, bool etat) {
                      else if ( Intensite == 15 ) message="Max";
                     else message="LUM :"+String(Intensite);
                     NotifMsg(message,Intensite,true);
-                      P.setIntensity(Intensite); 
+                      //P.setIntensity(Intensite); 
                       JSONOptions["INT"] = Intensite;
    
                }
@@ -1297,7 +1332,7 @@ void setup(void)
 if (config.interval_lux > 9 ) interval = config.interval_lux*1000;   // secondes
 if (config.interval_dht >= 1) intervaldht = config.interval_dht*60*1000;  // minutes
 if (config.interval_debug > 9 ) intervaldebug = config.interval_debug*1000;  //secondes
-BkIntensite=Intensite;
+//BkIntensite=Intensite;
   
 if (config.DEBUG)  { 
       Serial.begin(115200);
@@ -1580,7 +1615,7 @@ delay(100);
 
 
 // *********************************
-// Construction JSON
+// Construction JSON - INIT
 //**********************************
 JSONOptions["SEC"] = DisSec;
 JSONOptions["HOR"] = TimeOn;
@@ -1626,6 +1661,8 @@ JSONSystem["multizone"] = config.multiZone;
 JSONSystem["display"] = MAX_DEVICES;
 JSONSystem["LED"] = config.LED;
 JSONSystem["Imp"] = config.Imp;
+JSONSystem["CR"] = cR;
+JSONSystem["CRTIME"]=config.CRTIME;
 
 // box
 JSONSystem["box"] = config.JEEDOM;
@@ -1728,6 +1765,7 @@ void loop(void)
     }
 
   }
+  
 // ********** Fin boucle tempo
 
 
@@ -1821,8 +1859,11 @@ if (P.displayAnimate())
       // fx_center=false;
         }
        else  FinMsg=true;
-      if (!fx_center && type=="FIX" ) Alert=true;
-      else Alert=false;
+      if (!fx_center && type=="FIX" )  Alert=true;          
+        else {
+          Alert=false;
+         Intensite=BkIntensite;
+        }
     }
     P.displayClear(NZmsg);
     } // fin zonestatus
@@ -1865,17 +1906,31 @@ void digitalClockDisplay(char *heure,bool flash)
      char secondes[2];  // pour affichage des secondes
    // Si affichage de l'heure      
   if (TimeOn) { 
+    P.setIntensity(Intensite); // regle intensite 
     if (cR) {
       int h,m,s;
       h  = minuteur / 60 / 60 % 24;
       m = minuteur / 60 % 60;
       s = minuteur % 60;
-      sprintf(secondes,"%02d",s);
-      smallSec(secondes);
-       sprintf(heure,"%02d:%02d %c%c",h,m,secondes[0],secondes[1]);
+      if (h>0) {
+              sprintf(secondes,"%02d",s);
+              smallSec(secondes);
+              sprintf(heure,"%c %1d:%02d%c%c",88,h,m,secondes[0],secondes[1]);
+      }
+      else  sprintf(heure,"%c %02d:%02d",88,m,s);
+
+      
+       // fin minuteur
        if (minuteur==0) {
-         NotifMsg("Fin Minuteur ...",Intensite,false);
+         NotifMsg(config.CRTEXT,Intensite,true);
         cR=false;
+         if (config.CRACT>0) minutURL();
+        if (config.CRLED && config.LED ) {
+          ledState = false;
+          digitalWrite(LEDPin,ledState); // envoie info à led
+          JSONOptions["LEDstate"] = !ledState;
+          webSocket.broadcastTXT("Update");
+           }
        }
     }
     else {
@@ -1883,7 +1938,7 @@ void digitalClockDisplay(char *heure,bool flash)
         Intensite=BkIntensite;
         FinMsg=false;
      }
-     P.setIntensity(Intensite);
+    // P.setIntensity(Intensite);
   if ( DisSec ) 
   {  // si affichage des Secondes  00:00 (secondes en petit )
   //  char secondes[2];  // pour affichage des secondes
@@ -1891,11 +1946,11 @@ void digitalClockDisplay(char *heure,bool flash)
    smallSec(secondes);
    // secondes[0]=secondes[0]+23;  // permutation codes AScci 71 à 80
    // secondes[1]=secondes[1]+23;
-    sprintf(heure,"%02d:%02d %c%c",hour(),minute(),secondes[0],secondes[1]);
+    sprintf(heure,"%02d:%02d%c%c%c",hour(),minute(),secondes[0],secondes[1],(minuteur>0 ? 90:0));
     //sprintf(heure,"%02d%c%02d%c%c",hour(),(flash ? ':' : ' '),minute(),secondes[0],secondes[1]);
   }
   // Affichage 00:00  avec : Clignottant ( flasher )
-   else sprintf(heure,"%02d%c%02d",hour(),(flash ? ':' : ' '),minute());
+   else sprintf(heure,"%02d%c%02d%c",hour(),(flash ? ':' : ' '),minute(),(minuteur>0 ? 90:0));
    if (config.DEBUG) InfoDebugBoucle=heure;
   }
   } // fin timeon
@@ -1989,6 +2044,17 @@ switch (actionClick) {
                case 11 : //Defiler message
              DisplHist();
       break;
+                case 12 : //Afficher masquer minuteur
+             toggleCR();
+      break;
+          case 13 : //Lancer Minuteur
+                  minuteur = config.CRTIME*60;
+                  minuteur = constrain(minuteur,0,3599);
+                  if (minuteur >0) { 
+                     cR=true;
+                     if (config.LED)  digitalWrite(LEDPin,HIGH);
+                  }
+          break;
        case 255: // simple clic mais long sur dernier  - diminue
       --Intensite;
       if (Intensite<0) Intensite=0;
@@ -2005,6 +2071,30 @@ switch (actionClick) {
   webSocket.broadcastTXT("Update");
 }
 
+void minutURL() {
+  switch (config.CRACT) {
+     case 5 : //Action 1
+            ToBox(config.URL_Action1);
+      break;
+      case 6 : //Action 2
+            ToBox(config.URL_Action2);
+      break;
+        case 7 : //Action 3
+            ToBox(config.URL_Action3);
+      break;
+              case 8 : //Action 4
+            ToBox(config.URL_Action4);
+      break;
+              case 9 : //Action 5
+            ToBox(config.URL_Action5);
+      break;
+              case 10 : //Action 6
+            ToBox(config.URL_Action6);
+      break;
+      default:
+      break;  
+  }
+}
 
 //format bytes
 String formatBytes(size_t bytes) {
@@ -2031,61 +2121,7 @@ String getContentType(String filename){
   else if (filename.endsWith(".png")) return "image/png";
   return "text/plain";
 }
-/*
-String getContentType(String filename) {
-  if (server.hasArg("download")) {
-    return "application/octet-stream";
-  } else if (filename.endsWith(".htm")) {
-    return "text/html";
-  } else if (filename.endsWith(".html")) {
-    return "text/html";
-  } else if (filename.endsWith(".css")) {
-    return "text/css";
-  } else if (filename.endsWith(".js")) {
-    return "application/javascript";
-  } else if (filename.endsWith(".png")) {
-    return "image/png";
-  } else if (filename.endsWith(".gif")) {
-    return "image/gif";
-  } else if (filename.endsWith(".jpg")) {
-    return "image/jpeg";
-  } else if (filename.endsWith(".ico")) {
-    return "image/x-icon";
-  } else if (filename.endsWith(".xml")) {
-    return "text/xml";
-  } else if (filename.endsWith(".pdf")) {
-    return "application/x-pdf";
-  } else if (filename.endsWith(".zip")) {
-    return "application/x-zip";
-  } else if (filename.endsWith(".gz")) {
-    return "application/x-gzip";
-  }
-  return "text/plain";
-}
-*/
-/*
-bool handleFileRead(String path) {
-  
-    if (path.endsWith("/")) {
-    path += "index.html";
-  }
-  if (config.DEBUG) Serial.println("handleFileRead: " + path);
 
-  String contentType = getContentType(path);
-   if (config.DEBUG)  Serial.println("content type " + contentType );
-  String pathWithGz = path + ".gz";
-  if (SPIFFS.exists(pathWithGz) || SPIFFS.exists(path)) {
-    if (SPIFFS.exists(pathWithGz)) {
-      path += ".gz";
-    }
-    File file = SPIFFS.open(path, "r");
-    server.streamFile(file, contentType);
-    file.close();
-    return true;
-}
-return false;
-}
-*/
 bool handleFileRead(String path){  // send the right file to the client (if it exists)
   Serial.println("handleFileRead: " + path);
   if(path.endsWith("/")) path += "index.html";           // If a folder is requested, send the index file
@@ -2137,7 +2173,7 @@ String getPage(){
   page += "<title>upload</title><meta charset='utf-8'>";
   page += "<style> body { background-color: #fffff; font-family: Arial, Helvetica, Sans-Serif; Color: #000088; }</style>";
   page += "</head><body><h3>Le fichier à bien été enregistré</h3>";
-  page += "<p>Le notif'heure va rebooter dans quelques secondes </p>";
+  page += "<p>Le notif'heure va rebooter d'ici une trentaine de secondes - Merci d'atendre le reboot pour la prise en compte </p>";
   page += "<p>Vous pouvez cliquer sur ce lien , pour retourner sur l' <a href='/'>Accueil</a> .</p>";
   page += "</body></html>";
   return page;

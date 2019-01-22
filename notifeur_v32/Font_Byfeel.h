@@ -103,9 +103,9 @@ MD_MAX72XX::fontType_t numeric7Seg_Byfeel[] PROGMEM =
 	0,		// 85 - 'U'
 	0,		// 86 - 'V'
 	0,		// 87 - 'W'
-	0,		// 88 - 'X'
-	0,		// 89 - 'Y'
-	0,		// 90 - 'Z'
+	5,  65,	99,127,99,65,	// 88 - sablier
+	5, 127, 2, 28, 2, 127,   // 89 - 'M'
+	1,128,		// 90  caractére pour signe Minuteur
 	0,		// 91 - '['
 	0,		// 92 - '\'
 	0,		// 93 - ']'
