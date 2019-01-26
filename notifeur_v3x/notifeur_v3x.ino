@@ -7,7 +7,7 @@
 //  -------------------------
 // Copyright Byfeel 2017-2018
 // *************************
-String Ver="3.3.0";
+String Ver="3.3.1";
 // *************************
 //**************************
 //****** CONFIG SKETCH *****
@@ -17,14 +17,14 @@ String Ver="3.3.0";
 // En fonction de vos matrices , si probléme         *
 // d'affichage ( inversé , effet miroir , etc .....) *
 // ***************************************************
-// matrix   - decocher selon config matrix    ********     
-#define HARDWARE_TYPE MD_MAX72XX::FC16_HW        //***
+// matrix   - decocher selon config matrix    ********
+//#define HARDWARE_TYPE MD_MAX72XX::FC16_HW        //***
 //#define HARDWARE_TYPE MD_MAX72XX::PAROLA_HW    //***
-//#define HARDWARE_TYPE MD_MAX72XX::ICSTATION_HW //***
+#define HARDWARE_TYPE MD_MAX72XX::ICSTATION_HW //***
 //#define HARDWARE_TYPE MD_MAX72XX::GENERIC_HW   //***
 // ***************************************************
 //****************************************************
-#define MAX_DEVICES 8 // nombre de matrice  
+#define MAX_DEVICES 8 // nombre de matrice
 // PIN de raccordement matrice ( si different )
 #define CLK_PIN   D5
 #define DATA_PIN  D7
@@ -46,7 +46,7 @@ String Ver="3.3.0";
 const char* www_username = "admin";
 const char* www_password = "notif";
 
- 
+
 // ******************************//
 //******** Bibliotheque *********//
 //******************************//
@@ -104,7 +104,7 @@ const char* www_password = "notif";
 
 // Hardware SPI connection
 //MD_Parola P = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
-// Si probleme avec detection auto SPI 
+// Si probleme avec detection auto SPI
 MD_Parola P = MD_Parola(HARDWARE_TYPE, DATA_PIN, CLK_PIN, CS_PIN, MAX_DEVICES);
 
 
@@ -113,14 +113,14 @@ MD_Parola P = MD_Parola(HARDWARE_TYPE, DATA_PIN, CLK_PIN, CS_PIN, MAX_DEVICES);
 // *************************
 // init dht
 DHTesp dht;
-      
+
 
 // Structure fichier config
 struct Config {
   char HOSTNAME[10];
   char Name[12];
   char NTPSERVER[30];
-  int timeZone;                // 
+  int timeZone;                //
   bool DLS;                   // Le fuseau utilise les horaires été / hiver
   bool DEBUG;
   bool BOUTON_1;
@@ -159,7 +159,7 @@ Config config;                         // <- global configuration object
 
 //Init JSON
 // JSON pour fichier etat notif'heure
-//StaticJsonBuffer<1600> jsonBuffer; 
+//StaticJsonBuffer<1600> jsonBuffer;
 const size_t bufferSize = JSON_ARRAY_SIZE(6) + JSON_OBJECT_SIZE(3) + JSON_OBJECT_SIZE(7) + JSON_OBJECT_SIZE(8) + JSON_OBJECT_SIZE(29) + 800;
 DynamicJsonBuffer jsonBuffer(bufferSize);
 JsonObject& JSONRoot = jsonBuffer.createObject();
@@ -200,7 +200,7 @@ byte Intensite;    // valeur par defaut au premier demmarrage
 byte BkIntensite;
 
 //interval
-unsigned long interval = 20000;  // interval pour mesure luminosite réglé sur 20 s 
+unsigned long interval = 20000;  // interval pour mesure luminosite réglé sur 20 s
 unsigned long previousMillis=0 ;
 
 unsigned long intervaldebug = 45000;  // interval pour debug ( 45 s min )
@@ -218,7 +218,7 @@ int numh=0;
 unsigned long timersys=60000; // timer pour action systeme (60s)
 unsigned long previousMillissys=0 ;
 bool bk=false;
- 
+
 // - Debug
 String InfoDebugBoucle;
 String InfoDebugtInit;
@@ -226,7 +226,7 @@ String InfoDebugtInit;
 // - Options
 bool AutoIn;     // Auto / manu intensite
 bool TimeOn;    // ON - off Affichage horloge
-bool DisSec; 
+bool DisSec;
 byte dj=0;
 bool msgTemp;
 bool raz;
@@ -246,7 +246,7 @@ char Horloge[BUF_SIZE];
 char txtAnim[20];
 boolean Alert=false;
 boolean FinMsg=false;
-String message="";    
+String message="";
 String type="";
 String jours[8]={"Erreur","Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"};
 String mois[13]={"Erreur","Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"};
@@ -266,10 +266,10 @@ bool DHTsensor=false;
   float heatIndex;
   float dewPoint;
   byte per;
- 
-  //String comfortStatus="";     
+
+  //String comfortStatus="";
    char date_stamp[18];
-   
+
 //variable systemes
 byte valEPROM;
 byte adminEPROM;
@@ -284,7 +284,7 @@ bool notifOk;  // verif si notif
 //**********************//
 //interaction Jeedom
 /*
-boolean JEEDOM=false;                
+boolean JEEDOM=false;
 String ipBox="x.x.x.x";
 String portBox="80";
 String ReqUpBox;
@@ -435,7 +435,7 @@ void processSyncEvent (NTPSyncEvent_t ntpEvent) {
             }
          else ++NTPcount;
   }
-  
+
 }
 
 boolean syncEventTriggered = false; // True if a time even has been triggered
@@ -480,7 +480,7 @@ void NotifMsg(String Msg,byte lum,bool Info,bool U2A=true,int fpause=3,int fxIn=
   {
     BkIntensite = Intensite; // memorise la valeur d'entree
     Intensite=lum;
-    P.setIntensity(Intensite); // regle intensite 
+    P.setIntensity(Intensite); // regle intensite
     fx_center=false;
     if (Msg.length() >round(LZMsg*1.4) && config.AutoMsg) Info=false;  // force affichage scroll si texte plus grand que display
      P.setFont(NZmsg,ExtASCII);
@@ -494,7 +494,7 @@ void NotifMsg(String Msg,byte lum,bool Info,bool U2A=true,int fpause=3,int fxIn=
           if (Important && config.LED ) digitalWrite(LEDPin,LOW);
           Important=false;
     }
-  
+
   if (Info) {
     //P.displayZoneText(0,Notif,PA_CENTER,config.SPEED_TIME, config.PAUSE_TIME,PA_PRINT,PA_NO_EFFECT);
    fx_center=true;
@@ -504,7 +504,7 @@ void NotifMsg(String Msg,byte lum,bool Info,bool U2A=true,int fpause=3,int fxIn=
       fix_pause=fpause;
         fx_out=fxOut;
         }
-    } else { 
+    } else {
       P.setTextAlignment(NZmsg,PA_LEFT) ;
      // P.displayZoneText(0, Notif, PA_LEFT, config.SPEED_TIME, config.PAUSE_TIME, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
     // fx_in=3;
@@ -515,7 +515,7 @@ void NotifMsg(String Msg,byte lum,bool Info,bool U2A=true,int fpause=3,int fxIn=
   }
 
 void LoadHistorique() {
-      
+
  // Chargement historique si existe
   File histNotif = SPIFFS.open(fileHistNotif,"r");
    if (!histNotif) {
@@ -528,12 +528,12 @@ void LoadHistorique() {
 
     //const size_t bufferSize2 = 2*JSON_ARRAY_SIZE(3) + JSON_OBJECT_SIZE(2) + 400;
     DynamicJsonBuffer jbtemp;
-    
+
             JsonObject& JSONTEMP = jbtemp.parseObject(histNotif);
                     if (!JSONTEMP.success()) {
                                if (config.DEBUG) Serial.println("Impossible de lire le fichier historique notif ");
                        } else {
-                           if (config.DEBUG)  { 
+                           if (config.DEBUG)  {
                             Serial.println("Historique chargé");
                                                 }
                       JsonArray& timeNOTIF = JSONTEMP["timeNOTIF"];
@@ -544,12 +544,12 @@ void LoadHistorique() {
                                   JSONtimeNOTIF.add(timeNOTIF[i].as<long>());
                                    JSONtypNOTIF.add(typNOTIF[i].as<String>());
                              }
-          
+
                       }
              histNotif.close();
               jbtemp.clear();
       }
-     
+
 }
 
 
@@ -578,15 +578,15 @@ bk=true;
 if (config.LED ) digitalWrite(LEDPin,HIGH);
  int n=JSONmsgNOTIF.size();
  if (n>0) {
-         numh ++;     
+         numh ++;
               if( millis() - timerhist >= 60000) {
               numh = 1;
-               timerhist = millis();   
+               timerhist = millis();
               }
           if (numh>n) numh=1;
              time_t t=JSONtimeNOTIF[n-numh];
             sprintf(djh,"%u: %02d/%02d à %02d:%02d:%02d -> ",numh,day(t),month(t),hour(t),minute(t),second(t));
-            message=djh; 
+            message=djh;
             message+=JSONmsgNOTIF[n-numh].as<String>();
             }
             else message="Aucun Enregistrement";
@@ -610,33 +610,33 @@ if (config.DEBUG) Serial.println("Mise a jour valeur Options : SEC="+String(DisS
   rootcfg["Name"] = config.Name;
   rootcfg["NTPserver"] = config.NTPSERVER;
   rootcfg["timeZone"] =  config.timeZone;
-  rootcfg["DLS"] = config.DLS;             
-  rootcfg["DEBUG"] = config.DEBUG;  
-  rootcfg["BOUTON1"] = config.BOUTON_1;  
-  rootcfg["BOUTON2"] =config.BOUTON_2; 
-  rootcfg["LED"] =config.LED; 
-  rootcfg["multizone"] = config.multiZone; 
+  rootcfg["DLS"] = config.DLS;
+  rootcfg["DEBUG"] = config.DEBUG;
+  rootcfg["BOUTON1"] = config.BOUTON_1;
+  rootcfg["BOUTON2"] =config.BOUTON_2;
+  rootcfg["LED"] =config.LED;
+  rootcfg["multizone"] = config.multiZone;
   rootcfg["DispRight"] = config.DispRight;
   rootcfg["LZTime"] = config.LZTime;
   rootcfg["speed_time"] = config.SPEED_TIME;
-  rootcfg["pause_time"] =  config.PAUSE_TIME;  
+  rootcfg["pause_time"] =  config.PAUSE_TIME;
   rootcfg["interval_lux"] = config.interval_lux;
-  rootcfg["interval_dht"] =config.interval_dht; 
-  rootcfg["interval_debug"] =config.interval_debug; 
-  rootcfg["AutoIn"] = AutoIn; 
-  rootcfg["TimeOn"] = TimeOn; 
-  rootcfg["DisSec"] = DisSec; 
+  rootcfg["interval_dht"] =config.interval_dht;
+  rootcfg["interval_debug"] =config.interval_debug;
+  rootcfg["AutoIn"] = AutoIn;
+  rootcfg["TimeOn"] = TimeOn;
+  rootcfg["DisSec"] = DisSec;
   rootcfg["intensite"]=Intensite;
   rootcfg["ddht"] = msgTemp;
   rootcfg["maxdisplay"] = MAX_DEVICES;
   rootcfg["AutoMsg"] = config.AutoMsg;
   rootcfg["Imp"] = config.Imp;
-  if (raz) rootcfg["raz"] =raz ; 
+  if (raz) rootcfg["raz"] =raz ;
 JsonArray& btn1 = rootcfg.createNestedArray("btn1");
 btn1.add(config.btnclic[1][1]);
 btn1.add(config.btnclic[1][2]);
 btn1.add(config.btnclic[1][3]);
- rootcfg["off"] = config.off;  
+ rootcfg["off"] = config.off;
 JsonArray& btn2 = rootcfg.createNestedArray("btn2");
 btn2.add(config.btnclic[2][1]);
 btn2.add(config.btnclic[2][2]);
@@ -697,25 +697,25 @@ DynamicJsonBuffer jsonBufferconfig;
 
   // Initialisation des variables systémes pour configuration , si non présente valeur par defaut affecté
   strlcpy(config.HOSTNAME, rootcfg["Hostname"] | "Notif",sizeof(config.HOSTNAME));
-  strlcpy(config.Name, rootcfg["Name"] | "new",sizeof(config.Name));    
-  strlcpy(config.NTPSERVER,rootcfg["NTPserver"] | "pool.ntp.org",sizeof(config.NTPSERVER));  
-  maxdisplay =  rootcfg["maxdisplay"] | MAX_DEVICES;  
+  strlcpy(config.Name, rootcfg["Name"] | "new",sizeof(config.Name));
+  strlcpy(config.NTPSERVER,rootcfg["NTPserver"] | "pool.ntp.org",sizeof(config.NTPSERVER));
+  maxdisplay =  rootcfg["maxdisplay"] | MAX_DEVICES;
   config.timeZone = rootcfg["timeZone"] | 1;
-  config.DLS = rootcfg["DLS"] | true;              
-  config.DEBUG = rootcfg["DEBUG"] | false;  
-  config.BOUTON_1 = rootcfg["BOUTON1"] | false;  
-  config.BOUTON_2 = rootcfg["BOUTON2"] | false; 
-  config.LED = rootcfg["LED"] | false; 
-  config.multiZone = rootcfg["multizone"] | false; 
+  config.DLS = rootcfg["DLS"] | true;
+  config.DEBUG = rootcfg["DEBUG"] | false;
+  config.BOUTON_1 = rootcfg["BOUTON1"] | false;
+  config.BOUTON_2 = rootcfg["BOUTON2"] | false;
+  config.LED = rootcfg["LED"] | false;
+  config.multiZone = rootcfg["multizone"] | false;
   config.DispRight = rootcfg["DispRight"] | false;
   config.LZTime =  rootcfg["LZTime"] | round(maxdisplay/2);
- config.AutoMsg = rootcfg["AutoMsg"] | true; 
- config.Imp = rootcfg["Imp"] | false; 
+ config.AutoMsg = rootcfg["AutoMsg"] | true;
+ config.Imp = rootcfg["Imp"] | false;
   config.SPEED_TIME = rootcfg["speed_time"] | 35;
-  config.PAUSE_TIME = rootcfg["pause_time"] | 3;  
-  config.interval_lux = rootcfg["interval_lux"] | 15; 
-  config.interval_dht = rootcfg["interval_dht"] | 10; 
-  config.interval_debug = rootcfg["interval_debug"] | 40; 
+  config.PAUSE_TIME = rootcfg["pause_time"] | 3;
+  config.interval_lux = rootcfg["interval_lux"] | 15;
+  config.interval_dht = rootcfg["interval_dht"] | 10;
+  config.interval_debug = rootcfg["interval_debug"] | 40;
   JsonArray& btn1 = rootcfg["btn1"];
   config.btnclic[1][1] = btn1[0] | 1;
   config.btnclic[1][2] = btn1[1] | 2;
@@ -724,12 +724,12 @@ DynamicJsonBuffer jsonBufferconfig;
   config.btnclic[2][1] = btn2[0] | 4;
   config.btnclic[2][2] = btn2[1] | 11;
   config.btnclic[2][3] = btn2[2] | 6;
-  AutoIn = rootcfg["AutoIn"] | true; 
-  TimeOn = rootcfg["TimeOn"] | true; 
-  DisSec = rootcfg["DisSec"] | true; 
+  AutoIn = rootcfg["AutoIn"] | true;
+  TimeOn = rootcfg["TimeOn"] | true;
+  DisSec = rootcfg["DisSec"] | true;
   Intensite = rootcfg["intensite"] | 1;
  config.off = rootcfg["off"] | false;
-  raz = rootcfg["raz"] | false; 
+  raz = rootcfg["raz"] | false;
   msgTemp = rootcfg["ddht"] | false;
   dj =  rootcfg["dj"] | 0;
   strlcpy(txtAnim, rootcfg["txtAnim"] | "Notif",sizeof(txtAnim));
@@ -786,7 +786,7 @@ void luminosite() {
    Intensite =round((sensorValue*1.5)/100);
    Intensite = constrain(Intensite,0,15);
 
- 
+
 }
 
 void GetTemp() {
@@ -824,7 +824,7 @@ void GetTemp() {
       default : Modele="Inconnu";
       break;
     }
-  
+
   if (config.DEBUG) Serial.println("Valeur Sensor DHT :"+String(DHTsensor));
   JSONDht["T"] = temperature;
   JSONDht["H"] = humidity;
@@ -851,7 +851,7 @@ void DebugInfo() {
   Serial.println(valEPROM,BIN);
   Serial.print(" Valeur adminEprom : "+ String(adminEPROM) +" : " );
   Serial.println(adminEPROM,BIN);
- 
+
 }
 
 
@@ -887,41 +887,41 @@ int fxIn=8;
 int fxOut=8;
 int lum=Intensite;
 Important=false;
-//BkIntensite=Intensite; 
+//BkIntensite=Intensite;
 // on recupere les parametre dans l'url dans la partie /Notification?msg="notification a affiocher"&type="PAC"
      if ( server.hasArg("msg")) {
           message=server.arg("msg");
            if (message!="") {
               if (server.arg("type")) type=server.arg("type");
-              if (type=="INFO" || type=="FIX")  { 
+              if (type=="INFO" || type=="FIX")  {
                 INFO=true;
                 if (server.hasArg("fi") ) fxIn = server.arg("fi").toInt();
                 if (server.hasArg("fo") ) fxOut = server.arg("fo").toInt();
-                if (server.hasArg("fio") ) { 
+                if (server.hasArg("fio") ) {
                   fxOut = server.arg("fio").toInt();
                   fxIn=fxOut;
                 }
                 fxIn = constrain(fxIn,0,28);
                 fxOut = constrain(fxOut,0,28);
               }
-   
-              if (server.hasArg("intnotif") && server.arg("intnotif").length() > 0 ) 
+
+              if (server.hasArg("intnotif") && server.arg("intnotif").length() > 0 )
                 {
                    lum = server.arg("intnotif").toInt();
                    lum = constrain(lum,0,15);
-                 } 
+                 }
               if (server.arg("flash") == "true" || server.arg("flash") == "1") Fnotif=true;
               if (server.hasArg("pause") && type=="INFO" ) fpause=server.arg("pause").toInt();
               if ( type=="FIX" ) fpause=-1;
               if (server.hasArg("important")) Important=true;
                 else Important=false;
-              if ( server.hasArg("txt"))   { 
+              if ( server.hasArg("txt"))   {
                 server.arg("txt").toCharArray(txtAnim,sizeof(txtAnim));
                 JSONOptions["txtAnim"] = txtAnim;
                 saveConfiguration(fileconfig, config);
               }
-              InfoNotif="ok"; 
-              if (message=="!Clear!")  { 
+              InfoNotif="ok";
+              if (message=="!Clear!")  {
                 P.setPause(NZmsg,0);
                  P.displayReset(NZmsg);
                 message="";
@@ -930,24 +930,24 @@ Important=false;
               if (config.DEBUG) {
                 Serial.println(" Info variable notif : int= "+String(lum) +" fx ="+String(fxIn));
               }
-              
+
               P.setIntensity(lum); // regle intensite notif
               NotifMsg(message,lum,INFO,false,fpause,fxIn,fxOut); // envoie de la notif pour traitement
               }
-              else InfoNotif="vide";         
+              else InfoNotif="vide";
      }
      server.send(200, "text/plane",InfoNotif);
 }
 
 void handleOptions() {
 String result="ok";
-    if ( server.hasArg("SEC")) { 
+    if ( server.hasArg("SEC")) {
         String SEC = server.arg("SEC");
          if ( (SEC == "on" || SEC =="1") && !DisSec ) Option(&DisSec,true);
           else if ( (SEC == "off" || SEC=="0") && DisSec ) Option(&DisSec,false);
             else result="idem";
           }
-     else if ( server.hasArg("HOR")) { 
+     else if ( server.hasArg("HOR")) {
         String HOR = server.arg("HOR");
          if ( (HOR == "on" || HOR=="1") && !TimeOn) Option(&TimeOn,true);
          else if ( (HOR == "off" || HOR=="0") && TimeOn) Option(&TimeOn,false);
@@ -959,25 +959,26 @@ String result="ok";
          else if ( (LUM == "manu" || LUM == "0") && AutoIn) Option(&AutoIn,false);
          else result="idem";
           }
-     //else if ( server.hasArg("INT") && !AutoIn) { 
-       else if ( server.hasArg("INT")) { 
+     //else if ( server.hasArg("INT") && !AutoIn) {
+       else if ( server.hasArg("INT")) {
            Intensite=server.arg("INT").toInt();
             Option(&AutoIn,false);
-         } 
-        else if ( server.hasArg("LED") && config.LED) { 
+         }
+        else if ( server.hasArg("LED") && config.LED) {
                   if (server.arg("LED")=="1" || server.arg("LED")=="on" ) ledState = 0;
                   else ledState=1;
                   digitalWrite(LEDPin,ledState); // On-Off led
                   JSONOptions["LEDstate"] = !ledState;
          }
-       else if ( server.hasArg("MIN") ) { 
+       else if ( server.hasArg("MIN") ) {
                   minuteur=server.arg("MIN").toInt();
                    minuteur = constrain(minuteur,0,35999);
                   if (minuteur >0) cR=true;
-                  else { 
+                  else {
                     cR=false;
                     NotifMsg("Anulation Minuteur ",Intensite,false);
                   }
+                  JSONSystem["CR"] = cR;
          }
         else if (server.hasArg("CR")) {
                 //if  (server.arg("CR")=="1" && minuteur>0 ) cR=true;
@@ -999,10 +1000,10 @@ void handleInfo() {
   JSONSystem["uptime"] = UptimeNotif;
   JSONSystem["RSSI"] = WiFi.RSSI();
   JSONSystem["LastSynchroNTP"] = NTP.getTimeDateString(NTP.getLastNTPSync());
-  
+
   JSONRoot.prettyPrintTo(InfoSystem);
   //JSONDht.printTo(InfoSystem);
-  if (config.DEBUG) { 
+  if (config.DEBUG) {
     Serial.println("Requete getinfo");
     Serial.println(InfoSystem);
   }
@@ -1016,8 +1017,8 @@ void handleIP() {
 
 // envoie IP module
 void handleTool() {
-  String reponse="Erreur";  
-   if ( server.hasArg("debug")) { 
+  String reponse="Erreur";
+   if ( server.hasArg("debug")) {
       if (server.arg("debug")=="1") {
        if  (SPIFFS.exists(fileHistNotif)) SPIFFS.remove(fileHistNotif);
         delay(100);
@@ -1031,7 +1032,7 @@ void handleTool() {
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
   String InfoJson;
-  
+
     switch(type) {
         case WStype_DISCONNECTED:
            if (config.DEBUG) Serial.printf("[%u] Disconnected!\n", num);
@@ -1041,7 +1042,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
         {
                 IPAddress ip = webSocket.remoteIP(num);
                 if (config.DEBUG)  Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
-        
+
         // send message to client
         String bonjour;
         bonjour = "hello , de ";
@@ -1076,9 +1077,9 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
               if (n==0) ReponseMdns+="0";
               for (int i = 0; i < n; ++i) {
                 ReponseMdns+= MDNS.IP(i).toString();
-                if (n-1>i) ReponseMdns+=","; 
+                if (n-1>i) ReponseMdns+=",";
               }
-          
+
             webSocket.sendTXT(num, ReponseMdns);
           }
           // envoie fichier de config
@@ -1112,16 +1113,16 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
             delay(1000);
             ESP.restart();
           }
-          
-          
+
+
           // Reponse sauvegarde config
            else if ( c > 10 ) {
              DynamicJsonBuffer jbtemp;
             JsonObject& jsoncfg = jbtemp.parseObject(s);
 
            strlcpy(config.HOSTNAME,  jsoncfg["Hostname"] | config.HOSTNAME,sizeof(config.HOSTNAME));
-            strlcpy(config.Name, jsoncfg["Name"] | config.Name,sizeof(config.Name));    
-            strlcpy(config.NTPSERVER,jsoncfg["NTPserver"] | config.NTPSERVER ,sizeof(config.NTPSERVER));    
+            strlcpy(config.Name, jsoncfg["Name"] | config.Name,sizeof(config.Name));
+            strlcpy(config.NTPSERVER,jsoncfg["NTPserver"] | config.NTPSERVER ,sizeof(config.NTPSERVER));
 
              config.timeZone = jsoncfg["timeZone"];
             config.DLS = jsoncfg["DLS"];
@@ -1159,8 +1160,8 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
               config.CRTIME= jsoncfg["CRTIME"];
              strlcpy(config.CRTEXT,jsoncfg["CRTEXT"] | config.CRTEXT,sizeof(config.CRTEXT));
              saveConfiguration(fileconfig, config);
-            
-             
+
+
             webSocket.sendTXT(num,"ok fichier config sauvegardé de :  "+ String(config.HOSTNAME));
             jbtemp.clear();
           }
@@ -1171,69 +1172,69 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
             String reponsetxt="";
             DynamicJsonBuffer jbtemp;
             JsonObject& jsoncfg = jbtemp.parseObject(s);
-            
+
            O=jsoncfg["option"].as<String>();
-            val= jsoncfg["valeur"] | true; 
-          
+            val= jsoncfg["valeur"] | true;
+
 
             if (O=="SEC") {
-                      if (DisSec != val ) { 
+                      if (DisSec != val ) {
                           Option(&DisSec,val);
                           reponsetxt = "-Ok- Options Secondes Mis à jour , Nouvelle Valeur : "+String(val);
                           }
             }
               else if (O=="HOR")
                           {
-                          if (TimeOn != val ) { 
+                          if (TimeOn != val ) {
                           Option(&TimeOn,val);
                           reponsetxt = "-Ok- Options Affichage Horloge Mis à jour , Nouvelle Valeur : "+String(val);
                           }
-            }         
+            }
                 else if (O=="LED" && config.LED )  {
-                          if (val==true ) ledState = 0; 
+                          if (val==true ) ledState = 0;
                           else ledState = 1;
                            digitalWrite(LEDPin,ledState); // On-Off led
                            JSONOptions["LEDstate"] = !ledState;
                           reponsetxt = "-Ok- Options LED modifié , Nouvelle Valeur : "+String(val);
-                       
-            }   
+
+            }
             else if (O=="MIN")
             {
                   int tempo;
-                  tempo=jsoncfg["minuteur"]; 
+                  tempo=jsoncfg["minuteur"];
                   minuteur = tempo*60;
                   minuteur = constrain(minuteur,0,35999);
-                  if (minuteur >0) { 
+                  if (minuteur >0) {
                      cR=true;
                      if (config.LED)  digitalWrite(LEDPin,HIGH);
                       JSONSystem["CR"] = cR;
                       reponsetxt = "-Ok- Options Minuteur activé : "+String(tempo)+" min ";
-                  } else { 
+                  } else {
                     cR=false;
                      JSONSystem["CR"] = cR;
                     NotifMsg("Anulation Minuteur ",Intensite,false);
                     reponsetxt = "-Ok- Options Minuteur désactivé";
                   }
-                  
+
             }
 
             else  if  (O=="CR")  {
               toggleCR();
              // reponsetext="CR:"+String(cR)";
             }
-                
-      
+
+
             else if (O=="LUM")  {
-                   if (AutoIn != val ) { 
+                   if (AutoIn != val ) {
                           Option(&AutoIn,val);
                           if (val==true ) reponsetxt = "-Ok- Options Mode Auto/manuel mis a jour , mode Auto activé";
                           else reponsetxt = "-Ok- Options Mode Auto/manuel mis a jour , mode Manuel activé avec Intensité à :"+String(Intensite);
                           }
             }
                else if (O=="INT" && !AutoIn)  {
-                          //String in= jsoncfg["intensite"] | String(Intensite); 
+                          //String in= jsoncfg["intensite"] | String(Intensite);
                           //Intensite =in.toInt();
-                          Intensite = jsoncfg["intensite"] | Intensite; 
+                          Intensite = jsoncfg["intensite"] | Intensite;
                           Option(&AutoIn,false);
                            reponsetxt = "-Ok- Options Mode Manuel , Intensité = "+String(Intensite);
                           }
@@ -1241,14 +1242,14 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
                           msgTemp=val;
                           JSONOptions["ddht"] = msgTemp;
                           reponsetxt = "-Ok- Options Affichage DHT modifié , Nouvelle Valeur : "+String(val);
-                       
-            } 
-            
+
+            }
+
           if (reponsetxt!="")  webSocket.sendTXT(num,reponsetxt);
           webSocket.broadcastTXT("Update");
           jbtemp.clear();
           }
-          
+
 
             // send data to all connected clients
             // webSocket.broadcastTXT("message here");
@@ -1276,24 +1277,24 @@ void Option(bool *Poption, bool etat) {
           else if ( Poption == &AutoIn )  {
                 JSONOptions["LUM"] = AutoIn;
               if (etat) NotifMsg("Auto",Intensite,true);
-               if ( !etat ) {  
+               if ( !etat ) {
                     if ( Intensite == 0 ) message="Min";
                      else if ( Intensite == 15 ) message="Max";
                     else message="LUM :"+String(Intensite);
                     NotifMsg(message,Intensite,true);
-                      //P.setIntensity(Intensite); 
+                      //P.setIntensity(Intensite);
                       JSONOptions["INT"] = Intensite;
-   
+
                }
            }
            else if ( Poption == &TimeOn  )  {
                    JSONOptions["HOR"] = TimeOn;
-                    if (!etat) 
+                    if (!etat)
                     {
                       NotifMsg("OFF",Intensite,true);
                     }
            }
-        
+
   saveConfiguration(fileconfig, config);
 
   if (config.DEBUG) {
@@ -1323,18 +1324,18 @@ void setup(void)
  // saveConfig();
   InfoDebugtInit=InfoDebugtInit+" Chargement configuration -";
   loadConfiguration(fileconfig, config);
-  
+
   } else {
     InfoDebugtInit=InfoDebugtInit+" Erreur fileSystem -";
- 
+
   }
 
 if (config.interval_lux > 9 ) interval = config.interval_lux*1000;   // secondes
 if (config.interval_dht >= 1) intervaldht = config.interval_dht*60*1000;  // minutes
 if (config.interval_debug > 9 ) intervaldebug = config.interval_debug*1000;  //secondes
 //BkIntensite=Intensite;
-  
-if (config.DEBUG)  { 
+
+if (config.DEBUG)  {
       Serial.begin(115200);
       Serial.println("**********");
       Serial.println("info init : "+InfoDebugtInit);
@@ -1358,7 +1359,7 @@ if (config.DEBUG)  {
       Serial.println("AUTO / manuel :"+String(AutoIn));
       Serial.println("TimeOn :"+String(TimeOn));
       Serial.println("MultiZone :"+String(config.multiZone));
-    
+
 }
 
 
@@ -1370,12 +1371,12 @@ P.print("Start ...");
 
      //Si besoin de fixer une adresse IP
     //wifiManager.setAPStaticIPConfig(IPAddress(10,0,1,1), IPAddress(10,0,1,1), IPAddress(255,255,255,0));
-    
+
     //Forcer à effacer les donnees WIFI dans l'eprom , permet de changer d'AP à chaque demmarrage ou effacer les infos d'une AP dans la memoire ( a valider , lors du premier lancement  )
     if (raz) wifiManager.resetSettings();
     //set callback that gets called when connecting to previous WiFi fails, and enters Access Point mode
      wifiManager.setAPCallback(configModeCallback);
-    
+
     //Recupere les identifiants   ssid et Mot de passe dans l'eprom  et essayes de se connecter
     //Si pas de connexion possible , il demarre un nouveau point d'accés avec comme nom , celui definit dans la commande autoconnect ( ici : AutoconnectAP )
     // wifiManager.autoConnect("AutoConnectAP");
@@ -1387,8 +1388,8 @@ P.print("Start ...");
               //reset and try again, or maybe put it to deep sleep
               ESP.reset();
               delay(2000);
-        } 
-    
+        }
+
 // ****** Fin config WIFI Manager ************
 
  // Wait for connection
@@ -1414,7 +1415,7 @@ String  hostname = config.Name;
    WiFi.hostname(hostname);
   //*************************
   if (config.DEBUG) WiFi.printDiag(Serial);
-  
+
 
 P.print( "service");
 //******* OTA ***************
@@ -1445,18 +1446,18 @@ ArduinoOTA.setHostname((const char *)hostname.c_str());
      //Serial.println("Start updating " + type);
   });
   ArduinoOTA.onEnd([]() {
-    P.print("Reboot ..."); 
-     
+    P.print("Reboot ...");
+
      delay(500);
   });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
 
     if (MAX_DEVICES<5) sprintf(Notif,"Up %u%%", (progress / (total / 100)));
     else sprintf(Notif,"Upload  %u%%", (progress / (total / 100)));
-    P.print(Notif); 
+    P.print(Notif);
   });
   ArduinoOTA.onError([](ota_error_t error) {
-      P.print("ER ..."); 
+      P.print("ER ...");
       delay(500);
      OTAerreur=true;
    //if (config.DEBUG) Serial.printf("Error[%u]: ", error);
@@ -1471,7 +1472,7 @@ webSocket.onEvent(webSocketEvent);
 
 //ftp server
   //  ftpSrv.begin("esp8266","pass");   // demarrage serveur ftp avec user = esp8266 et mdp = password
-  
+
 // ********************************************
 // *********** Page WEB pour reponse **********
 // ********************************************
@@ -1507,7 +1508,7 @@ webSocket.onEvent(webSocketEvent);
     }
     if (!handleFileRead("/config/upload.html")) {
       server.send(404, "text/plain", "FileNotFound");
-      
+
     }
   });
 
@@ -1518,15 +1519,15 @@ webSocket.onEvent(webSocketEvent);
     if (!handleFileRead(server.uri())) {
       server.send(404, "text/plain", "FileNotFound");
     }
-  }); 
-  
-  // on demarre le serveur web 
+  });
+
+  // on demarre le serveur web
   server.begin();
 
 
 // Set up mDNS responder:
 String  mdnsName = config.Name;
-  mdnsName += config.HOSTNAME; 
+  mdnsName += config.HOSTNAME;
   // - first argument is the domain name, in this example
   //   the fully-qualified domain name is "esp8266.local"
   // - second argument is the IP address to advertise
@@ -1552,12 +1553,12 @@ String  mdnsName = config.Name;
         syncEventTriggered = true;
     });
 
-// Démarrage du processus NTP  
+// Démarrage du processus NTP
 
 NTP.begin(config.NTPSERVER, config.timeZone, config.DLS);
 NTP.setInterval(60);
 
-    
+
 //************ Initialisation *********
 P.print("init");
 delay(200);
@@ -1569,7 +1570,7 @@ if (config.multiZone) {
   if (config.LZTime <1 || config.LZTime>(maxdisplay-1)) config.LZTime=round(maxdisplay/2);
   //config.LZTime=3;
   //config.DispRight=false;
-  if (config.DispRight) { 
+  if (config.DispRight) {
           NZtime=0;
           NZmsg=1;
            P.setZone(0, 0 , config.LZTime-1);
@@ -1595,7 +1596,7 @@ P.displayZoneText(NZmsg, "", PA_LEFT, config.SPEED_TIME, config.PAUSE_TIME, PA_S
 P.setSpriteData(pacman1, W_PMAN1, F_PMAN1,pacman2, W_PMAN2, F_PMAN2);   // chargement animation en memoire
 
 // Verif des options Physiques ( photocell , dht , bouton ... si presentes
- // ------- Capteur Photocell 
+ // ------- Capteur Photocell
 sensorValue = analogRead(0); // init du sensor luminosite
 delay(100);
  if (sensorValue >11) PhotoCell=true;
@@ -1605,7 +1606,7 @@ delay(100);
  // dht.setup(dhtPin, DHTType);
  int pin(dhtpin);
  dht.setup(pin,DHTTYPE);
- delay(2000); 
+ delay(2000);
 // DHT
   GetTemp();
 // led
@@ -1662,19 +1663,20 @@ JSONSystem["display"] = MAX_DEVICES;
 JSONSystem["LED"] = config.LED;
 JSONSystem["Imp"] = config.Imp;
 JSONSystem["CR"] = cR;
+JSONSystem["miniteur"] = minuteur;
 JSONSystem["CRTIME"]=config.CRTIME;
 
 // box
 JSONSystem["box"] = config.JEEDOM;
 
 LoadHistorique();
-  
+
 // Fin de Setup
   message = " Système OK - Adresse ip : ";
   message += WiFi.localIP().toString();
   NotifMsg(message,Intensite,false);
-  if (config.DEBUG)  { 
-    Serial.println("fin initialisation"); 
+  if (config.DEBUG)  {
+    Serial.println("fin initialisation");
     Serial.print("valeur auto "+String(AutoIn));
     Serial.print(" ,valeur affciahge Secondes "+String(DisSec));
     Serial.print(" ,valeur Affichage horloge "+String(TimeOn));
@@ -1694,14 +1696,14 @@ LoadHistorique();
 void loop(void)
 {
   // synchro flasher  ":"
- static uint32_t lastTime = 0; 
+ static uint32_t lastTime = 0;
  static bool flasher = false;
  static byte CPTReboot=0;
  static bool dj =false;
 
  //temp systeme
  if( millis() - previousMillissys >= timersys) {
-     previousMillissys = millis();   
+     previousMillissys = millis();
   if (bk) {
     File histNotif = SPIFFS.open(fileHistNotif,"w");
     JSONNOTIF.printTo(histNotif);
@@ -1716,24 +1718,24 @@ void loop(void)
        NotifMsg("Reboot",15,true);
     }
     if (CPTReboot>=1 && Reboot) ESP.restart();
-      
+
  }
 
- // Tempo debug  
+ // Tempo debug
    if (config.DEBUG) {
       if( millis() - previousMillisdebug >= intervaldebug) {
-      previousMillisdebug = millis();   
+      previousMillisdebug = millis();
       // afficahge debug
-      DebugInfo(); 
+      DebugInfo();
       }
    }
 
 // Tempo temperature
   if( millis() - previousMillisdht >= intervaldht) {
-     previousMillisdht = millis();   
+     previousMillisdht = millis();
     GetTemp();
-    if ( msgTemp) { 
-    
+    if ( msgTemp) {
+
           char MSGt[BUF_SIZE];
           char str_temp[6];
           char str_hum[6];
@@ -1743,9 +1745,9 @@ void loop(void)
           message=String(MSGt);
       //message = "Temp : "+String(temperature)+" °C";
        NotifMsg(message,Intensite,false);
-       
+
        }
-    }  
+    }
 
 // Tempo date
   if( millis() - previousMillisddj >= intervalddj) {
@@ -1753,10 +1755,10 @@ void loop(void)
      dj=1;
      /*String jour=ddj();
       if (TimeOn) NotifMsg(jour,Intensite,false);*/
-    } 
+    }
 
 
-// Temporisation luminosite 
+// Temporisation luminosite
   if( millis() - previousMillis >= interval) {
     previousMillis = millis();
     // ******** Gestion luminosite
@@ -1765,7 +1767,7 @@ void loop(void)
     }
 
   }
-  
+
 // ********** Fin boucle tempo
 
 
@@ -1777,36 +1779,36 @@ if (config.BOUTON_1) {
   // etat bouton
    bouton1.Update();
    // Sauvegarde de la valeur dans la variable click
-  if (bouton1.clicks != 0) { 
+  if (bouton1.clicks != 0) {
     clic = bouton1.clicks;
      if (config.DEBUG) Serial.println("Valeur bouton 1 ="+String(config.BOUTON_1)+" , Valeur du clic ="+String(clic));
-  BoutonAction(1,clic); 
-  clic=0; 
+  BoutonAction(1,clic);
+  clic=0;
   }
 }
 if (config.BOUTON_2) {
  // etat bouton 2
    bouton2.Update();
-    if (bouton2.clicks != 0) { 
+    if (bouton2.clicks != 0) {
     clic2 = bouton2.clicks;
      if (config.DEBUG) Serial.println("Valeur bouton 2 ="+String(config.BOUTON_2)+" , Valeur du clic ="+String(clic2));
-      BoutonAction(2,clic2); 
+      BoutonAction(2,clic2);
       clic2=0;
   }
- 
+
 }
 // ******** Fin gestion bouton
 
 
- 
+
 // ********* Gestion Reseau : Pages WEB , NTP et OTA
 // ********* Service NTP
  if (syncEventTriggered) {
         processSyncEvent (ntpEvent);
         syncEventTriggered = false;
     }
-    
-//  ****** Page WEb : a chaque iteration, la fonction handleClient traite les requetes 
+
+//  ****** Page WEb : a chaque iteration, la fonction handleClient traite les requetes
   server.handleClient();
   webSocket.loop();
 
@@ -1823,6 +1825,7 @@ if (millis() - lastTime >= 1000)
     flasher = !flasher;
     if (minuteur>0) {
         minuteur--;
+        JSONSystem["miniteur"] = minuteur;
         if (minuteur==0) cR=true;
     }
   }
@@ -1831,12 +1834,12 @@ if (millis() - lastTime >= 1000)
 if (P.displayAnimate())
 {
 
-    if (Alert) { 
+    if (Alert) {
       if (Fnotif && config.LED) flashlight();
       if (P.getZoneStatus(NZmsg))
       {
       P.setFont(NZmsg,ExtASCII);   // chargement caractere etendue
-       // Type de demande 
+       // Type de demande
     if (type=="PAC" ) {    // animation PAC MAn
       P.displayZoneText(NZmsg,txtAnim, PA_LEFT, round((24/LZMsg)*5+15), 1, PA_SPRITE, PA_SPRITE);
       type="";
@@ -1852,14 +1855,14 @@ if (P.displayAnimate())
     else {
      // P.displayClear(NZmsg);
       P.displayZoneText(NZmsg, Notif, PA_LEFT,config.SPEED_TIME, config.PAUSE_TIME*1000, effect[fx_in], effect[fx_out]);
-      if (fx_center) { 
+      if (fx_center) {
         P.setTextAlignment(NZmsg,PA_CENTER);
        // if (fix_pause<1) fix_pause=3;
         P.setPause(NZmsg,fix_pause*1000);
       // fx_center=false;
         }
        else  FinMsg=true;
-      if (!fx_center && type=="FIX" )  Alert=true;          
+      if (!fx_center && type=="FIX" )  Alert=true;
         else {
           Alert=false;
          Intensite=BkIntensite;
@@ -1869,17 +1872,17 @@ if (P.displayAnimate())
     } // fin zonestatus
     } // fin alert
     else {
-    
+
     if (!config.multiZone && type!="FIX" ) DispZoneTime(flasher);
-    
+
     }
    //P.displayReset(0);
 
 
  if (config.multiZone) DispZoneTime(flasher);
 
- 
-                        
+
+
 } // fin display animate
 
 
@@ -1888,7 +1891,7 @@ if (P.displayAnimate())
 //********************** fin boucle
 
 void DispZoneTime(bool flasher) {
-                         P.setFont(NZtime, numeric7Seg_Byfeel); 
+                         P.setFont(NZtime, numeric7Seg_Byfeel);
                           if (dj==1)  {
                             ddj_time(Notif);
                             P.displayZoneText(NZtime, Notif, PA_CENTER, 0, 3000, PA_PRINT, PA_NO_EFFECT);
@@ -1904,9 +1907,9 @@ void DispZoneTime(bool flasher) {
 void digitalClockDisplay(char *heure,bool flash)
     {
      char secondes[2];  // pour affichage des secondes
-   // Si affichage de l'heure      
-  if (TimeOn) { 
-    P.setIntensity(Intensite); // regle intensite 
+   // Si affichage de l'heure
+  if (TimeOn) {
+    P.setIntensity(Intensite); // regle intensite
     if (cR) {
       int h,m,s;
       h  = minuteur / 60 / 60 % 24;
@@ -1919,11 +1922,12 @@ void digitalClockDisplay(char *heure,bool flash)
       }
       else  sprintf(heure,"%c %02d:%02d",88,m,s);
 
-      
+
        // fin minuteur
        if (minuteur==0) {
          NotifMsg(config.CRTEXT,Intensite,true);
         cR=false;
+        JSONSystem["CR"] = cR;
          if (config.CRACT>0) minutURL();
         if (config.CRLED && config.LED ) {
           ledState = false;
@@ -1934,12 +1938,12 @@ void digitalClockDisplay(char *heure,bool flash)
        }
     }
     else {
-       if (FinMsg) { 
+       if (FinMsg) {
         Intensite=BkIntensite;
         FinMsg=false;
      }
     // P.setIntensity(Intensite);
-  if ( DisSec ) 
+  if ( DisSec )
   {  // si affichage des Secondes  00:00 (secondes en petit )
   //  char secondes[2];  // pour affichage des secondes
    sprintf(secondes,"%02d",second());
@@ -1989,9 +1993,9 @@ int actionClick;
 if (btnclic < 4 ) actionClick=config.btnclic[btn][btnclic];
 else if (btnclic>100)  actionClick=btnclic;
 else actionClick=0;
-  
+
 switch (actionClick) {
-    
+
     case 1: //  Affiche ou non les secondes
           Option(&DisSec,!DisSec);
          // webSocket.sendTXT(num,"test secondes");
@@ -2001,14 +2005,14 @@ switch (actionClick) {
       break;
       case 3: // boucle : Manuel intensite à 0 / Manu Intensite MAX / Auto
         if (clicstate==1) {
-          Intensite = 0; 
-          Option(&AutoIn,false);    
+          Intensite = 0;
+          Option(&AutoIn,false);
           }
           if (clicstate==2) {
             Intensite = 15;
             Option(&AutoIn,false);
           }
-          if (clicstate==3) { 
+          if (clicstate==3) {
              Option(&AutoIn,true);
             clicstate=0;
           }
@@ -2021,7 +2025,7 @@ switch (actionClick) {
           ledState = !ledState;
           digitalWrite(LEDPin,ledState); // envoie info à led
           JSONOptions["LEDstate"] = !ledState;
-          }   
+          }
           break;
       case 5 : //Action 1
             ToBox(config.URL_Action1);
@@ -2050,7 +2054,7 @@ switch (actionClick) {
           case 13 : //Lancer Minuteur
                   minuteur = config.CRTIME*60;
                   minuteur = constrain(minuteur,0,3599);
-                  if (minuteur >0) { 
+                  if (minuteur >0) {
                      cR=true;
                      if (config.LED)  digitalWrite(LEDPin,HIGH);
                   }
@@ -2066,7 +2070,7 @@ switch (actionClick) {
       NotifMsg("LUM :"+String(Intensite),Intensite,true);
       break;
     default:
-      break;  
+      break;
   }
   webSocket.broadcastTXT("Update");
 }
@@ -2092,7 +2096,7 @@ void minutURL() {
             ToBox(config.URL_Action6);
       break;
       default:
-      break;  
+      break;
   }
 }
 
