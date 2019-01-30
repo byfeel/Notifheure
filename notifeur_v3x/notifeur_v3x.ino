@@ -7,7 +7,7 @@
 //  -------------------------
 // Copyright Byfeel 2017-2018
 // *************************
-String Ver="3.3.1";
+String Ver="3.3.2";
 // *************************
 //**************************
 //****** CONFIG SKETCH *****
@@ -18,9 +18,9 @@ String Ver="3.3.1";
 // d'affichage ( inversé , effet miroir , etc .....) *
 // ***************************************************
 // matrix   - decocher selon config matrix    ********
-//#define HARDWARE_TYPE MD_MAX72XX::FC16_HW        //***
+#define HARDWARE_TYPE MD_MAX72XX::FC16_HW        //***
 //#define HARDWARE_TYPE MD_MAX72XX::PAROLA_HW    //***
-#define HARDWARE_TYPE MD_MAX72XX::ICSTATION_HW //***
+//#define HARDWARE_TYPE MD_MAX72XX::ICSTATION_HW //***
 //#define HARDWARE_TYPE MD_MAX72XX::GENERIC_HW   //***
 // ***************************************************
 //****************************************************
@@ -33,7 +33,7 @@ String Ver="3.3.1";
 // Ne pas supprimer ou ne pas modifier , meme si options absentes
 #define PINbouton1 0 // Bouton 1   --- GPIO0 ( pullup integré - D8 pour R1 ou ( D3 pour R2 ou wemos mini )
 #define PINbouton2 2 // Bouton 2   -- GPIO2  ( d9 por wemos r1 ou d3 pour wemos mini
-#define DHTTYPE DHTesp::DHT22  // si DHT22 ou DHT11 si DHT11
+#define DHTTYPE DHTesp::DHT22  // si DHT22 
 //#define DHTTYPE DHTesp::DHT11  // si DHT11
 #define dhtpin 16 // GPIO16  egale a D2 sur WEMOS D1R1  ou D0 pour les autres ( a verifier selon esp )
 #define LEDPin 5  // GPIO 5  D15 pour wemos R1  ou D1 pour wemos mini
@@ -491,7 +491,7 @@ void NotifMsg(String Msg,byte lum,bool Info,bool U2A=true,int fpause=3,int fxIn=
 // pour ne pas memoriser message systéme
     if ((!U2A && !config.Imp) || Important)  {
           AddNotifToJson(Msg);
-          if (Important && config.LED ) digitalWrite(LEDPin,LOW);
+          if (Important && config.LED ) ledOnOff(0);
           Important=false;
     }
 
@@ -575,7 +575,7 @@ bk=true;
 // display historique
  void DisplHist() {
  char djh[15];
-if (config.LED ) digitalWrite(LEDPin,HIGH);
+if (config.LED ) ledOnOff(1);
  int n=JSONmsgNOTIF.size();
  if (n>0) {
          numh ++;
@@ -873,6 +873,12 @@ void toggleCR() {
 
 }
 
+void ledOnOff(bool state) {
+  ledState=state;
+  digitalWrite(LEDPin,ledState); // On-Off led
+  JSONOptions["LEDstate"] = !ledState;
+}
+
 //*************************************************
 //************* Gestion du serveur WEB ************
 //*************************************************
@@ -965,10 +971,9 @@ String result="ok";
             Option(&AutoIn,false);
          }
         else if ( server.hasArg("LED") && config.LED) {
-                  if (server.arg("LED")=="1" || server.arg("LED")=="on" ) ledState = 0;
-                  else ledState=1;
-                  digitalWrite(LEDPin,ledState); // On-Off led
-                  JSONOptions["LEDstate"] = !ledState;
+                  if (server.arg("LED")=="1" || server.arg("LED")=="on" ) ledOnOff(0);
+                  else ledOnOff(1);
+
          }
        else if ( server.hasArg("MIN") ) {
                   minuteur=server.arg("MIN").toInt();
@@ -978,7 +983,8 @@ String result="ok";
                     cR=false;
                     NotifMsg("Anulation Minuteur ",Intensite,false);
                   }
-                  JSONSystem["CR"] = cR;
+                    if (config.LED) ledOnOff(1);
+                    JSONSystem["CR"] = cR;
          }
         else if (server.hasArg("CR")) {
                 //if  (server.arg("CR")=="1" && minuteur>0 ) cR=true;
@@ -1191,10 +1197,8 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
                           }
             }
                 else if (O=="LED" && config.LED )  {
-                          if (val==true ) ledState = 0;
-                          else ledState = 1;
-                           digitalWrite(LEDPin,ledState); // On-Off led
-                           JSONOptions["LEDstate"] = !ledState;
+                          if (val==true ) ledOnOff(0);
+                          else ledOnOff(1);
                           reponsetxt = "-Ok- Options LED modifié , Nouvelle Valeur : "+String(val);
 
             }
@@ -1206,7 +1210,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
                   minuteur = constrain(minuteur,0,35999);
                   if (minuteur >0) {
                      cR=true;
-                     if (config.LED)  digitalWrite(LEDPin,HIGH);
+                     if (config.LED)  ledOnOff(1);
                       JSONSystem["CR"] = cR;
                       reponsetxt = "-Ok- Options Minuteur activé : "+String(tempo)+" min ";
                   } else {
@@ -1611,7 +1615,7 @@ delay(100);
   GetTemp();
 // led
   pinMode(LEDPin,OUTPUT);
-  digitalWrite(LEDPin,ledState);
+  ledOnOff(ledState);
 //************************************
 
 
@@ -1930,9 +1934,7 @@ void digitalClockDisplay(char *heure,bool flash)
         JSONSystem["CR"] = cR;
          if (config.CRACT>0) minutURL();
         if (config.CRLED && config.LED ) {
-          ledState = false;
-          digitalWrite(LEDPin,ledState); // envoie info à led
-          JSONOptions["LEDstate"] = !ledState;
+          ledOnOff(0);
           webSocket.broadcastTXT("Update");
            }
        }
@@ -2021,11 +2023,7 @@ switch (actionClick) {
           ++clicstate;
           break;
        case 4:  // ON off LED
-          if (config.LED) {
-          ledState = !ledState;
-          digitalWrite(LEDPin,ledState); // envoie info à led
-          JSONOptions["LEDstate"] = !ledState;
-          }
+          if (config.LED) ledOnOff(!ledState);
           break;
       case 5 : //Action 1
             ToBox(config.URL_Action1);
@@ -2056,7 +2054,7 @@ switch (actionClick) {
                   minuteur = constrain(minuteur,0,3599);
                   if (minuteur >0) {
                      cR=true;
-                     if (config.LED)  digitalWrite(LEDPin,HIGH);
+                     if (config.LED)  ledOnOff(1);
                   }
           break;
        case 255: // simple clic mais long sur dernier  - diminue
