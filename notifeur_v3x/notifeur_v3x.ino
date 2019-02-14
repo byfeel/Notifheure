@@ -5,9 +5,9 @@
 // Gestion Zone + Gestion memoire ( Spiffs - eeprom )
 // Websockets & Mdns
 //  -------------------------
-// Copyright Byfeel 2017-2018
+// Copyright Byfeel 2017-2019
 // *************************
-String Ver="3.3.2";
+String Ver="3.3.3";
 // *************************
 //**************************
 //****** CONFIG SKETCH *****
@@ -18,9 +18,9 @@ String Ver="3.3.2";
 // d'affichage ( inversé , effet miroir , etc .....) *
 // ***************************************************
 // matrix   - decocher selon config matrix    ********
-#define HARDWARE_TYPE MD_MAX72XX::FC16_HW        //***
+//#define HARDWARE_TYPE MD_MAX72XX::FC16_HW        //***
 //#define HARDWARE_TYPE MD_MAX72XX::PAROLA_HW    //***
-//#define HARDWARE_TYPE MD_MAX72XX::ICSTATION_HW //***
+#define HARDWARE_TYPE MD_MAX72XX::ICSTATION_HW //***
 //#define HARDWARE_TYPE MD_MAX72XX::GENERIC_HW   //***
 // ***************************************************
 //****************************************************
@@ -33,7 +33,7 @@ String Ver="3.3.2";
 // Ne pas supprimer ou ne pas modifier , meme si options absentes
 #define PINbouton1 0 // Bouton 1   --- GPIO0 ( pullup integré - D8 pour R1 ou ( D3 pour R2 ou wemos mini )
 #define PINbouton2 2 // Bouton 2   -- GPIO2  ( d9 por wemos r1 ou d3 pour wemos mini
-#define DHTTYPE DHTesp::DHT22  // si DHT22 
+#define DHTTYPE DHTesp::DHT22  // si DHT22
 //#define DHTTYPE DHTesp::DHT11  // si DHT11
 #define dhtpin 16 // GPIO16  egale a D2 sur WEMOS D1R1  ou D0 pour les autres ( a verifier selon esp )
 #define LEDPin 5  // GPIO 5  D15 pour wemos R1  ou D1 pour wemos mini
@@ -180,8 +180,8 @@ JsonObject& JSONDht = JSONRoot.createNestedObject("dht");
 ESP8266WebServer server(80);         // serveur WEB sur port 80
 WebSocketsServer webSocket = WebSocketsServer(81);
 
-String getContentType(String filename); // convert the file extension to the MIME type
-bool handleFileRead(String path);       // send the right file to the client (if it exists)
+String getContentType(String filename); // conversion type fichier
+bool handleFileRead(String path);       // Envoie le fichier si existe
 //nom fichier charge
 File fsUploadFile;
 void handleFileUpload();
@@ -280,22 +280,6 @@ boolean Reboot = false;
 boolean UptoBox=false;
 bool OTAerreur=false;
 bool notifOk;  // verif si notif
-
-//**********************//
-//interaction Jeedom
-/*
-boolean JEEDOM=false;
-String ipBox="x.x.x.x";
-String portBox="80";
-String ReqUpBox;
-String UpUrlBox;
-boolean Up=false;
-boolean URLOK=false;
-*/
-//new
-
-
-
 
 //******** fx *******
 textEffect_t  effect[] =
@@ -398,17 +382,10 @@ void utf8Ascii(char* s)
   *cp = '\0';   // terminate the new string
 }
 
-//*****************************************
 
-// **************************
-// Parametre NTP
-// Serveur NTP
-// **************************
-/*
-
-boolean syncEventTriggered = false; // True if a time even has been triggered
-NTPSyncEvent_t ntpEvent; // Last triggered event
-*/
+//*****************************************************
+// ******************** WIFI MAnager ******************
+//*****************************************************
 
 void configModeCallback (WiFiManager *myWiFiManager) {
   P.print("Choisir AP..");
@@ -416,12 +393,15 @@ void configModeCallback (WiFiManager *myWiFiManager) {
   P.print(WiFi.softAPIP().toString());
     delay(3000);
     P.print(myWiFiManager->getConfigPortalSSID());
-  //Serial.println(WiFi.softAPIP());
   //if you used auto generated SSID, print it
   //Serial.println(myWiFiManager->getConfigPortalSSID());
 }
 
-
+// **************************
+// Parametre NTP
+// Serveur NTP
+// **************************
+//
 
 void processSyncEvent (NTPSyncEvent_t ntpEvent) {
   if (ntpEvent) {
@@ -515,7 +495,6 @@ void NotifMsg(String Msg,byte lum,bool Info,bool U2A=true,int fpause=3,int fxIn=
   }
 
 void LoadHistorique() {
-
  // Chargement historique si existe
   File histNotif = SPIFFS.open(fileHistNotif,"r");
    if (!histNotif) {
@@ -597,7 +576,6 @@ if (config.LED ) ledOnOff(1);
 String JsonConfig(bool NC=false) {
   String configjson;
     // Allocate the memory pool on the stack
-  // Don't forget to change the capacity to match your JSON document.
   // Use https://arduinojson.org/assistant/ to compute the capacity.
  // StaticJsonBuffer<2000> jsonBuffercfg;
  //const size_t bufferSizecfg = 2*JSON_ARRAY_SIZE(3) + JSON_OBJECT_SIZE(36) + 1200;
@@ -766,7 +744,7 @@ file.print(JsonConfig());
 
 
 
-void ToBox(char* Url) {
+void ToBox(char *Url) {
   String URL=Url;
   if (config.DEBUG) Serial.println("valeur de URL dans tobox : "+URL);
    http.begin(URL);
@@ -1467,7 +1445,7 @@ ArduinoOTA.setHostname((const char *)hostname.c_str());
    //if (config.DEBUG) Serial.printf("Error[%u]: ", error);
   });
   ArduinoOTA.begin();
-
+P.print( "service..");
 //******* FIN OTA ***************
 
 // Websocket
@@ -1527,20 +1505,13 @@ webSocket.onEvent(webSocketEvent);
 
   // on demarre le serveur web
   server.begin();
-
+P.print( "service...");
 
 // Set up mDNS responder:
 String  mdnsName = config.Name;
   mdnsName += config.HOSTNAME;
-  // - first argument is the domain name, in this example
-  //   the fully-qualified domain name is "esp8266.local"
-  // - second argument is the IP address to advertise
-  //   we send our IP address on the WiFi network
   if (!MDNS.begin(mdnsName.c_str())) {
     if (config.DEBUG) Serial.println("Error setting up MDNS responder!");
-    while (1) {
-      delay(1000);
-    }
   }
   if (config.DEBUG) Serial.println("mDNS responder started");
   //mdns.register("fishtank", { description="Top Fishtank", service="http", port=80, location='Living Room' })
@@ -1549,7 +1520,7 @@ String  mdnsName = config.Name;
   MDNS.addService("ws", "tcp", 81);
   MDNS.addService("notifeur", "tcp", 8888); // Announce notifeur service port 8888 TCP
 
-
+P.print( "service....");
 //***************************
 //******* Service NTP ********
    NTP.onNTPSyncEvent ([](NTPSyncEvent_t event) {
