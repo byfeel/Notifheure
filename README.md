@@ -1,5 +1,5 @@
 # horloge-et-Notification
-Ce sont les sources liés à l'article sur mon blog [byfeel.info](https://byfeel.infp) , concernant la mise en place d'une horloge avec notification a base d'un module esp8266 comme les wemos ( d1, D2 ou mini ) ou compatibles
+Ce sont les sources liés à l'article sur mon blog [byfeel.info](https://byfeel.info) , concernant la mise en place d'une horloge avec notification a base d'un module esp8266 comme les wemos ( d1, D2 ou mini ) ou compatibles
 
 ## installation
 Copiez le contenu du dossier __notifheure_v3.x__ ,  sur votre poste et lancez votre interface Arduino , en double cliquant sur le fichier __notifheure.ino__
