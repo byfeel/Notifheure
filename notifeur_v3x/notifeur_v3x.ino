@@ -1,4 +1,3 @@
-
 //**************************
 // NOTIFEUR
 // OTA + Interface Web + API ( box domotique )
@@ -7,7 +6,7 @@
 //  -------------------------
 // Copyright Byfeel 2017-2019
 // *************************
-String Ver="3.3.3";
+String Ver="3.3.4";
 // *************************
 //**************************
 //****** CONFIG SKETCH *****
@@ -18,9 +17,9 @@ String Ver="3.3.3";
 // d'affichage ( inversé , effet miroir , etc .....) *
 // ***************************************************
 // matrix   - decocher selon config matrix    ********
-//#define HARDWARE_TYPE MD_MAX72XX::FC16_HW        //***
+#define HARDWARE_TYPE MD_MAX72XX::FC16_HW        //***
 //#define HARDWARE_TYPE MD_MAX72XX::PAROLA_HW    //***
-#define HARDWARE_TYPE MD_MAX72XX::ICSTATION_HW //***
+//#define HARDWARE_TYPE MD_MAX72XX::ICSTATION_HW //***
 //#define HARDWARE_TYPE MD_MAX72XX::GENERIC_HW   //***
 // ***************************************************
 //****************************************************
@@ -991,6 +990,7 @@ void handleInfo() {
     Serial.println("Requete getinfo");
     Serial.println(InfoSystem);
   }
+  server.sendHeader("Access-Control-Allow-Origin", "*");
   server.send(200, "application/json",InfoSystem);
 }
 
@@ -1003,11 +1003,17 @@ void handleIP() {
 void handleTool() {
   String reponse="Erreur";
    if ( server.hasArg("debug")) {
-      if (server.arg("debug")=="1") {
+      if (server.arg("debug")=="PURGE") {
        if  (SPIFFS.exists(fileHistNotif)) SPIFFS.remove(fileHistNotif);
         delay(100);
+        reponse = "Purge fichier historique : ok ";
       }
-   reponse = server.arg("debug");
+      else if (server.arg("debug")=="REBOOT") {
+            server.send(200, "text/html","Reboot dans 2s");
+            delay(2000);
+            ESP.restart();
+      }
+
    }
   server.send(200, "text/html",reponse);
 }

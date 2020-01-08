@@ -47,6 +47,7 @@ Plus de detail dans l'article DIY Horloge et Notification sur mon blog [pour la 
 Plus de detail dans l'article DIY Horloge et Notification sur mon blog http://byfeel.info
 
 ### Release :
+**V3.3.4** : Bug fix ( allow access control )
 **V3.3.3** : Bug fix avec Version 2.5.0 gestionnaire carte ( bloque sur Service )     
 **V3.3** : Ajout fonction Minuteur / correctif Bug et ajout option OFF HORLOGE ( noir complet )  
 **V3.2** : Gestion des effets pour le type INFO et FIX , Historisation des messages , corrections .....  
